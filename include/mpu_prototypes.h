@@ -369,6 +369,9 @@ BaseType_t MPU_xTimerGenericCommandFromISR( TimerHandle_t xTimer,
                                             BaseType_t * const pxHigherPriorityTaskWoken,
                                             const TickType_t xTicksToWait ) PRIVILEGED_FUNCTION;
 
+BaseType_t MPU_xTimerDelete( TimerHandle_t xTimer,
+                             TickType_t xTicksToWait ) PRIVILEGED_FUNCTION;
+
 /* MPU versions of event_group.h API functions. */
 EventBits_t MPU_xEventGroupWaitBits( EventGroupHandle_t xEventGroup,
                                      const EventBits_t uxBitsToWaitFor,
