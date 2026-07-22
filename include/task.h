@@ -2226,7 +2226,7 @@ char * pcTaskGetName( TaskHandle_t xTaskToQuery ) PRIVILEGED_FUNCTION;
  * the scheduler for an extended period. The callback runs while the
  * scheduler is suspended, so it must return quickly and must not perform
  * blocking operations.
- * 
+ *
  * NOTE: This API is privileged-only (it invokes a user callback from
  * privileged context).
  *

@@ -4521,7 +4521,11 @@ char * pcTaskGetName( TaskHandle_t xTaskToQuery )
         UBaseType_t uxTask;
 
         configASSERT( pxCallbackFunction != NULL );
-        if( pxCallbackFunction == NULL ) return 0;
+
+        if( pxCallbackFunction == NULL )
+        {
+            return 0;
+        }
 
         vTaskSuspendAll();
         {
