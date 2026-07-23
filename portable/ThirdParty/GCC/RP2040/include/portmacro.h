@@ -237,6 +237,11 @@ static inline void vPortRecursiveLock( BaseType_t xCoreID,
             }
             spin_lock_unsafe_blocking(pxSpinLock);
         }
+        else
+        {
+            /* spin_try_lock_unsafe() does not provide acquire ordering on the fast path. */
+            __mem_fence_acquire();
+        }
         configASSERT( ucRecursionCountByLock[ ulLockNum ] == 0 );
         ucRecursionCountByLock[ ulLockNum ] = 1;
         ucOwnedByCore[ xCoreID ][ ulLockNum ] = 1;
