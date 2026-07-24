@@ -1451,6 +1451,54 @@ BaseType_t xTaskResumeFromISR( TaskHandle_t xTaskToResume ) PRIVILEGED_FUNCTION;
     UBaseType_t vTaskCoreAffinityGet( ConstTaskHandle_t xTask );
 #endif
 
+#if ( ( configNUMBER_OF_CORES > 1 ) && ( configUSE_SCHEDULER_CORE_MASK == 1 ) )
+
+/**
+ *
+ * Controls which cores are allowed to run non-idle tasks system-wide.
+ * Bit N = 1 means core N may run non-idle tasks; bit N = 0 means core N will
+ * only run its idle task.  configNUMBER_OF_CORES must be greater than 1 for
+ * this function to be available.
+ *
+ * Masking a core (including core 0) does NOT power it off or stop its tick
+ * ISR and scheduler from executing.  All cores remain active; the mask only
+ * controls whether the scheduler may dispatch a non-idle task onto a core.
+ * A masked core continues to service its tick interrupt and enters the
+ * scheduler normally, but will always be assigned the idle task.
+ *
+ * Passing 0 as the mask is valid; every core will run only its idle task
+ * until a new mask is applied.
+ *
+ * If a core that is currently running a non-idle task becomes disabled by
+ * the new mask, it is yielded immediately so the scheduler can replace the
+ * running task with the idle task.
+ *
+ * @param uxCoreMask Bitmask of cores to enable.  Cores are numbered 0 to
+ * configNUMBER_OF_CORES - 1.  Pass ( tskNO_AFFINITY ) to re-enable all cores.
+ *
+ * Example usage (4-core system, exclude core 2):
+ *
+ *     // Allow scheduling on cores 0, 1 and 3 only.
+ *     vTaskSetSchedulerCoreMask( ( 1 << 0 ) | ( 1 << 1 ) | ( 1 << 3 ) );
+ *
+ *     // Later, restore all four cores.
+ *     vTaskSetSchedulerCoreMask( ( 1 << 0 ) | ( 1 << 1 ) | ( 1 << 2 ) | ( 1 << 3 ) );
+ */
+    void vTaskSetSchedulerCoreMask( UBaseType_t uxCoreMask ) PRIVILEGED_FUNCTION;
+
+/**
+ * @brief Gets the current global scheduler core mask.
+ *
+ * @return Bitmask where bit N = 1 means core N is currently allowed to run
+ * non-idle tasks.
+ *
+ * Example usage:
+ *
+ *     UBaseType_t uxMask = uxTaskGetSchedulerCoreMask();
+ */
+    UBaseType_t uxTaskGetSchedulerCoreMask( void ) PRIVILEGED_FUNCTION;
+#endif
+
 #if ( configUSE_TASK_PREEMPTION_DISABLE == 1 )
 
 /**
