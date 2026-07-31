@@ -941,7 +941,7 @@ void vTaskDelay( const TickType_t xTicksToDelay ) PRIVILEGED_FUNCTION;
  * void vTaskFunction( void * pvParameters )
  * {
  * TickType_t xLastWakeTime;
- * const TickType_t xFrequency = 10;
+ * const TickType_t xPeriod = 10;
  * BaseType_t xWasDelayed;
  *
  *     // Initialise the xLastWakeTime variable with the current time.
@@ -949,7 +949,7 @@ void vTaskDelay( const TickType_t xTicksToDelay ) PRIVILEGED_FUNCTION;
  *     for( ;; )
  *     {
  *         // Wait for the next cycle.
- *         xWasDelayed = xTaskDelayUntil( &xLastWakeTime, xFrequency );
+ *         xWasDelayed = xTaskDelayUntil( &xLastWakeTime, xPeriod );
  *
  *         // Perform action here. xWasDelayed value can be used to determine
  *         // whether a deadline was missed if the code here took too long.
