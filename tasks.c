@@ -8916,3 +8916,40 @@ void vTaskResetState( void )
     #endif /* #if ( configGENERATE_RUN_TIME_STATS == 1 ) */
 }
 /*-----------------------------------------------------------*/
+/* CmBacktrace helper functions — use real TCB_t, not a mirror */
+/*-----------------------------------------------------------*/
+
+/*
+ * Returns the start (lowest address) of the current task's stack.
+ */
+StackType_t * vTaskStackAddr( void )
+{
+    TCB_t * pxTCB = ( TCB_t * ) xTaskGetCurrentTaskHandle();
+
+    return pxTCB->pxStack;
+}
+/*-----------------------------------------------------------*/
+
+/*
+ * Returns the stack size of the current task in words.
+ *   pxEndOfStack = pxStack + ( depth - 1 )
+ *   => depth = pxEndOfStack - pxStack + 1
+ */
+uint32_t vTaskStackSize( void )
+{
+    TCB_t * pxTCB = ( TCB_t * ) xTaskGetCurrentTaskHandle();
+
+    /* pxEndOfStack available because configRECORD_STACK_HIGH_ADDRESS == 1 */
+    return ( uint32_t ) ( pxTCB->pxEndOfStack - pxTCB->pxStack + 1 );
+}
+/*-----------------------------------------------------------*/
+
+/*
+ * Returns the name of the current task.
+ */
+char * vTaskName( void )
+{
+    return pcTaskGetName( NULL );
+}
+/*-----------------------------------------------------------*/
+/*-----------------------------------------------------------*/
