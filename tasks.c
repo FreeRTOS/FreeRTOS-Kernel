@@ -2362,6 +2362,55 @@ STATIC void prvInitialiseNewTask( TaskFunction_t pxTaskCode,
 
 #if ( INCLUDE_xTaskDelayUntil == 1 )
 
+    TickType_t xTaskPeriodicDelay( TickType_t * const pxPreviousWakeTime,
+                                   const TickType_t xTimeIncrement )
+    {
+        TickType_t xIncrements, xTicksIncrements, xTicksToWait;
+
+        traceENTER_xTaskPeriodicDelay( pxPreviousWakeTime, xTimeIncrement );
+
+        configASSERT( pxPreviousWakeTime );
+        configASSERT( ( xTimeIncrement > 0U ) );
+
+        vTaskSuspendAll();
+        {
+            /* As long as everything is the same type, this plays well with overflows */
+            const TickType_t xTicksElapsed = xTickCount - *pxPreviousWakeTime;
+
+            configASSERT( uxSchedulerSuspended == 1U );
+
+            /* Number of increments to catch up: it could be 0 if
+             * not enough ticks have elapsed, 1 in the common case or
+             * more than 1 if the task has not been resumed in time */
+            xIncrements = xTicksElapsed / xTimeIncrement;
+            xTicksIncrements = xIncrements * xTimeIncrement;
+
+            /* Update to the last wake time */
+            *pxPreviousWakeTime += xTicksIncrements;
+
+            /* Ticks to the next wake time */
+            xTicksToWait = xTimeIncrement - ( xTicksElapsed - xTicksIncrements );
+
+            prvAddCurrentTaskToDelayedList( xTicksToWait, pdFALSE );
+        }
+
+        /* Force a reschedule if xTaskResumeAll has not already done so, we may
+         * have put ourselves to sleep. */
+        if( xTaskResumeAll() == pdFALSE )
+        {
+            taskYIELD_WITHIN_API();
+        }
+        else
+        {
+            mtCOVERAGE_TEST_MARKER();
+        }
+
+        traceRETURN_xTaskPeriodicDelay( xIncrements );
+
+        return xIncrements;
+    }
+
+
     BaseType_t xTaskDelayUntil( TickType_t * const pxPreviousWakeTime,
                                 const TickType_t xTimeIncrement )
     {
@@ -7930,7 +7979,7 @@ TickType_t uxTaskResetEventItemValue( void )
                 *pulNotificationValue = pxCurrentTCB->ulNotifiedValue[ uxIndexToWaitOn ];
             }
 
-            /* If ucNotifyValue is set then either the task never entered the
+            /* If ucNotifyState is set then either the task never entered the
              * blocked state (because a notification was already pending) or the
              * task unblocked because of a notification.  Otherwise the task
              * unblocked because of a timeout. */
@@ -8800,7 +8849,7 @@ STATIC void prvAddCurrentTaskToDelayedList( TickType_t xTicksToWait,
  * This is the kernel provided implementation of vApplicationGetIdleTaskMemory()
  * to provide the memory that is used by the Idle task. It is used when
  * configKERNEL_PROVIDED_STATIC_MEMORY is set to 1. The application can provide
- * it's own implementation of vApplicationGetIdleTaskMemory by setting
+ * its own implementation of vApplicationGetIdleTaskMemory by setting
  * configKERNEL_PROVIDED_STATIC_MEMORY to 0 or leaving it undefined.
  */
     void vApplicationGetIdleTaskMemory( StaticTask_t ** ppxIdleTaskTCBBuffer,
@@ -8841,7 +8890,7 @@ STATIC void prvAddCurrentTaskToDelayedList( TickType_t xTicksToWait,
  * This is the kernel provided implementation of vApplicationGetTimerTaskMemory()
  * to provide the memory that is used by the Timer service task. It is used when
  * configKERNEL_PROVIDED_STATIC_MEMORY is set to 1. The application can provide
- * it's own implementation of vApplicationGetTimerTaskMemory by setting
+ * its own implementation of vApplicationGetTimerTaskMemory by setting
  * configKERNEL_PROVIDED_STATIC_MEMORY to 0 or leaving it undefined.
  */
     void vApplicationGetTimerTaskMemory( StaticTask_t ** ppxTimerTaskTCBBuffer,

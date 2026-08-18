@@ -577,7 +577,7 @@
 /* Defines the kernel provided implementation of
  * vApplicationGetIdleTaskMemory() and vApplicationGetTimerTaskMemory()
  * to provide the memory that is used by the Idle task and Timer task
- * respectively. The application can provide it's own implementation of
+ * respectively. The application can provide its own implementation of
  * vApplicationGetIdleTaskMemory() and vApplicationGetTimerTaskMemory() by
  * setting configKERNEL_PROVIDED_STATIC_MEMORY to 0 or leaving it undefined. */
 #define configKERNEL_PROVIDED_STATIC_MEMORY    1

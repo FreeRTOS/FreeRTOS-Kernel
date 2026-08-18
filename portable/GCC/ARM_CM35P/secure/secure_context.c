@@ -349,7 +349,7 @@ secureportNON_SECURE_CALLABLE void SecureContext_SaveContext( SecureContextHandl
 
         secureportREAD_PSPLIM( pucStackLimit );
 
-        /* Ensure that task's context is loaded and the task is saving it's own
+        /* Ensure that task's context is loaded and the task is saving its own
          * context. */
         if( ( xSecureContexts[ ulSecureContextIndex ].pucStackLimit == pucStackLimit ) &&
             ( xSecureContexts[ ulSecureContextIndex ].pvTaskHandle == pvTaskHandle ) )

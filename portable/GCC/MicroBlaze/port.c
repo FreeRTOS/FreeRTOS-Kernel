@@ -63,7 +63,7 @@
 #define portISR_STACK_FILL_VALUE     0x55555555
 
 /* Counts the nesting depth of calls to portENTER_CRITICAL().  Each task
- * maintains it's own count, so this variable is saved as part of the task
+ * maintains its own count, so this variable is saved as part of the task
  * context. */
 volatile UBaseType_t uxCriticalNesting = portINITIAL_NESTING_VALUE;
 
@@ -235,7 +235,7 @@ void vPortYield( void )
 
     /* Perform the context switch in a critical section to assure it is
      * not interrupted by the tick ISR.  It is not a problem to do this as
-     * each task maintains it's own interrupt status. */
+     * each task maintains its own interrupt status. */
     portENTER_CRITICAL();
 
     /* Jump directly to the yield function to ensure there is no
