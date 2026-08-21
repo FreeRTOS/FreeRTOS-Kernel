@@ -1120,7 +1120,7 @@ void vPortSVCHandler_C( uint32_t * pulCallerStackAddress ) /* PRIVILEGED_FUNCTIO
         #endif /* defined( __ARMCC_VERSION ) */
     #endif /* ( configENABLE_MPU == 1 ) && ( configUSE_MPU_WRAPPERS_V1 == 1 ) */
 
-    #if ( ( configENABLE_MPU == 1 ) && ( configENABLE_TRUSTZONE == 1 ) )
+    #if ( configENABLE_MPU == 1 )
         #if defined( __ARMCC_VERSION )
             /* Declaration when these variable are defined in code instead of being
              * exported from linker scripts. */
@@ -1131,7 +1131,7 @@ void vPortSVCHandler_C( uint32_t * pulCallerStackAddress ) /* PRIVILEGED_FUNCTIO
             extern uint32_t __privileged_functions_start__[];
             extern uint32_t __privileged_functions_end__[];
         #endif /* defined( __ARMCC_VERSION ) */
-    #endif /* ( configENABLE_MPU == 1 ) && ( configENABLE_TRUSTZONE == 1 ) */
+    #endif /* configENABLE_MPU == 1 */
 
     uint32_t ulPC;
 
@@ -1182,11 +1182,11 @@ void vPortSVCHandler_C( uint32_t * pulCallerStackAddress ) /* PRIVILEGED_FUNCTIO
             break;
 
         case portSVC_FREE_SECURE_CONTEXT:
-            #if( configENABLE_MPU == 1 )
+            #if ( configENABLE_MPU == 1 )
             if( ( ulPC >= ( uint32_t ) __privileged_functions_start__ ) &&
                 ( ulPC <= ( uint32_t ) __privileged_functions_end__ ) )
             {
-            #endif
+            #endif /* configENABLE_MPU */
                 /* R0 contains TCB being freed and R1 contains the secure
                  * context handle to be freed. */
                 ulR0 = pulCallerStackAddress[ 0 ];
@@ -1194,18 +1194,18 @@ void vPortSVCHandler_C( uint32_t * pulCallerStackAddress ) /* PRIVILEGED_FUNCTIO
 
                 /* Free the secure context. */
                 SecureContext_FreeContext( ( SecureContextHandle_t ) ulR1, ( void * ) ulR0 );
-            #if( configENABLE_MPU == 1 )
+            #if ( configENABLE_MPU == 1 )
             }
-            #endif
+            #endif /* configENABLE_MPU */
             break;
     #endif /* configENABLE_TRUSTZONE */
 
         case portSVC_START_SCHEDULER:
-            #if( configENABLE_MPU == 1 )
+            #if ( configENABLE_MPU == 1 )
             if( ( ulPC >= ( uint32_t ) __privileged_functions_start__ ) &&
                 ( ulPC <= ( uint32_t ) __privileged_functions_end__ ) )
             {
-            #endif
+            #endif /* configENABLE_MPU */
                 #if ( configENABLE_TRUSTZONE == 1 )
                 {
                     /* De-prioritize the non-secure exceptions so that the
@@ -1227,9 +1227,9 @@ void vPortSVCHandler_C( uint32_t * pulCallerStackAddress ) /* PRIVILEGED_FUNCTIO
                 /* Setup the context of the first task so that the first task starts
                  * executing. */
                 vRestoreContextOfFirstTask();
-            #if( configENABLE_MPU == 1 )
+            #if ( configENABLE_MPU == 1 )
             }
-            #endif
+            #endif /* configENABLE_MPU */
             break;
 
     #if ( ( configENABLE_MPU == 1 ) && ( configUSE_MPU_WRAPPERS_V1 == 1 ) )
