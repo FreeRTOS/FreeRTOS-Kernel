@@ -214,8 +214,12 @@ secureportNON_SECURE_CALLABLE void SecureContext_Init( void )
         if( ulSecureContextIndex < secureconfigMAX_SECURE_CONTEXTS )
         {
             /* Allocate the stack space if possible. */
-            if( ulSecureStackSize > ( UINT32_MAX - securecontextSTACK_SEAL_SIZE ) )
+            if( ( ulSecureStackSize < securecontextSTACK_SEAL_SIZE ) ||
+                ( ulSecureStackSize > ( UINT32_MAX - securecontextSTACK_SEAL_SIZE ) ) )
             {
+                /* Reject stacks that are too small (the CONTROL word would be
+                 * written before the allocation, corrupting the secure heap)
+                 * and sizes that would overflow when the seal size is added. */
                 pucStackMemory = NULL;
             }
             else
