@@ -637,7 +637,11 @@ void vPortGenerateSimulatedInterrupt( uint32_t ulInterruptNumber )
 
 void vPortGenerateSimulatedInterruptFromWindowsThread( uint32_t ulInterruptNumber )
 {
-    if( xPortRunning == pdTRUE )
+    /* Reject out-of-range interrupt numbers before the shift below. Mirrors the
+     * bounds check the task-context sibling vPortGenerateSimulatedInterrupt already
+     * performs: ( 1UL << ulInterruptNumber ) is undefined when ulInterruptNumber is
+     * >= portMAX_INTERRUPTS (the width of ulPendingInterrupts). */
+    if( ( xPortRunning == pdTRUE ) && ( ulInterruptNumber < portMAX_INTERRUPTS ) )
     {
         /* Can't proceed if in a critical section as pvInterruptEventMutex won't
          * be available. */

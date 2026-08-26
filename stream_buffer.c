@@ -820,10 +820,12 @@ size_t xStreamBufferSend( StreamBufferHandle_t xStreamBuffer,
                           TickType_t xTicksToWait )
 {
     StreamBuffer_t * const pxStreamBuffer = xStreamBuffer;
-    size_t xReturn, xSpace = 0;
+    size_t xReturn = 0;
+    size_t xSpace = 0;
     size_t xRequiredSpace = xDataLengthBytes;
     TimeOut_t xTimeOut;
     size_t xMaxReportedSpace = 0;
+    BaseType_t xSendAllowed = pdTRUE;
 
     traceENTER_xStreamBufferSend( xStreamBuffer, pvTxData, xDataLengthBytes, xTicksToWait );
 
@@ -845,9 +847,22 @@ size_t xStreamBufferSend( StreamBufferHandle_t xStreamBuffer,
         /* Overflow? */
         configASSERT( xRequiredSpace > xDataLengthBytes );
 
+        /* Enforce the overflow check at runtime as well, so that a message
+         * length whose required-space addition wraps size_t is rejected even
+         * when configASSERT() is compiled out. Without this the wrapped
+         * (smaller) xRequiredSpace would pass the space checks below and the
+         * send would proceed to copy xDataLengthBytes bytes, causing an
+         * out-of-bounds write. Reject the send instead: leave xReturn 0, skip
+         * blocking and the write, and exit through the single return below. */
+        if( xRequiredSpace <= xDataLengthBytes )
+        {
+            xSendAllowed = pdFALSE;
+            xTicksToWait = ( TickType_t ) 0;
+        }
+
         /* If this is a message buffer then it must be possible to write the
          * whole message. */
-        if( xRequiredSpace > xMaxReportedSpace )
+        else if( xRequiredSpace > xMaxReportedSpace )
         {
             /* The message would not fit even if the entire buffer was empty,
              * so don't wait for space. */
@@ -921,7 +936,10 @@ size_t xStreamBufferSend( StreamBufferHandle_t xStreamBuffer,
         mtCOVERAGE_TEST_MARKER();
     }
 
-    xReturn = prvWriteMessageToBuffer( pxStreamBuffer, pvTxData, xDataLengthBytes, xSpace, xRequiredSpace );
+    if( xSendAllowed == pdTRUE )
+    {
+        xReturn = prvWriteMessageToBuffer( pxStreamBuffer, pvTxData, xDataLengthBytes, xSpace, xRequiredSpace );
+    }
 
     if( xReturn > ( size_t ) 0 )
     {
@@ -955,8 +973,10 @@ size_t xStreamBufferSendFromISR( StreamBufferHandle_t xStreamBuffer,
                                  BaseType_t * const pxHigherPriorityTaskWoken )
 {
     StreamBuffer_t * const pxStreamBuffer = xStreamBuffer;
-    size_t xReturn, xSpace;
+    size_t xReturn = 0;
+    size_t xSpace;
     size_t xRequiredSpace = xDataLengthBytes;
+    BaseType_t xSendAllowed = pdTRUE;
 
     traceENTER_xStreamBufferSendFromISR( xStreamBuffer, pvTxData, xDataLengthBytes, pxHigherPriorityTaskWoken );
 
@@ -973,14 +993,31 @@ size_t xStreamBufferSendFromISR( StreamBufferHandle_t xStreamBuffer,
 
         /* Overflow? */
         configASSERT( xRequiredSpace > xDataLengthBytes );
+
+        /* Enforce the overflow check at runtime as well (see xStreamBufferSend),
+         * so a wrapping message length is rejected when configASSERT() is
+         * compiled out rather than proceeding to an out-of-bounds write. Reject
+         * the send by leaving xReturn 0 and skipping the write below, so the
+         * function still exits through its single return. */
+        if( xRequiredSpace <= xDataLengthBytes )
+        {
+            xSendAllowed = pdFALSE;
+        }
+        else
+        {
+            mtCOVERAGE_TEST_MARKER();
+        }
     }
     else
     {
         mtCOVERAGE_TEST_MARKER();
     }
 
-    xSpace = xStreamBufferSpacesAvailable( pxStreamBuffer );
-    xReturn = prvWriteMessageToBuffer( pxStreamBuffer, pvTxData, xDataLengthBytes, xSpace, xRequiredSpace );
+    if( xSendAllowed == pdTRUE )
+    {
+        xSpace = xStreamBufferSpacesAvailable( pxStreamBuffer );
+        xReturn = prvWriteMessageToBuffer( pxStreamBuffer, pvTxData, xDataLengthBytes, xSpace, xRequiredSpace );
+    }
 
     if( xReturn > ( size_t ) 0 )
     {
@@ -1028,16 +1065,21 @@ static size_t prvWriteMessageToBuffer( StreamBuffer_t * const pxStreamBuffer,
         /* Ensure the data length given fits within configMESSAGE_BUFFER_LENGTH_TYPE. */
         configASSERT( ( size_t ) xMessageLength == xDataLengthBytes );
 
-        if( xSpace >= xRequiredSpace )
+        if( ( ( size_t ) xMessageLength == xDataLengthBytes ) && ( xSpace >= xRequiredSpace ) )
         {
-            /* There is enough space to write both the message length and the message
+            /* The message length fits within configMESSAGE_BUFFER_LENGTH_TYPE and
+             * there is enough space to write both the message length and the message
              * itself into the buffer.  Start by writing the length of the data, the data
              * itself will be written later in this function. */
             xNextHead = prvWriteBytesToBuffer( pxStreamBuffer, ( const uint8_t * ) &( xMessageLength ), sbBYTES_TO_STORE_MESSAGE_LENGTH, xNextHead );
         }
         else
         {
-            /* Not enough space, so do not write data to the buffer. */
+            /* Either there is not enough space, or the message length cannot be
+             * represented by configMESSAGE_BUFFER_LENGTH_TYPE without truncation.
+             * Writing a truncated length header would corrupt the message
+             * framing at the receiver, so do not write any data to the buffer.  When asserts are
+             * disabled this runtime check is the only guard against truncation. */
             xDataLengthBytes = 0;
         }
     }
