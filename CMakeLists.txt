@@ -16,6 +16,7 @@ cmake_minimum_required(VERSION 3.15)
 # implementation (e.g. when only static allocation is used).
 
 # `freertos_config` target defines the path to FreeRTOSConfig.h and optionally other freertos based config files
+if(NOT CMAKE_INTERFACE_LIBRARY)
 if(NOT TARGET freertos_config )
     if (NOT DEFINED FREERTOS_CONFIG_FILE_DIRECTORY )
 
@@ -255,8 +256,12 @@ endif()
 add_library(freertos_kernel STATIC)
 
 ########################################################################
+endif()
+
 add_subdirectory(include)
 add_subdirectory(portable)
+
+if (NOT CMAKE_INTERFACE_LIBRARY)
 
 target_sources(freertos_kernel PRIVATE
     croutine.c
@@ -285,5 +290,29 @@ target_link_libraries(freertos_kernel
         freertos_kernel_port
 
 )
+else()
+    message(WARNING " CMAKE_INTERFACE_LIBRARY is set. FreeRTOS will be configured as INTERFACE library.\n"
+    "Please make sure to link freertos_kernel, config and desired port & heap libraries to your executable target")
+
+add_library(freertos_kernel INTERFACE)
+target_sources(freertos_kernel INTERFACE
+    croutine.c
+    event_groups.c
+    list.c
+    queue.c
+    stream_buffer.c
+    tasks.c
+    timers.c
+)
+
+target_link_libraries(freertos_kernel
+    INTERFACE
+        freertos_kernel_include
+
+)
+
+endif()
+
+
 
 ########################################################################
