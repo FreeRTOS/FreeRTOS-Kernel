@@ -5731,9 +5731,9 @@ BaseType_t xTaskCheckForTimeOut( TimeOut_t * const pxTimeOut,
         if( ( xNumOfOverflows != pxTimeOut->xOverflowCount ) && ( xConstTickCount >= pxTimeOut->xTimeOnEntering ) )
         {
             /* The tick count is greater than the time at which
-             * vTaskSetTimeout() was called, but has also overflowed since
-             * vTaskSetTimeOut() was called.  It must have wrapped all the way
-             * around and gone past again. This passed since vTaskSetTimeout()
+             * vTaskSetTimeOutState() was called, but has also overflowed since
+             * vTaskSetTimeOutState() was called.  It must have wrapped all the way
+             * around and gone past again. This passed since vTaskSetTimeOutState()
              * was called. */
             xReturn = pdTRUE;
             *pxTicksToWait = ( TickType_t ) 0;
