@@ -54,7 +54,7 @@
 * done by adding the following line to ~/.lldbinit:
 * `process handle SIGUSR1 -n true -p false -s false`
 *----------------------------------------------------------*/
-#ifdef __linux__
+#if defined(__linux__) && !defined(_GNU_SOURCE)
     #define _GNU_SOURCE
 #endif
 #include "portmacro.h"
@@ -305,7 +305,7 @@ BaseType_t xPortStartScheduler( void )
 
     /* Reset pthread_once_t, needed to restart the scheduler again.
      * memset the internal struct members for MacOS/Linux Compatibility */
-    #if __APPLE__
+    #ifdef __APPLE__
         hSigSetupThread.__sig = _PTHREAD_ONCE_SIG_init;
         hThreadKeyOnce.__sig = _PTHREAD_ONCE_SIG_init;
         memset( ( void * ) &hSigSetupThread.__opaque, 0, sizeof( hSigSetupThread.__opaque ) );
