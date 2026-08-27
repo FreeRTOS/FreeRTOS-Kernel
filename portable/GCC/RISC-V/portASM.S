@@ -162,6 +162,7 @@ definitions. */
  * where the global and thread pointers are currently assumed to be constant so
  * are not saved:
  *
+ * xInterruptNesting
  * xCriticalNesting
  * x31
  * x30
@@ -198,6 +199,8 @@ definitions. */
  * pxCode
  */
 pxPortInitialiseStack:
+    addi a0, a0, -portWORD_SIZE         /* Space for interrupt nesting count. */
+
     addi a0, a0, -portWORD_SIZE         /* Space for critical nesting count. */
     store_x x0, 0(a0)                   /* Critical nesting count starts at 0 for every task. */
 

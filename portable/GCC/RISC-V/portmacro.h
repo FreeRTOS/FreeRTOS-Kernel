@@ -106,6 +106,8 @@ extern void vTaskSwitchContext( void );
         }                                        \
     } while( 0 )
 #define portYIELD_FROM_ISR( x )    portEND_SWITCHING_ISR( x )
+
+BaseType_t xPortIsInsideInterrupt( void );
 /*-----------------------------------------------------------*/
 
 /* Critical section management. */
