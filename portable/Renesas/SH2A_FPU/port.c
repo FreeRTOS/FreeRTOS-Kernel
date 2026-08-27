@@ -43,13 +43,6 @@
  * value is for all interrupts to be enabled. */
 #define portINITIAL_SR                 ( 0UL )
 
-/* Dimensions the array into which the floating point context is saved.
- * Allocate enough space for FPR0 to FPR15, FPUL and FPSCR, each of which is 4
- * bytes big.  If this number is changed then the 72 in portasm.src also needs
- * changing. */
-#define portFLOP_REGISTERS_TO_STORE    ( 18 )
-#define portFLOP_STORAGE_SIZE          ( portFLOP_REGISTERS_TO_STORE * 4 )
-
 #if ( configSUPPORT_DYNAMIC_ALLOCATION == 0 )
     #error configSUPPORT_DYNAMIC_ALLOCATION must be 1 to use this port.
 #endif
@@ -245,26 +238,35 @@ BaseType_t xPortUsesFloatingPoint( TaskHandle_t xTask )
         xTask = ( TaskHandle_t ) pxCurrentTCB;
     }
 
-    /* Allocate a buffer large enough to hold all the flop registers. */
-    pulFlopBuffer = ( uint32_t * ) pvPortMalloc( portFLOP_STORAGE_SIZE );
-
-    if( pulFlopBuffer != NULL )
+    /* The task tag already owns the FPU buffer for this port.  Do not replace
+     * it, or the original allocation would become unreachable. */
+    if( xTaskGetApplicationTaskTag( xTask ) != NULL )
     {
-        /* Start with the registers in a benign state. */
-        memset( ( void * ) pulFlopBuffer, 0x00, portFLOP_STORAGE_SIZE );
-
-        /* The first thing to get saved in the buffer is the FPSCR value -
-         * initialise this to the current FPSCR value. */
-        *pulFlopBuffer = get_fpscr();
-
-        /* Use the task tag to point to the flop buffer.  Pass pointer to just
-         * above the buffer because the flop save routine uses a pre-decrement. */
-        vTaskSetApplicationTaskTag( xTask, ( void * ) ( pulFlopBuffer + portFLOP_REGISTERS_TO_STORE ) );
         xReturn = pdPASS;
     }
     else
     {
-        xReturn = pdFAIL;
+        /* Allocate a buffer large enough to hold all the flop registers. */
+        pulFlopBuffer = ( uint32_t * ) pvPortMalloc( portFLOP_STORAGE_SIZE );
+
+        if( pulFlopBuffer != NULL )
+        {
+            /* Start with the registers in a benign state. */
+            memset( ( void * ) pulFlopBuffer, 0x00, portFLOP_STORAGE_SIZE );
+
+            /* The first thing to get saved in the buffer is the FPSCR value -
+             * initialise this to the current FPSCR value. */
+            *pulFlopBuffer = get_fpscr();
+
+            /* Use the task tag to point to the flop buffer.  Pass pointer to just
+             * above the buffer because the flop save routine uses a pre-decrement. */
+            vTaskSetApplicationTaskTag( xTask, ( void * ) ( pulFlopBuffer + portFLOP_REGISTERS_TO_STORE ) );
+            xReturn = pdPASS;
+        }
+        else
+        {
+            xReturn = pdFAIL;
+        }
     }
 
     return xReturn;
