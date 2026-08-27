@@ -44,7 +44,7 @@ vPortStartFirstTask:
     portRESTORE_CONTEXT
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-; Manual context switch function.  This is the SWI hander.
+; Manual context switch function.  This is the SWI handler.
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 vPortYieldProcessor:
     ADD     LR, LR, #4          ; Add 4 to the LR to make the LR appear exactly
