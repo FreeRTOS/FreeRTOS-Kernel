@@ -243,7 +243,7 @@ void vCoRoutineSchedule( void );
  *   crEND();
  * }
  * @endcode
- * \defgroup crSTART crSTART
+ * \defgroup crEND crEND
  * \ingroup Tasks
  */
 
