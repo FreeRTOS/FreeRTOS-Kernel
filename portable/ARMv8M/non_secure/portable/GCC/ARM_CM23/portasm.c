@@ -126,9 +126,9 @@
             " restore_general_regs_first_task:                \n"
             "    subs r2, #32                                 \n"
             "    ldmia r2!, {r4-r7}                           \n" /* r4-r7 contain half of the hardware saved context. */
-            "    stmia r3!, {r4-r7}                           \n" /* Copy half of the the hardware saved context on the task stack. */
+            "    stmia r3!, {r4-r7}                           \n" /* Copy half of the hardware saved context on the task stack. */
             "    ldmia r2!, {r4-r7}                           \n" /* r4-r7 contain rest half of the hardware saved context. */
-            "    stmia r3!, {r4-r7}                           \n" /* Copy rest half of the the hardware saved context on the task stack. */
+            "    stmia r3!, {r4-r7}                           \n" /* Copy rest half of the hardware saved context on the task stack. */
             "    subs r2, #48                                 \n"
             "    ldmia r2!, {r4-r7}                           \n" /* Restore r8-r11. */
             "    mov r8, r4                                   \n" /* r8 = r4. */
@@ -402,9 +402,9 @@ void vClearInterruptMask( __attribute__( ( unused ) ) uint32_t ulMask ) /* __att
             " restore_general_regs:                           \n"
             "    subs r2, #32                                 \n"
             "    ldmia r2!, {r4-r7}                           \n" /* r4-r7 contain half of the hardware saved context. */
-            "    stmia r3!, {r4-r7}                           \n" /* Copy half of the the hardware saved context on the task stack. */
+            "    stmia r3!, {r4-r7}                           \n" /* Copy half of the hardware saved context on the task stack. */
             "    ldmia r2!, {r4-r7}                           \n" /* r4-r7 contain rest half of the hardware saved context. */
-            "    stmia r3!, {r4-r7}                           \n" /* Copy rest half of the the hardware saved context on the task stack. */
+            "    stmia r3!, {r4-r7}                           \n" /* Copy rest half of the hardware saved context on the task stack. */
             "    subs r2, #48                                 \n"
             "    ldmia r2!, {r4-r7}                           \n" /* Restore r8-r11. */
             "    mov r8, r4                                   \n" /* r8 = r4. */

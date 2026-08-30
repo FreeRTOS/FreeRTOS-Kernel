@@ -3225,7 +3225,16 @@ BaseType_t xQueueIsQueueFullFromISR( const QueueHandle_t xQueue )
 
         taskENTER_CRITICAL();
         {
-            if( ( ( Queue_t * ) xQueueOrSemaphore )->pxQueueSetContainer != NULL )
+            if( ( ( Queue_t * ) xQueueSet )->uxItemSize != ( UBaseType_t ) sizeof( Queue_t * ) )
+            {
+                /* The object passed as the queue set is not a queue set. A queue
+                 * set always has an item size of sizeof( Queue_t * ). Reject any
+                 * other object to prevent a type confusion in which
+                 * prvNotifyQueueSetContainer() would later copy uxItemSize bytes
+                 * from a single pointer on the stack. */
+                xReturn = pdFAIL;
+            }
+            else if( ( ( Queue_t * ) xQueueOrSemaphore )->pxQueueSetContainer != NULL )
             {
                 /* Cannot add a queue/semaphore to more than one queue set. */
                 xReturn = pdFAIL;

@@ -467,9 +467,11 @@
             xMessage.u.xTimerParameters.xMessageValue = xOptionalValue;
             xMessage.u.xTimerParameters.pxTimer = xTimer;
 
-            configASSERT( xCommandID < tmrFIRST_FROM_ISR_COMMAND );
+            /* Enforce a lower bound as well as an upper bound so that only
+             * valid task-issued commands are accepted here. */
+            configASSERT( ( xCommandID >= tmrCOMMAND_START_DONT_TRACE ) && ( xCommandID < tmrFIRST_FROM_ISR_COMMAND ) );
 
-            if( xCommandID < tmrFIRST_FROM_ISR_COMMAND )
+            if( ( xCommandID >= tmrCOMMAND_START_DONT_TRACE ) && ( xCommandID < tmrFIRST_FROM_ISR_COMMAND ) )
             {
                 if( xTaskGetSchedulerState() == taskSCHEDULER_RUNNING )
                 {

@@ -63,7 +63,7 @@ scheduler startup function. */
 /* Calls to portENTER_CRITICAL() can be nested.  When they are nested the
 critical section should not be left (i.e. interrupts should not be re-enabled)
 until the nesting depth reaches 0.  This variable simply tracks the nesting
-depth.  Each task maintains it's own critical nesting depth variable so
+depth.  Each task maintains its own critical nesting depth variable so
 uxCriticalNesting is saved and restored from the task stack during a context
 switch. */
 volatile UBaseType_t uxCriticalNesting = 0xff;

@@ -174,7 +174,7 @@
     la          k0, uxInterruptNesting
     lw          s6, (k0)
 
-    /* If the nesting count is 0 then swap to the the system stack, otherwise
+    /* If the nesting count is 0 then swap to the system stack, otherwise
     the system stack is already being used. */
     bne         s6, zero, 1f
     nop

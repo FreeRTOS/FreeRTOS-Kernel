@@ -1109,7 +1109,6 @@ void vPortSVCHandler_C( uint32_t * pulCallerStackAddress ) /* PRIVILEGED_FUNCTIO
 {
     #if ( ( configENABLE_MPU == 1 ) && ( configUSE_MPU_WRAPPERS_V1 == 1 ) )
         #if defined( __ARMCC_VERSION )
-
             /* Declaration when these variable are defined in code instead of being
              * exported from linker scripts. */
             extern uint32_t * __syscalls_flash_start__;
@@ -1120,6 +1119,19 @@ void vPortSVCHandler_C( uint32_t * pulCallerStackAddress ) /* PRIVILEGED_FUNCTIO
             extern uint32_t __syscalls_flash_end__[];
         #endif /* defined( __ARMCC_VERSION ) */
     #endif /* ( configENABLE_MPU == 1 ) && ( configUSE_MPU_WRAPPERS_V1 == 1 ) */
+
+    #if ( configENABLE_MPU == 1 )
+        #if defined( __ARMCC_VERSION )
+            /* Declaration when these variable are defined in code instead of being
+             * exported from linker scripts. */
+            extern uint32_t * __privileged_functions_start__;
+            extern uint32_t * __privileged_functions_end__;
+        #else
+            /* Declaration when these variable are exported from linker scripts. */
+            extern uint32_t __privileged_functions_start__[];
+            extern uint32_t __privileged_functions_end__[];
+        #endif /* defined( __ARMCC_VERSION ) */
+    #endif /* configENABLE_MPU == 1 */
 
     uint32_t ulPC;
 
@@ -1170,39 +1182,54 @@ void vPortSVCHandler_C( uint32_t * pulCallerStackAddress ) /* PRIVILEGED_FUNCTIO
             break;
 
         case portSVC_FREE_SECURE_CONTEXT:
+            #if ( configENABLE_MPU == 1 )
+            if( ( ulPC >= ( uint32_t ) __privileged_functions_start__ ) &&
+                ( ulPC <= ( uint32_t ) __privileged_functions_end__ ) )
+            {
+            #endif /* configENABLE_MPU */
+                /* R0 contains TCB being freed and R1 contains the secure
+                 * context handle to be freed. */
+                ulR0 = pulCallerStackAddress[ 0 ];
+                ulR1 = pulCallerStackAddress[ 1 ];
 
-            /* R0 contains TCB being freed and R1 contains the secure
-             * context handle to be freed. */
-            ulR0 = pulCallerStackAddress[ 0 ];
-            ulR1 = pulCallerStackAddress[ 1 ];
-
-            /* Free the secure context. */
-            SecureContext_FreeContext( ( SecureContextHandle_t ) ulR1, ( void * ) ulR0 );
+                /* Free the secure context. */
+                SecureContext_FreeContext( ( SecureContextHandle_t ) ulR1, ( void * ) ulR0 );
+            #if ( configENABLE_MPU == 1 )
+            }
+            #endif /* configENABLE_MPU */
             break;
     #endif /* configENABLE_TRUSTZONE */
 
         case portSVC_START_SCHEDULER:
-            #if ( configENABLE_TRUSTZONE == 1 )
+            #if ( configENABLE_MPU == 1 )
+            if( ( ulPC >= ( uint32_t ) __privileged_functions_start__ ) &&
+                ( ulPC <= ( uint32_t ) __privileged_functions_end__ ) )
             {
-                /* De-prioritize the non-secure exceptions so that the
-                 * non-secure pendSV runs at the lowest priority. */
-                SecureInit_DePrioritizeNSExceptions();
+            #endif /* configENABLE_MPU */
+                #if ( configENABLE_TRUSTZONE == 1 )
+                {
+                    /* De-prioritize the non-secure exceptions so that the
+                     * non-secure pendSV runs at the lowest priority. */
+                    SecureInit_DePrioritizeNSExceptions();
 
-                /* Initialize the secure context management system. */
-                SecureContext_Init();
+                    /* Initialize the secure context management system. */
+                    SecureContext_Init();
+                }
+                #endif /* configENABLE_TRUSTZONE */
+
+                #if ( configENABLE_FPU == 1 )
+                {
+                    /* Setup the Floating Point Unit (FPU). */
+                    prvSetupFPU();
+                }
+                #endif /* configENABLE_FPU */
+
+                /* Setup the context of the first task so that the first task starts
+                 * executing. */
+                vRestoreContextOfFirstTask();
+            #if ( configENABLE_MPU == 1 )
             }
-            #endif /* configENABLE_TRUSTZONE */
-
-            #if ( configENABLE_FPU == 1 )
-            {
-                /* Setup the Floating Point Unit (FPU). */
-                prvSetupFPU();
-            }
-            #endif /* configENABLE_FPU */
-
-            /* Setup the context of the first task so that the first task starts
-             * executing. */
-            vRestoreContextOfFirstTask();
+            #endif /* configENABLE_MPU */
             break;
 
     #if ( ( configENABLE_MPU == 1 ) && ( configUSE_MPU_WRAPPERS_V1 == 1 ) )

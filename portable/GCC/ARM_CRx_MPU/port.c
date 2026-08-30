@@ -489,7 +489,7 @@ static uint32_t prvGetMPURegionSizeEncoding( uint32_t ulActualMPURegionSize )
     }
 
     /* Shift the code by one before returning so it can be written directly
-     * into the the correct bit position of the attribute register. */
+     * into the correct bit position of the attribute register. */
     return ulReturnValue << 1UL;
 }
 
