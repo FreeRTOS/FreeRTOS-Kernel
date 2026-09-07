@@ -1637,6 +1637,19 @@ STATIC void prvAddNewTaskToReadyList( TCB_t * pxNewTCB ) PRIVILEGED_FUNCTION;
     {
         TCB_t * pxNewTCB;
 
+        /* uxStackDepth is a word count that gets multiplied by
+         * sizeof( StackType_t ) below to get a byte count for the stack
+         * allocation. On targets where configSTACK_DEPTH_TYPE / size_t is
+         * 32-bit, an oversized uxStackDepth can make that multiplication
+         * wrap, silently allocating a far smaller stack than requested
+         * while prvInitialiseNewTask() still initialises the task using
+         * the original, larger uxStackDepth. Reject that up front and
+         * treat it the same as any other allocation failure. */
+        if( ( SIZE_MAX / sizeof( StackType_t ) ) < ( size_t ) uxStackDepth )
+        {
+            pxNewTCB = NULL;
+        }
+        else
         /* If the stack grows down then allocate the stack then the TCB so the stack
          * does not grow into the TCB.  Likewise if the stack grows up then allocate
          * the TCB then the stack. */
