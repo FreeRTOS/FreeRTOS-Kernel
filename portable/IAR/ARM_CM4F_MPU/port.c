@@ -120,9 +120,11 @@ typedef void ( * portISR_t )( void );
 #define portCORTEX_M7_r0p1_ID                     ( 0x410FC271UL )
 #define portCORTEX_M7_r0p0_ID                     ( 0x410FC270UL )
 
+/* Constants to manipulate FreeRTOS interrupt priorities. */
 #define portMIN_INTERRUPT_PRIORITY                ( 255UL )
 #define portNVIC_PENDSV_PRI                       ( ( ( uint32_t ) portMIN_INTERRUPT_PRIORITY ) << 16UL )
 #define portNVIC_SYSTICK_PRI                      ( ( ( uint32_t ) portMIN_INTERRUPT_PRIORITY ) << 24UL )
+#define portNVIC_SVC_PRI                          ( ( ( uint32_t ) configMAX_SYSCALL_INTERRUPT_PRIORITY - 1UL ) << 24UL )
 
 /* Constants used to check the installation of the FreeRTOS interrupt handlers. */
 #define portSCB_VTOR_REG                          ( *( ( portISR_t ** ) 0xE000ED08 ) )
@@ -862,11 +864,11 @@ BaseType_t xPortStartScheduler( void )
     }
     #endif /* configASSERT_DEFINED */
 
-    /* Make PendSV and SysTick the lowest priority interrupts, and make SVCall
-     * the highest priority. */
+    /* Make PendSV and SysTick the lowest priority interrupts, and configure
+     * SVCall for sufficient preemption priority. */
     portNVIC_SHPR3_REG |= portNVIC_PENDSV_PRI;
     portNVIC_SHPR3_REG |= portNVIC_SYSTICK_PRI;
-    portNVIC_SHPR2_REG = 0;
+    portNVIC_SHPR2_REG = portNVIC_SVC_PRI;
 
     /* Configure the regions in the MPU that are common to all tasks. */
     prvSetupMPU();
