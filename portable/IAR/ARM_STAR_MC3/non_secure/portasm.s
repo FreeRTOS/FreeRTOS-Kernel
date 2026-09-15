@@ -473,7 +473,7 @@ PendSV_Handler:
         msr  PAC_KEY_P_0, r6
         clrm {r3-r6}                        /* Clear r3-r6. */
     #endif /* configENABLE_PAC */
-        ldmia r2!, {r0, r3, lr}             http://files.iar.com/ftp/pub/box/bxarm-9.60.3.deb/* Read from stack - r0 = xSecureContext, r3 = PSPLIM and LR restored. */
+        ldmia r2!, {r0, r3, lr}             /* Read from stack - r0 = xSecureContext, r3 = PSPLIM and LR restored. */
         msr psplim, r3                      /* Restore the PSPLIM register value for the task. */
         ldr r3, =xSecureContext             /* Read the location of xSecureContext i.e. &( xSecureContext ). */
         str r0, [r3]                        /* Restore the task's xSecureContext. */
