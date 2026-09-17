@@ -214,8 +214,12 @@ secureportNON_SECURE_CALLABLE void SecureContext_Init( void )
         if( ulSecureContextIndex < secureconfigMAX_SECURE_CONTEXTS )
         {
             /* Allocate the stack space if possible. */
-            if( ulSecureStackSize > ( UINT32_MAX - securecontextSTACK_SEAL_SIZE ) )
+            if( ( ulSecureStackSize < securecontextSTACK_SEAL_SIZE ) ||
+                ( ulSecureStackSize > ( UINT32_MAX - securecontextSTACK_SEAL_SIZE ) ) )
             {
+                /* Reject stacks that are too small (the CONTROL word would be
+                 * written before the allocation, corrupting the secure heap)
+                 * and sizes that would overflow when the seal size is added. */
                 pucStackMemory = NULL;
             }
             else
@@ -286,9 +290,12 @@ secureportNON_SECURE_CALLABLE void SecureContext_FreeContext( SecureContextHandl
                                                               void * pvTaskHandle )
 {
     uint32_t ulIPSR, ulSecureContextIndex;
+    uint8_t * pucStackLimit;
 
-    /* Read the Interrupt Program Status Register (IPSR) value. */
+    /* Read the Interrupt Program Status Register (IPSR) and Process Stack Limit
+     * Register (PSPLIM) value. */
     secureportREAD_IPSR( ulIPSR );
+    secureportREAD_PSPLIM( pucStackLimit );
 
     /* Do nothing if the processor is running in the Thread Mode. IPSR is zero
      * when the processor is running in the Thread Mode. */
@@ -300,8 +307,14 @@ secureportNON_SECURE_CALLABLE void SecureContext_FreeContext( SecureContextHandl
             ulSecureContextIndex = xSecureContextHandle - 1UL;
 
             /* Ensure that the secure context being deleted is associated with
-             * the task. */
-            if( xSecureContexts[ ulSecureContextIndex ].pvTaskHandle == pvTaskHandle )
+             * the task and is NOT the currently-loaded context. Freeing a
+             * context whose stack is currently loaded in PSPLIM would leave the
+             * running task referencing freed secure memory (use-after-free).
+             * pvTaskHandle is supplied by the non-secure side and is untrusted,
+             * so it is used only as an additional ownership match, not as
+             * authority. */
+            if( ( xSecureContexts[ ulSecureContextIndex ].pvTaskHandle == pvTaskHandle ) &&
+                ( xSecureContexts[ ulSecureContextIndex ].pucStackLimit != pucStackLimit ) )
             {
                 /* Free the stack space. */
                 vPortFree( xSecureContexts[ ulSecureContextIndex ].pucStackLimit );

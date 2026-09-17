@@ -95,13 +95,15 @@ typedef void ( * portISR_t )( void );
 #define portPERIPHERALS_START_ADDRESS             0x40000000UL
 #define portPERIPHERALS_END_ADDRESS               0x5FFFFFFFUL
 
-/* Constants required to access and manipulate the SysTick. */
+/* Constants required to access and manipulate the SysTick and other FreeRTOS
+ * interrupts. */
 #define portNVIC_SYSTICK_CLK                      ( 0x00000004UL )
 #define portNVIC_SYSTICK_INT                      ( 0x00000002UL )
 #define portNVIC_SYSTICK_ENABLE                   ( 0x00000001UL )
 #define portMIN_INTERRUPT_PRIORITY                ( 255UL )
 #define portNVIC_PENDSV_PRI                       ( ( ( uint32_t ) portMIN_INTERRUPT_PRIORITY ) << 16UL )
 #define portNVIC_SYSTICK_PRI                      ( ( ( uint32_t ) portMIN_INTERRUPT_PRIORITY ) << 24UL )
+#define portNVIC_SVC_PRI                          ( ( ( uint32_t ) configMAX_SYSCALL_INTERRUPT_PRIORITY - 1UL ) << 24UL )
 
 /* Constants required to manipulate the VFP. */
 #define portFPCCR                                 ( ( volatile uint32_t * ) 0xe000ef34UL ) /* Floating point context control register. */
@@ -966,12 +968,11 @@ BaseType_t xPortStartScheduler( void )
     }
     #endif /* configASSERT_DEFINED */
 
-    /* Make PendSV and SysTick the same priority as the kernel, and the SVC
-     * handler highest priority so it can be used to exit a critical section
-     * (where lower priorities are masked). */
+    /* Make PendSV and SysTick the lowest priority interrupts, and configure
+     * SVCall for sufficient preemption priority. */
     portNVIC_SHPR3_REG |= portNVIC_PENDSV_PRI;
     portNVIC_SHPR3_REG |= portNVIC_SYSTICK_PRI;
-    portNVIC_SHPR2_REG = 0;
+    portNVIC_SHPR2_REG = portNVIC_SVC_PRI;
 
     /* Configure the regions in the MPU that are common to all tasks. */
     prvSetupMPU();
