@@ -596,6 +596,12 @@ void vStreamBufferDelete( StreamBufferHandle_t xStreamBuffer )
         ( void ) memset( pxStreamBuffer, 0x00, sizeof( StreamBuffer_t ) );
     }
 
+    #if ( ( portUSING_MPU_WRAPPERS == 1 ) && ( configENABLE_ACCESS_CONTROL_LIST == 1 ) )
+    {
+        vvMPU_ObjectDeleted( ( int32_t ) xStreamBuffer );
+    }
+    #endif
+
     traceRETURN_vStreamBufferDelete();
 }
 /*-----------------------------------------------------------*/
