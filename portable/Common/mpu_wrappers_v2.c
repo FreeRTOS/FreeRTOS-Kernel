@@ -47,6 +47,21 @@
 #include "mpu_syscall_numbers.h"
 
 #undef MPU_WRAPPERS_INCLUDED_FROM_API_FILE
+
+void vvMPU_ObjectDeleted( int32_t lExternalKernelObjectHandle ) /* PRIVILEGED_FUNCTION */
+{
+    if( IS_EXTERNAL_INDEX_VALID( lExternalKernelObjectHandle ) != pdFALSE )
+    {
+        #if ( configENABLE_AUTOMATIC_ACL_CLEANUP == 1 )
+        {
+            vRevokeAccessToKernelObject( NULL, lExternalKernelObjectHandle );
+        }
+        #endif
+
+        MPU_SetIndexFreeInKernelObjectPool( CONVERT_TO_INTERNAL_INDEX( lExternalKernelObjectHandle ) );
+    }
+}
+
 /*-----------------------------------------------------------*/
 
 #if ( ( portUSING_MPU_WRAPPERS == 1 ) && ( configUSE_MPU_WRAPPERS_V1 == 0 ) )

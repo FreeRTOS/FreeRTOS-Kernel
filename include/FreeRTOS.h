@@ -85,6 +85,12 @@
     #define configENABLE_ACCESS_CONTROL_LIST    0
 #endif
 
+/* Set configENABLE_AUTOMATIC_ACL_CLEANUP to 1 to automatically revoke ACL
+ * permissions on object deletion. */
+#ifndef configENABLE_AUTOMATIC_ACL_CLEANUP
+    #define configENABLE_AUTOMATIC_ACL_CLEANUP    0
+#endif
+
 /* Set default value of configNUMBER_OF_CORES to 1 to use single core FreeRTOS. */
 #ifndef configNUMBER_OF_CORES
     #define configNUMBER_OF_CORES    1
