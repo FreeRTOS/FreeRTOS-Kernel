@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2024, Arm Limited. All rights reserved.
+ * Copyright 2019-2024,2026 Arm Limited and/or its affiliates <open-source-office@arm.com>
  *
  * SPDX-License-Identifier: MIT
  *
@@ -28,9 +28,12 @@
  * The implementation is based on FreeRTOS mutex type semaphore.
  */
 
+#include <stdbool.h>
+
 #include "os_wrapper/mutex.h"
 
 #include "FreeRTOS.h"
+#include "task.h"
 #include "semphr.h"
 #include "mpu_wrappers.h"
 
@@ -41,6 +44,13 @@
  * state.
  */
     StaticSemaphore_t xSecureMutexBuffer;
+#endif
+
+#if ( ( INCLUDE_xTaskGetSchedulerState == 1 ) || ( configUSE_TIMERS == 1 ) )
+    bool os_wrapper_is_kernel_started( void )
+    {
+        return xTaskGetSchedulerState() != taskSCHEDULER_NOT_STARTED;
+    }
 #endif
 
 void * os_wrapper_mutex_create( void )
