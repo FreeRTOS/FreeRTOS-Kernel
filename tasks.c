@@ -1046,16 +1046,34 @@ STATIC void prvAddNewTaskToReadyList( TCB_t * pxNewTCB ) PRIVILEGED_FUNCTION;
                 const ListItem_t * pxEndMarker = listGET_END_MARKER( pxReadyList );
                 ListItem_t * pxIterator;
 
-                /* The ready task list for uxCurrentPriority is not empty, so uxTopReadyPriority
-                 * must not be decremented any further. */
-                xDecrementTopPriority = pdFALSE;
-
                 for( pxIterator = listGET_HEAD_ENTRY( pxReadyList ); pxIterator != pxEndMarker; pxIterator = listGET_NEXT( pxIterator ) )
                 {
                     /* MISRA Ref 11.5.3 [Void pointer assignment] */
                     /* More details at: https://github.com/FreeRTOS/FreeRTOS-Kernel/blob/main/MISRA.md#rule-115 */
                     /* coverity[misra_c_2012_rule_11_5_violation] */
                     pxTCB = ( TCB_t * ) listGET_LIST_ITEM_OWNER( pxIterator );
+
+                    /* The ready task list for uxCurrentPriority is not empty, so
+                     * uxTopReadyPriority must not be decremented any further -
+                     * unless every task in it is runnable on no core, in which
+                     * case no core can ever select a task from this list and the
+                     * list must not pin uxTopReadyPriority. */
+                    #if ( configUSE_CORE_AFFINITY == 1 )
+                    {
+                        if( pxTCB->uxCoreAffinityMask != ( UBaseType_t ) 0U )
+                        {
+                            xDecrementTopPriority = pdFALSE;
+                        }
+                        else
+                        {
+                            mtCOVERAGE_TEST_MARKER();
+                        }
+                    }
+                    #else /* #if ( configUSE_CORE_AFFINITY == 1 ) */
+                    {
+                        xDecrementTopPriority = pdFALSE;
+                    }
+                    #endif /* #if ( configUSE_CORE_AFFINITY == 1 ) */
 
                     #if ( configRUN_MULTIPLE_PRIORITIES == 0 )
                     {
@@ -1112,6 +1130,22 @@ STATIC void prvAddNewTaskToReadyList( TCB_t * pxNewTCB ) PRIVILEGED_FUNCTION;
                         /* A task has been selected to run on this core. */
                         break;
                     }
+                }
+
+                if( xDecrementTopPriority != pdFALSE )
+                {
+                    /* Every task in this ready list is runnable on no core, so
+                     * uxTopReadyPriority must not stay pinned on this list.
+                     * Otherwise this function would keep starting its search at
+                     * this priority, fall back to the idle tasks on every call
+                     * and starve every ready task at a lower priority that is
+                     * eligible to run. */
+                    uxTopReadyPriority--;
+                    #if ( configRUN_MULTIPLE_PRIORITIES == 0 )
+                    {
+                        xPriorityDropped = pdTRUE;
+                    }
+                    #endif
                 }
             }
             else
@@ -1373,8 +1407,19 @@ STATIC void prvAddNewTaskToReadyList( TCB_t * pxNewTCB ) PRIVILEGED_FUNCTION;
 
             if( pxNewTCB != NULL )
             {
-                /* Set the task's affinity before scheduling it. */
-                pxNewTCB->uxCoreAffinityMask = uxCoreAffinityMask;
+                /* Set the task's affinity before scheduling it.  A zero mask
+                 * would leave the task ready but runnable on no core - fall
+                 * back to the default core affinity instead. */
+                configASSERT( uxCoreAffinityMask != ( UBaseType_t ) 0U );
+
+                if( uxCoreAffinityMask != ( UBaseType_t ) 0U )
+                {
+                    pxNewTCB->uxCoreAffinityMask = uxCoreAffinityMask;
+                }
+                else
+                {
+                    pxNewTCB->uxCoreAffinityMask = configTASK_DEFAULT_CORE_AFFINITY;
+                }
 
                 prvAddNewTaskToReadyList( pxNewTCB );
             }
@@ -1488,8 +1533,19 @@ STATIC void prvAddNewTaskToReadyList( TCB_t * pxNewTCB ) PRIVILEGED_FUNCTION;
 
             if( pxNewTCB != NULL )
             {
-                /* Set the task's affinity before scheduling it. */
-                pxNewTCB->uxCoreAffinityMask = uxCoreAffinityMask;
+                /* Set the task's affinity before scheduling it.  A zero mask
+                 * would leave the task ready but runnable on no core - fall
+                 * back to the default core affinity instead. */
+                configASSERT( uxCoreAffinityMask != ( UBaseType_t ) 0U );
+
+                if( uxCoreAffinityMask != ( UBaseType_t ) 0U )
+                {
+                    pxNewTCB->uxCoreAffinityMask = uxCoreAffinityMask;
+                }
+                else
+                {
+                    pxNewTCB->uxCoreAffinityMask = configTASK_DEFAULT_CORE_AFFINITY;
+                }
 
                 prvAddNewTaskToReadyList( pxNewTCB );
                 xReturn = pdPASS;
@@ -1605,8 +1661,19 @@ STATIC void prvAddNewTaskToReadyList( TCB_t * pxNewTCB ) PRIVILEGED_FUNCTION;
 
             if( pxNewTCB != NULL )
             {
-                /* Set the task's affinity before scheduling it. */
-                pxNewTCB->uxCoreAffinityMask = uxCoreAffinityMask;
+                /* Set the task's affinity before scheduling it.  A zero mask
+                 * would leave the task ready but runnable on no core - fall
+                 * back to the default core affinity instead. */
+                configASSERT( uxCoreAffinityMask != ( UBaseType_t ) 0U );
+
+                if( uxCoreAffinityMask != ( UBaseType_t ) 0U )
+                {
+                    pxNewTCB->uxCoreAffinityMask = uxCoreAffinityMask;
+                }
+                else
+                {
+                    pxNewTCB->uxCoreAffinityMask = configTASK_DEFAULT_CORE_AFFINITY;
+                }
 
                 prvAddNewTaskToReadyList( pxNewTCB );
 
@@ -1781,8 +1848,19 @@ STATIC void prvAddNewTaskToReadyList( TCB_t * pxNewTCB ) PRIVILEGED_FUNCTION;
 
             if( pxNewTCB != NULL )
             {
-                /* Set the task's affinity before scheduling it. */
-                pxNewTCB->uxCoreAffinityMask = uxCoreAffinityMask;
+                /* Set the task's affinity before scheduling it.  A zero mask
+                 * would leave the task ready but runnable on no core - fall
+                 * back to the default core affinity instead. */
+                configASSERT( uxCoreAffinityMask != ( UBaseType_t ) 0U );
+
+                if( uxCoreAffinityMask != ( UBaseType_t ) 0U )
+                {
+                    pxNewTCB->uxCoreAffinityMask = uxCoreAffinityMask;
+                }
+                else
+                {
+                    pxNewTCB->uxCoreAffinityMask = configTASK_DEFAULT_CORE_AFFINITY;
+                }
 
                 prvAddNewTaskToReadyList( pxNewTCB );
                 xReturn = pdPASS;
@@ -3068,40 +3146,71 @@ STATIC void prvInitialiseNewTask( TaskFunction_t pxTaskCode,
             pxTCB = prvGetTCBFromHandle( xTask );
             configASSERT( pxTCB != NULL );
 
-            pxTCB->uxCoreAffinityMask = uxCoreAffinityMask;
+            /* A zero mask would leave the task ready but runnable on no core.
+             * It would pin uxTopReadyPriority on a task that can never be
+             * selected, permanently starving every lower priority task that is
+             * ready and eligible to run.  Keep the task's current mask and make
+             * the call a no-op. */
+            configASSERT( uxCoreAffinityMask != ( UBaseType_t ) 0U );
 
-            if( xSchedulerRunning != pdFALSE )
+            if( uxCoreAffinityMask != ( UBaseType_t ) 0U )
             {
-                if( taskTASK_IS_RUNNING( pxTCB ) == pdTRUE )
-                {
-                    xCoreID = ( BaseType_t ) pxTCB->xTaskRunState;
+                pxTCB->uxCoreAffinityMask = uxCoreAffinityMask;
 
-                    /* If the task can no longer run on the core it was running,
-                     * request the core to yield. */
-                    if( ( uxCoreAffinityMask & ( ( UBaseType_t ) 1U << ( UBaseType_t ) xCoreID ) ) == 0U )
+                if( listIS_CONTAINED_WITHIN( &( pxReadyTasksLists[ pxTCB->uxPriority ] ), &( pxTCB->xStateListItem ) ) != pdFALSE )
+                {
+                    /* The task is ready and has just been made runnable again.
+                     * uxTopReadyPriority may have dropped below its priority
+                     * while it was runnable on no core - record the priority so
+                     * that the task is selected again. */
+                    taskRECORD_READY_PRIORITY( pxTCB->uxPriority );
+                }
+                else
+                {
+                    mtCOVERAGE_TEST_MARKER();
+                }
+
+                if( xSchedulerRunning != pdFALSE )
+                {
+                    if( taskTASK_IS_RUNNING( pxTCB ) == pdTRUE )
                     {
-                        prvYieldCore( xCoreID );
+                        xCoreID = ( BaseType_t ) pxTCB->xTaskRunState;
+
+                        /* If the task can no longer run on the core it was running,
+                         * request the core to yield. */
+                        if( ( uxCoreAffinityMask & ( ( UBaseType_t ) 1U << ( UBaseType_t ) xCoreID ) ) == 0U )
+                        {
+                            prvYieldCore( xCoreID );
+                        }
+                    }
+                    else
+                    {
+                        #if ( configUSE_PREEMPTION == 1 )
+                        {
+                            /* The SMP scheduler requests a core to yield when a ready
+                             * task is able to run. It is possible that the core affinity
+                             * of the ready task is changed before the requested core
+                             * can select it to run. In that case, the task may not be
+                             * selected by the previously requested core due to core affinity
+                             * constraint and the SMP scheduler must select a new core to
+                             * yield for the task. */
+                            prvYieldForTask( xTask );
+                        }
+                        #else /* #if( configUSE_PREEMPTION == 1 ) */
+                        {
+                            mtCOVERAGE_TEST_MARKER();
+                        }
+                        #endif /* #if( configUSE_PREEMPTION == 1 ) */
                     }
                 }
                 else
                 {
-                    #if ( configUSE_PREEMPTION == 1 )
-                    {
-                        /* The SMP scheduler requests a core to yield when a ready
-                         * task is able to run. It is possible that the core affinity
-                         * of the ready task is changed before the requested core
-                         * can select it to run. In that case, the task may not be
-                         * selected by the previously requested core due to core affinity
-                         * constraint and the SMP scheduler must select a new core to
-                         * yield for the task. */
-                        prvYieldForTask( xTask );
-                    }
-                    #else /* #if( configUSE_PREEMPTION == 1 ) */
-                    {
-                        mtCOVERAGE_TEST_MARKER();
-                    }
-                    #endif /* #if( configUSE_PREEMPTION == 1 ) */
+                    mtCOVERAGE_TEST_MARKER();
                 }
+            }
+            else
+            {
+                mtCOVERAGE_TEST_MARKER();
             }
         }
         taskEXIT_CRITICAL();
