@@ -48,7 +48,7 @@ jobs:
           GENERATED_MD5=$(md5sum "$HOME/cov-analysis.tar.gz" | awk '{print $1}')
 
           if [ "$GENERATED_MD5" = "$EXPECTED_MD5" ]; then
-            tar -zxf "$HOME/cov-analysis.tar.gz" --one-top-level=cov_scan -C "$HOME"            
+            tar -zxf "$HOME/cov-analysis.tar.gz" --one-top-level=cov_scan --strip-components 1 -C "$HOME"            
             echo "cov_scan_path=$HOME/cov_scan/bin" >> $GITHUB_ENV
             sudo rm -f "$HOME/cov-analysis.tar.gz"
             echo "::endgroup::"
