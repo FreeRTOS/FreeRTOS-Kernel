@@ -42,9 +42,9 @@ jobs:
           # ${{ env.stepName }}
           echo -e "::group::${{ env.bashInfo }} ${{ env.stepName }} ${{ env.bashEnd }}"
 
-          wget -nv -q -O "$HOME/cov-analysis.tar.gz" https://scan.coverity.com/download/linux64 --post-data="token=${COVERITY_TOKEN}&project=FreeRTOS-Kernel"
+          wget -nv -q -O "$HOME/cov-analysis.tar.gz" https://scan.coverity.com/download/cxx/linux64 --post-data="token=${COVERITY_TOKEN}&project=FreeRTOS-Kernel"
           
-          EXPECTED_MD5="e4418004b073140d67390cffba79c3b2"
+          EXPECTED_MD5="75e38e6a47eb14eb3a062037d0f7fdfa"
           GENERATED_MD5=$(md5sum "$HOME/cov-analysis.tar.gz" | awk '{print $1}')
 
           if [ "$GENERATED_MD5" = "$EXPECTED_MD5" ]; then
