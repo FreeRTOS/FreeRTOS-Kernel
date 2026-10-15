@@ -258,9 +258,9 @@ extern void vClearInterruptMask( uint32_t ulMask ) /* __attribute__(( naked )) P
              * +-----------+---------------+----------+-----------------+------------------------------+------------+-----+
              *
              * <-----------><--------------><---------><----------------><-----------------------------><-----------><---->
-             *      16             17            8               8                     5                     16         1
+             *      16             17            8               8                     5                      4         1
              */
-            #define MAX_CONTEXT_SIZE    71
+            #define MAX_CONTEXT_SIZE    59
 
         #elif ( ( configENABLE_TRUSTZONE == 1 ) && ( configENABLE_PAC == 0 ) )
 
@@ -284,9 +284,9 @@ extern void vClearInterruptMask( uint32_t ulMask ) /* __attribute__(( naked )) P
              * +-----------+---------------+----------+-----------------+----------------------+------------+-----+
              *
              * <-----------><--------------><---------><----------------><---------------------><-----------><---->
-             *      16             17            8               8                  4                16         1
+             *      16             17            8               8                  4                 4         1
              */
-            #define MAX_CONTEXT_SIZE    70
+            #define MAX_CONTEXT_SIZE    58
 
         #else /* if ( ( configENABLE_TRUSTZONE == 1 ) && ( configENABLE_PAC == 1 ) ) */
 
@@ -314,9 +314,9 @@ extern void vClearInterruptMask( uint32_t ulMask ) /* __attribute__(( naked )) P
              * +----------+-----------------+------------------------------+------------+-----+
              *
              * <---------><----------------><------------------------------><-----------><---->
-             *     8               8                      5                      16         1
+             *     8               8                      5                       4         1
              */
-            #define MAX_CONTEXT_SIZE    38
+            #define MAX_CONTEXT_SIZE    26
 
         #elif ( ( configENABLE_TRUSTZONE == 1 ) && ( configENABLE_PAC == 0 ) )
 
@@ -340,9 +340,9 @@ extern void vClearInterruptMask( uint32_t ulMask ) /* __attribute__(( naked )) P
              * +----------+-----------------+----------------------+------------+-----+
              *
              * <---------><----------------><----------------------><-----------><---->
-             *     8               8                  4                  16         1
+             *     8               8                  4                   4         1
              */
-            #define MAX_CONTEXT_SIZE    37
+            #define MAX_CONTEXT_SIZE    25
 
         #else /* #if( configENABLE_TRUSTZONE == 1 ) */
 
