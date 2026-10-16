@@ -338,13 +338,16 @@ freertos_risc_v_interrupt_handler:
 /*-----------------------------------------------------------*/
 
 .section .text.freertos_risc_v_mtimer_interrupt_handler
+.align 2
 freertos_risc_v_mtimer_interrupt_handler:
-    portcontextSAVE_INTERRUPT_CONTEXT
+    portcontextSAVE_TIMER_CALLER_CONTEXT
     portUPDATE_MTIMER_COMPARE_REGISTER
     call xTaskIncrementTick
-    beqz a0, exit_without_context_switch    /* Don't switch context if incrementing tick didn't unblock a task. */
+    bnez a0, mtimer_context_switch
+    portcontextRESTORE_TIMER_CALLER_CONTEXT
+mtimer_context_switch:
+    portcontextSAVE_DEFERRED_TASK_STATE
     call vTaskSwitchContext
-exit_without_context_switch:
     portcontextRESTORE_CONTEXT
 /*-----------------------------------------------------------*/
 
