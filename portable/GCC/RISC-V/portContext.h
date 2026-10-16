@@ -57,11 +57,13 @@
  * specific version of freertos_risc_v_chip_specific_extensions.h.  See the
  * notes at the top of portASM.S file. */
 #ifdef __riscv_32e
-    #define portCONTEXT_SIZE               ( 15 * portWORD_SIZE )
+    #define portCONTEXT_SIZE               ( 16 * portWORD_SIZE )
     #define portCRITICAL_NESTING_OFFSET    14
+    #define portINTERRUPT_NESTING_OFFSET   15
 #else
-    #define portCONTEXT_SIZE               ( 31 * portWORD_SIZE )
+    #define portCONTEXT_SIZE               ( 32 * portWORD_SIZE )
     #define portCRITICAL_NESTING_OFFSET    30
+    #define portINTERRUPT_NESTING_OFFSET   31
 #endif
 
 #if ( configENABLE_FPU == 1 )
@@ -122,6 +124,8 @@
 .extern xISRStackTop
 .extern xCriticalNesting
 .extern pxCriticalNesting
+.extern xInterruptNesting
+.extern pxInterruptNesting
 /*-----------------------------------------------------------*/
 
     .macro portcontexSAVE_FPU_CONTEXT
@@ -306,6 +310,12 @@ store_x x15, 13 * portWORD_SIZE( sp )
 load_x t0, xCriticalNesting                                   /* Load the value of xCriticalNesting into t0. */
 store_x t0, portCRITICAL_NESTING_OFFSET * portWORD_SIZE( sp ) /* Store the critical nesting value to the stack. */
 
+load_x t0, xInterruptNesting                                   /* Load the value of xInterruptNesting into t0. */
+store_x t0, portINTERRUPT_NESTING_OFFSET * portWORD_SIZE( sp ) /* Store the interrupt nesting value to the stack. */
+addi t0, t0, 1
+load_x t1, pxInterruptNesting           /* Load the address of xInterruptNesting into t1. */
+store_x t0, 0( t1 )                     /* Increment xInterruptNesting by 1 */
+
 #if( configENABLE_FPU == 1 )
     csrr t0, mstatus
     srl t1, t0, MSTATUS_FS_OFFSET
@@ -424,6 +434,10 @@ csrw mstatus, t3
     portcontextRESTORE_FPU_CONTEXT
 6:
 #endif /* ifdef portasmSTORE_FPU_CONTEXT */
+
+load_x t0, portINTERRUPT_NESTING_OFFSET * portWORD_SIZE( sp ) /* Obtain saved xInterruptNesting value from task's stack. */
+load_x t1, pxInterruptNesting                                 /* Load the address of xInterruptNesting into t1. */
+store_x t0, 0 ( t1 )                                          /* Restore the interrupt nesting value. */
 
 load_x t0, portCRITICAL_NESTING_OFFSET * portWORD_SIZE( sp ) /* Obtain xCriticalNesting value for this task from task's stack. */
 load_x t1, pxCriticalNesting                                 /* Load the address of xCriticalNesting into t1. */
