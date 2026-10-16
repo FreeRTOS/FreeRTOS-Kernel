@@ -1,5 +1,5 @@
 /*
- * FreeRTOS Kernel <DEVELOPMENT BRANCH>
+ * FreeRTOS Kernel VV11.3.2
  * Copyright 2020 Cambridge Consultants Ltd.
  *
  * SPDX-License-Identifier: MIT
