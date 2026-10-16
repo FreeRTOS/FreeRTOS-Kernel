@@ -1,0 +1,33 @@
+cmake_minimum_required(VERSION 3.15)
+project(posix_port_tests C)
+enable_testing()
+find_package(Threads REQUIRED)
+
+get_filename_component(KERNEL_ROOT "../../../../.." ABSOLUTE)
+add_library(freertos_config INTERFACE)
+target_include_directories(freertos_config INTERFACE "${CMAKE_CURRENT_SOURCE_DIR}")
+set(FREERTOS_PORT GCC_POSIX CACHE STRING "" FORCE)
+set(FREERTOS_HEAP 4 CACHE STRING "" FORCE)
+add_subdirectory("${KERNEL_ROOT}" kernel)
+
+foreach(assert_enabled 0 1)
+    set(target thread_marker_${assert_enabled})
+    add_executable(${target} thread_marker.c)
+    target_include_directories(${target} PRIVATE . .. "${KERNEL_ROOT}/include")
+    target_compile_definitions(${target} PRIVATE TEST_ASSERT_ENABLED=${assert_enabled})
+    target_compile_options(${target} PRIVATE -Wall -Wextra -Werror -ffunction-sections -fdata-sections)
+    target_link_libraries(${target} PRIVATE Threads::Threads)
+    target_link_options(${target} PRIVATE -Wl,--gc-sections
+        -Wl,--wrap=pthread_key_create -Wl,--wrap=pthread_setspecific
+        -Wl,--wrap=malloc -Wl,--wrap=free -Wl,--wrap=abort)
+    foreach(scenario success key_create key_query allocation setspecific)
+        add_test(NAME ${target}_${scenario} COMMAND ${target} ${scenario})
+        set_tests_properties(${target}_${scenario} PROPERTIES TIMEOUT 10)
+    endforeach()
+endforeach()
+
+add_executable(scheduler_smoke scheduler_smoke.c)
+target_link_libraries(scheduler_smoke PRIVATE freertos_kernel)
+target_compile_options(scheduler_smoke PRIVATE -Wall -Wextra -Werror)
+add_test(NAME scheduler_smoke COMMAND scheduler_smoke)
+set_tests_properties(scheduler_smoke PROPERTIES TIMEOUT 10)
