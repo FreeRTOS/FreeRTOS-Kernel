@@ -84,6 +84,13 @@ typedef unsigned long    UBaseType_t;
 #define portYIELD_TRAP_NO                ( 33 )
 #define portKERNEL_INTERRUPT_PRIORITY    ( 1 )
 
+/* Dimensions the array into which the floating point context is saved.
+ * Allocate enough space for FPR0 to FPR15, FPUL and FPSCR, each of which is 4
+ * bytes big.  If this number is changed then the 72 in portasm.src also needs
+ * changing. */
+#define portFLOP_REGISTERS_TO_STORE      ( 18 )
+#define portFLOP_STORAGE_SIZE            ( portFLOP_REGISTERS_TO_STORE * 4 )
+
 void vPortYield( void );
 #define portYIELD()                vPortYield()
 
@@ -111,6 +118,21 @@ void vPortRestoreFlopRegisters( void * pulBuffer );
  */
 #define traceTASK_SWITCHED_OUT()    do { if( pxCurrentTCB->pxTaskTag != NULL ) vPortSaveFlopRegisters( pxCurrentTCB->pxTaskTag ); } while( 0 )
 #define traceTASK_SWITCHED_IN()     do { if( pxCurrentTCB->pxTaskTag != NULL ) vPortRestoreFlopRegisters( pxCurrentTCB->pxTaskTag ); } while( 0 )
+
+/* pxTaskTag points just above the FPU context buffer because the save routine
+ * uses a pre-decrement.  Recover the allocation base before freeing it. */
+#define portCLEAN_UP_TCB( pxTCB )                                         \
+    do                                                                    \
+    {                                                                     \
+        if( ( pxTCB )->pxTaskTag != NULL )                                \
+        {                                                                 \
+            uint32_t * pulFlopBufferEnd =                                 \
+                ( uint32_t * ) ( pxTCB )->pxTaskTag;                      \
+            vPortFree( ( void * ) ( pulFlopBufferEnd -                    \
+                                    portFLOP_REGISTERS_TO_STORE ) );      \
+            ( pxTCB )->pxTaskTag = NULL;                                  \
+        }                                                                 \
+    } while( 0 )
 
 /*
  * These macros should be called directly, but through the taskENTER_CRITICAL()
