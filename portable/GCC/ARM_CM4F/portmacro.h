@@ -117,6 +117,13 @@ typedef unsigned long    UBaseType_t;
 /* Critical section management. */
 extern void vPortEnterCritical( void );
 extern void vPortExitCritical( void );
+
+/* This is a single-core port where BaseType_t and UBaseType_t are 32-bit, and
+ * uint8_t is 8-bit.  Reads and writes of these widths are atomic, so accesses
+ * protected by these macros do not need to enter a critical section. */
+#define portBASE_TYPE_ENTER_CRITICAL()
+#define portBASE_TYPE_EXIT_CRITICAL()
+
 #define portSET_INTERRUPT_MASK_FROM_ISR()         ulPortRaiseBASEPRI()
 #define portCLEAR_INTERRUPT_MASK_FROM_ISR( x )    vPortSetBASEPRI( x )
 #define portDISABLE_INTERRUPTS()                  vPortRaiseBASEPRI()
