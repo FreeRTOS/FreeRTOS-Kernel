@@ -622,7 +622,7 @@ static BaseType_t prvMPURegionAuthorizesBuffer( const xMPU_REGION_REGISTERS * xT
 
 /* PRIVILEGED_FUNCTION */
 BaseType_t xPortIsAuthorizedToAccessBuffer( const void * pvBuffer,
-                                            uint32_t ulBufferLength,
+                                            size_t xBufferLength,
                                             uint32_t ulAccessRequested )
 {
     BaseType_t xAccessGranted = pdFALSE;
@@ -652,7 +652,7 @@ BaseType_t xPortIsAuthorizedToAccessBuffer( const void * pvBuffer,
             {
                 xAccessGranted = prvMPURegionAuthorizesBuffer( &( xTaskMPUSettings->xRegion[ ulRegionIndex ] ),
                                                                ( uint32_t ) pvBuffer,
-                                                               ulBufferLength,
+                                                               ( uint32_t ) xBufferLength,
                                                                ulAccessRequested );
 
                 if( xAccessGranted == pdTRUE )

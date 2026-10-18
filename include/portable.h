@@ -254,7 +254,7 @@ void vPortEndScheduler( void ) PRIVILEGED_FUNCTION;
  * @brief Checks if the calling task is authorized to access the given buffer.
  *
  * @param pvBuffer The buffer which the calling task wants to access.
- * @param ulBufferLength The length of the pvBuffer.
+ * @param xBufferLength The length of the pvBuffer.
  * @param ulAccessRequested The permissions that the calling task wants.
  *
  * @return pdTRUE if the calling task is authorized to access the buffer,
@@ -262,7 +262,7 @@ void vPortEndScheduler( void ) PRIVILEGED_FUNCTION;
  */
 #if ( portUSING_MPU_WRAPPERS == 1 )
     BaseType_t xPortIsAuthorizedToAccessBuffer( const void * pvBuffer,
-                                                uint32_t ulBufferLength,
+                                                size_t xBufferLength,
                                                 uint32_t ulAccessRequested ) PRIVILEGED_FUNCTION;
 #endif
 

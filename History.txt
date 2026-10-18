@@ -1,5 +1,47 @@
 Documentation and download available at https://www.FreeRTOS.org/
 
+Changes between FreeRTOS V11.3.1 and FreeRTOS V11.3.2 released October 16, 2026
+
+    + Add the ability for a port to selectively override the
+      PRIVILEGED_FUNCTION, PRIVILEGED_DATA and FREERTOS_SYSTEM_CALL macros when
+      the MPU wrappers are not in use. This allows kernel functions and data to
+      be placed in port specific link time sections, such as cache coherent
+      memory on SMP systems, without enabling the full MPU wrappers. We thank
+      @ianstcdns for their contribution.
+    + Add an implementation of os_wrapper_is_kernel_started, which is new in
+      TF-M 2.3.0, to the ARM_TFM port. A suspended scheduler is reported as
+      started because the kernel has already been initialized. The
+      implementation is guarded by the same configuration condition as
+      xTaskGetSchedulerState so that configurations without that API continue
+      to build. We thank @ithinuel for their contribution.
+    + Update xPortIsAuthorizedToAccessBuffer to take the buffer length as a
+      size_t instead of a uint32_t so that it uses the natural word size of the
+      architecture, which enables 64-bit systems. Ports maintained outside of
+      this repository that implement this function need to update their
+      function signature to match. We thank Claude and Ada Logics for their
+      help identifying this issue.
+    + Update the ARMv7-M MPU ports to lower the SVCall preemption priority from
+      zero, the highest priority, to one just above
+      configMAX_SYSCALL_INTERRUPT_PRIORITY, which restores the priority used
+      before the ports were updated to raise SVCall to the highest priority. We
+      thank @jefftenney for their contribution.
+    + Update the Partner-Supported-Ports submodule.
+    + Fix the MAX_CONTEXT_SIZE calculation in the ARMv8-M ports to account for
+      the task PAC key as 4 words rather than 16, because the key is 16 bytes
+      long and MAX_CONTEXT_SIZE counts words. This reduces the amount of
+      context memory reserved per task when configENABLE_PAC is 1. We thank
+      @ithinuel for their contribution.
+    + Fix portEXTRACT_LAST_ADDRESS_FROM_PRLAR_EL1 in the ARM_CR82 port to set
+      only the address bits that PRLAR_EL1 implies, rather than every bit
+      outside of the address mask, which corrupted the upper bits of the region
+      end address used in MPU access checks. We thank Claude and Ada Logics for
+      their help identifying this issue.
+    + Fix the IAR TrustZone non-secure ports for ARM_CM33, ARM_CM35P, ARM_CM52,
+      ARM_CM55, ARM_CM85 and ARM_STAR_MC3 by removing a stray installer URL
+      that was left outside of a comment. The assembler parsed the URL as an
+      operand of the preceding instruction, which failed the build of every
+      configuration of these ports. We thank @sekior11 for their contribution.
+
 Changes between FreeRTOS V11.3.0 and FreeRTOS V11.3.1 released August 2026
 
     + Add Symmetric Multiprocessing (SMP) support to the Armv8-M ports for the
