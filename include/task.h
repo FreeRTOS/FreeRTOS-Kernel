@@ -3891,6 +3891,32 @@ void vTaskInternalSetTimeOutState( TimeOut_t * const pxTimeOut ) PRIVILEGED_FUNC
 
 #endif /* #if ( ( portUSING_MPU_WRAPPERS == 1 ) && ( configUSE_MPU_WRAPPERS_V1 == 0 ) && ( configENABLE_ACCESS_CONTROL_LIST == 1 ) ) */
 
+/* ===== CUSTOM CHANGE E: switch-statistics API (implemented in tasks.c) ===== */
+#ifndef configUSE_SWITCH_STATS
+    #define configUSE_SWITCH_STATS    0
+#endif
+
+#ifndef configSWITCH_TRACE_DEPTH
+    #define configSWITCH_TRACE_DEPTH    16
+#endif
+
+#if ( configUSE_SWITCH_STATS == 1 )
+
+    typedef struct xSWITCH_TRACE_ENTRY
+    {
+        TickType_t xTick;                         /* tick count at switch-in */
+        char pcTaskName[ configMAX_TASK_NAME_LEN ];
+    } SwitchTraceEntry_t;
+
+    uint32_t ulTaskGetSwitchCount( TaskHandle_t xTask ) PRIVILEGED_FUNCTION;       /* NULL = calling task */
+    TickType_t xTaskGetLastSwitchInTick( TaskHandle_t xTask ) PRIVILEGED_FUNCTION;
+    uint32_t ulTaskGetTotalSwitchCount( void ) PRIVILEGED_FUNCTION;
+    uint32_t ulTaskGetSwitchTrace( SwitchTraceEntry_t * pxBuffer,
+                                   uint32_t ulMaxEntries ) PRIVILEGED_FUNCTION;   /* oldest first */
+
+#endif
+/* ===== end CUSTOM CHANGE E ===== */
+
 /* *INDENT-OFF* */
 #ifdef __cplusplus
     }
