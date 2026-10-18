@@ -85,15 +85,21 @@ static void vMonitor( void * pv )
                 ( unsigned long ) xTaskGetTickCount(),
                 ( unsigned long ) ulTaskGetTotalSwitchCount(),
                 ( unsigned long ) ulSharedCounter );
-        printf( "%-10s %4s %9s %12s %10s\n", "Task", "Pri", "Switches", "LastInTick", "StackHWM" );
+        printf( "%-10s %4s %9s %11s %9s %7s %9s\n",
+                "Task", "Pri", "Switches", "RunTicks", "MaxRun", "CPU%", "StackHWM" );
 
         for( UBaseType_t i = 0; i < n; i++ )
         {
-            printf( "%-10s %4lu %9lu %12lu %10lu\n",
+            uint32_t ulRun = ulTaskGetTotalRunTicks( xStatus[ i ].xHandle );
+            uint32_t ulNow = ( uint32_t ) xTaskGetTickCount();
+
+            printf( "%-10s %4lu %9lu %11lu %9lu %6lu%% %9lu\n",
                     xStatus[ i ].pcTaskName,
                     ( unsigned long ) xStatus[ i ].uxCurrentPriority,
                     ( unsigned long ) ulTaskGetSwitchCount( xStatus[ i ].xHandle ),
-                    ( unsigned long ) xTaskGetLastSwitchInTick( xStatus[ i ].xHandle ),
+                    ( unsigned long ) ulRun,
+                    ( unsigned long ) ulTaskGetMaxRunTicks( xStatus[ i ].xHandle ),
+                    ( unsigned long ) ( ( ulNow > 0U ) ? ( ( ulRun * 100U ) / ulNow ) : 0U ),
                     ( unsigned long ) uxTaskGetStackHighWaterMark( xStatus[ i ].xHandle ) );
         }
 
