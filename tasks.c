@@ -452,6 +452,12 @@ typedef struct tskTaskControlBlock       /* The old naming convention is used to
     #if ( configUSE_POSIX_ERRNO == 1 )
         int iTaskErrno;
     #endif
+
+    /* ===== CUSTOM CHANGE B: per-task switch statistics ===== */
+    #if ( configUSE_SWITCH_STATS == 1 )
+        uint32_t ulSwitchCount;        /**< Times this task has been switched in. */
+        TickType_t xLastSwitchInTick;  /**< Tick count when it was last switched in. */
+    #endif
 } tskTCB;
 
 /* The old tskTCB name is maintained above then typedefed to the new TCB_t name
@@ -504,6 +510,18 @@ PRIVILEGED_DATA STATIC List_t xPendingReadyList;                         /**< Ta
 /* Other file private variables. --------------------------------*/
 PRIVILEGED_DATA STATIC volatile UBaseType_t uxCurrentNumberOfTasks = ( UBaseType_t ) 0U;
 PRIVILEGED_DATA STATIC volatile TickType_t xTickCount = ( TickType_t ) configINITIAL_TICK_COUNT;
+
+/* ===== CUSTOM CHANGE A: scheduler switch statistics (configUSE_SWITCH_STATS) ===== */
+#if ( configUSE_SWITCH_STATS == 1 )
+    #if ( configNUMBER_OF_CORES != 1 )
+        #error configUSE_SWITCH_STATS currently supports single-core builds only.
+    #endif
+    PRIVILEGED_DATA static volatile uint32_t ulTotalSwitches = 0U;
+    PRIVILEGED_DATA static SwitchTraceEntry_t xSwitchTrace[ configSWITCH_TRACE_DEPTH ];
+    PRIVILEGED_DATA static uint32_t ulTraceHead = 0U;   /* next slot to write */
+    PRIVILEGED_DATA static uint32_t ulTraceCount = 0U;  /* valid entries, <= depth */
+#endif
+/* ===== end CUSTOM CHANGE A ===== */
 PRIVILEGED_DATA STATIC volatile UBaseType_t uxTopReadyPriority = tskIDLE_PRIORITY;
 PRIVILEGED_DATA STATIC volatile BaseType_t xSchedulerRunning = pdFALSE;
 PRIVILEGED_DATA STATIC volatile TickType_t xPendedTicks = ( TickType_t ) 0U;
@@ -4264,6 +4282,85 @@ TickType_t xTaskGetTickCountFromISR( void )
 }
 /*-----------------------------------------------------------*/
 
+/* ===== CUSTOM CHANGE D: public switch-statistics API ===== */
+#if ( configUSE_SWITCH_STATS == 1 )
+
+    uint32_t ulTaskGetSwitchCount( TaskHandle_t xTask )
+    {
+        uint32_t ulReturn;
+
+        taskENTER_CRITICAL();
+        {
+            ulReturn = prvGetTCBFromHandle( xTask )->ulSwitchCount;
+        }
+        taskEXIT_CRITICAL();
+
+        return ulReturn;
+    }
+
+    TickType_t xTaskGetLastSwitchInTick( TaskHandle_t xTask )
+    {
+        TickType_t xReturn;
+
+        taskENTER_CRITICAL();
+        {
+            xReturn = prvGetTCBFromHandle( xTask )->xLastSwitchInTick;
+        }
+        taskEXIT_CRITICAL();
+
+        return xReturn;
+    }
+
+    uint32_t ulTaskGetTotalSwitchCount( void )
+    {
+        uint32_t ulReturn;
+
+        taskENTER_CRITICAL();
+        {
+            ulReturn = ulTotalSwitches;
+        }
+        taskEXIT_CRITICAL();
+
+        return ulReturn;
+    }
+
+    /* Copies up to ulMaxEntries of the most recent switches, oldest first.
+     * Returns the number of entries copied. */
+    uint32_t ulTaskGetSwitchTrace( SwitchTraceEntry_t * pxBuffer,
+                                   uint32_t ulMaxEntries )
+    {
+        uint32_t ulCopied = 0U;
+        uint32_t ulSkip = 0U;
+        uint32_t ulStart;
+        uint32_t i;
+
+        configASSERT( pxBuffer != NULL );
+
+        taskENTER_CRITICAL();
+        {
+            if( ulTraceCount > ulMaxEntries )
+            {
+                ulSkip = ulTraceCount - ulMaxEntries;   /* keep only the newest ones */
+            }
+
+            ulStart = ( ulTraceHead + ( uint32_t ) configSWITCH_TRACE_DEPTH - ulTraceCount + ulSkip )
+                      % ( uint32_t ) configSWITCH_TRACE_DEPTH;
+
+            for( i = 0U; i < ( ulTraceCount - ulSkip ); i++ )
+            {
+                pxBuffer[ ulCopied ] = xSwitchTrace[ ( ulStart + i ) % ( uint32_t ) configSWITCH_TRACE_DEPTH ];
+                ulCopied++;
+            }
+        }
+        taskEXIT_CRITICAL();
+
+        return ulCopied;
+    }
+
+#endif /* configUSE_SWITCH_STATS */
+/* ===== end CUSTOM CHANGE D ===== */
+/*-----------------------------------------------------------*/
+
 UBaseType_t uxTaskGetNumberOfTasks( void )
 {
     traceENTER_uxTaskGetNumberOfTasks();
@@ -5272,6 +5369,29 @@ BaseType_t xTaskIncrementTick( void )
             /* coverity[misra_c_2012_rule_11_5_violation] */
             taskSELECT_HIGHEST_PRIORITY_TASK();
             traceTASK_SWITCHED_IN();
+
+            /* ===== CUSTOM CHANGE C: record the switch ===== */
+            #if ( configUSE_SWITCH_STATS == 1 )
+            {
+                pxCurrentTCB->ulSwitchCount++;
+                pxCurrentTCB->xLastSwitchInTick = xTickCount;
+                ulTotalSwitches++;
+
+                xSwitchTrace[ ulTraceHead ].xTick = xTickCount;
+                ( void ) strncpy( xSwitchTrace[ ulTraceHead ].pcTaskName,
+                                  pxCurrentTCB->pcTaskName,
+                                  ( size_t ) configMAX_TASK_NAME_LEN );
+                xSwitchTrace[ ulTraceHead ].pcTaskName[ configMAX_TASK_NAME_LEN - 1 ] = '\0';
+
+                ulTraceHead = ( ulTraceHead + 1U ) % ( uint32_t ) configSWITCH_TRACE_DEPTH;
+
+                if( ulTraceCount < ( uint32_t ) configSWITCH_TRACE_DEPTH )
+                {
+                    ulTraceCount++;
+                }
+            }
+            #endif
+            /* ===== end CUSTOM CHANGE C ===== */
 
             /* Macro to inject port specific behaviour immediately after
              * switching tasks, such as setting an end of stack watchpoint
