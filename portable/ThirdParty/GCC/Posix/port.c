@@ -112,6 +112,7 @@ static pthread_t hTimerTickThread;
 static bool xTimerTickThreadShouldRun;
 static uint64_t prvStartTimeNs;
 static pthread_key_t xThreadKey = 0;
+static int iThreadKeyCreateResult = 0;
 /*-----------------------------------------------------------*/
 
 static void prvSetupSignalsAndSchedulerPolicy( void );
@@ -129,6 +130,8 @@ static void prvInitThreadKey( void );
 static void prvMarkAsFreeRTOSThread( void );
 static BaseType_t prvIsFreeRTOSThread( void );
 static void prvDestroyThreadKey( void );
+static void prvFatalError( const char * pcCall,
+                           int iErrno ) __attribute__( ( __noreturn__ ) );
 /*-----------------------------------------------------------*/
 
 static void prvThreadKeyDestructor( void * pvData )
@@ -139,24 +142,49 @@ static void prvThreadKeyDestructor( void * pvData )
 
 static void prvInitThreadKey( void )
 {
-    pthread_key_create( &xThreadKey, prvThreadKeyDestructor );
-    /* Destroy xThreadKey when the process exits. */
-    atexit( prvDestroyThreadKey );
+    iThreadKeyCreateResult = pthread_key_create( &xThreadKey, prvThreadKeyDestructor );
+
+    if( iThreadKeyCreateResult == 0 )
+    {
+        /* Destroy xThreadKey when the process exits. */
+        atexit( prvDestroyThreadKey );
+    }
 }
 /*-----------------------------------------------------------*/
 
 static void prvMarkAsFreeRTOSThread( void )
 {
     uint8_t * pucThreadData = NULL;
+    int iRet;
 
-    ( void ) pthread_once( &hThreadKeyOnce, prvInitThreadKey );
+    iRet = pthread_once( &hThreadKeyOnce, prvInitThreadKey );
+
+    if( iRet != 0 )
+    {
+        prvFatalError( "pthread_once", iRet );
+    }
+
+    if( iThreadKeyCreateResult != 0 )
+    {
+        prvFatalError( "pthread_key_create", iThreadKeyCreateResult );
+    }
 
     pucThreadData = malloc( 1 );
-    configASSERT( pucThreadData != NULL );
+
+    if( pucThreadData == NULL )
+    {
+        prvFatalError( "malloc", ENOMEM );
+    }
 
     *pucThreadData = 1;
 
-    pthread_setspecific( xThreadKey, pucThreadData );
+    iRet = pthread_setspecific( xThreadKey, pucThreadData );
+
+    if( iRet != 0 )
+    {
+        free( pucThreadData );
+        prvFatalError( "pthread_setspecific", iRet );
+    }
 }
 /*-----------------------------------------------------------*/
 
@@ -164,8 +192,19 @@ static BaseType_t prvIsFreeRTOSThread( void )
 {
     uint8_t * pucThreadData = NULL;
     BaseType_t xRet = pdFALSE;
+    int iRet;
 
-    ( void ) pthread_once( &hThreadKeyOnce, prvInitThreadKey );
+    iRet = pthread_once( &hThreadKeyOnce, prvInitThreadKey );
+
+    if( iRet != 0 )
+    {
+        prvFatalError( "pthread_once", iRet );
+    }
+
+    if( iThreadKeyCreateResult != 0 )
+    {
+        prvFatalError( "pthread_key_create", iThreadKeyCreateResult );
+    }
 
     pucThreadData = ( uint8_t * ) pthread_getspecific( xThreadKey );
 
@@ -183,9 +222,6 @@ static void prvDestroyThreadKey( void )
     pthread_key_delete( xThreadKey );
 }
 /*-----------------------------------------------------------*/
-
-static void prvFatalError( const char * pcCall,
-                           int iErrno ) __attribute__( ( __noreturn__ ) );
 
 void prvFatalError( const char * pcCall,
                     int iErrno )
