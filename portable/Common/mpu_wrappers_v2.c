@@ -884,6 +884,22 @@
 
     #if ( configUSE_APPLICATION_TASK_TAG == 1 )
 
+        static void MPU_vTaskSetApplicationTaskTagSyscallImpl( TaskHandle_t xTask,
+                                                               TaskHookFunction_t pxTagValue ) PRIVILEGED_FUNCTION;
+
+        static void MPU_vTaskSetApplicationTaskTagSyscallImpl( TaskHandle_t xTask,
+                                                               TaskHookFunction_t pxTagValue ) /* PRIVILEGED_FUNCTION */
+        {
+            /* Application task hooks execute in the privilege mode of the caller
+             * of xTaskCallApplicationTaskHook(). Therefore, an unprivileged task
+             * must not be allowed to register a callback that can later execute
+             * with privilege. */
+            ( void ) xTask;
+            ( void ) pxTagValue;
+        }
+
+/*-----------------------------------------------------------*/
+
         void MPU_vTaskSetApplicationTaskTagImpl( TaskHandle_t xTask,
                                                  TaskHookFunction_t pxTagValue ) PRIVILEGED_FUNCTION;
 
@@ -5153,7 +5169,7 @@
         #endif
 
         #if ( configUSE_APPLICATION_TASK_TAG == 1 )
-            ( UBaseType_t ) MPU_vTaskSetApplicationTaskTagImpl,             /* SYSTEM_CALL_vTaskSetApplicationTaskTag. */
+            ( UBaseType_t ) MPU_vTaskSetApplicationTaskTagSyscallImpl,      /* SYSTEM_CALL_vTaskSetApplicationTaskTag. */
             ( UBaseType_t ) MPU_xTaskGetApplicationTaskTagImpl,             /* SYSTEM_CALL_xTaskGetApplicationTaskTag. */
         #else
             ( UBaseType_t ) 0,                                              /* SYSTEM_CALL_vTaskSetApplicationTaskTag. */
