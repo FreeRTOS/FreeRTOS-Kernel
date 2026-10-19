@@ -120,6 +120,20 @@
  */
 #define tskSTACK_FILL_BYTE                        ( 0xa5U )
 
+/* The largest value representable by size_t, used to guard the stack
+ * allocation size calculation below against unsigned wraparound. Written
+ * this way (rather than SIZE_MAX from <stdint.h>) to match the existing
+ * pattern used for the same purpose in the secure_heap.c files under
+ * portable/, e.g. portable/GCC/ARM_CM33/secure/secure_heap.c. */
+#define tskSIZE_MAX                               ( ~( ( size_t ) 0 ) )
+
+/* True if allocating uxStackDepth words of StackType_t would overflow
+ * size_t, which would otherwise silently truncate to an undersized
+ * allocation while task initialisation continues to use the original,
+ * larger uxStackDepth for stack pointer arithmetic. */
+#define tskSTACK_DEPTH_WILL_OVERFLOW( uxStackDepth ) \
+    ( ( ( size_t ) ( uxStackDepth ) ) > ( tskSIZE_MAX / sizeof( StackType_t ) ) )
+
 /* Bits used to record how a task's stack and TCB were allocated. */
 #define tskDYNAMICALLY_ALLOCATED_STACK_AND_TCB    ( ( uint8_t ) 0 )
 #define tskSTATICALLY_ALLOCATED_STACK_ONLY        ( ( uint8_t ) 1 )
@@ -1657,10 +1671,20 @@ STATIC void prvAddNewTaskToReadyList( TCB_t * pxNewTCB ) PRIVILEGED_FUNCTION;
                 /* Allocate space for the stack used by the task being created.
                  * The base of the stack memory stored in the TCB so the task can
                  * be deleted later if required. */
-                /* MISRA Ref 11.5.1 [Malloc memory assignment] */
-                /* More details at: https://github.com/FreeRTOS/FreeRTOS-Kernel/blob/main/MISRA.md#rule-115 */
-                /* coverity[misra_c_2012_rule_11_5_violation] */
-                pxNewTCB->pxStack = ( StackType_t * ) pvPortMallocStack( ( ( ( size_t ) uxStackDepth ) * sizeof( StackType_t ) ) );
+                if( tskSTACK_DEPTH_WILL_OVERFLOW( uxStackDepth ) )
+                {
+                    /* uxStackDepth * sizeof( StackType_t ) would overflow size_t
+                     * and wrap to an undersized allocation. Treat this the same
+                     * as any other allocation failure. */
+                    pxNewTCB->pxStack = NULL;
+                }
+                else
+                {
+                    /* MISRA Ref 11.5.1 [Malloc memory assignment] */
+                    /* More details at: https://github.com/FreeRTOS/FreeRTOS-Kernel/blob/main/MISRA.md#rule-115 */
+                    /* coverity[misra_c_2012_rule_11_5_violation] */
+                    pxNewTCB->pxStack = ( StackType_t * ) pvPortMallocStack( ( ( ( size_t ) uxStackDepth ) * sizeof( StackType_t ) ) );
+                }
 
                 if( pxNewTCB->pxStack == NULL )
                 {
@@ -1675,10 +1699,20 @@ STATIC void prvAddNewTaskToReadyList( TCB_t * pxNewTCB ) PRIVILEGED_FUNCTION;
             StackType_t * pxStack;
 
             /* Allocate space for the stack used by the task being created. */
-            /* MISRA Ref 11.5.1 [Malloc memory assignment] */
-            /* More details at: https://github.com/FreeRTOS/FreeRTOS-Kernel/blob/main/MISRA.md#rule-115 */
-            /* coverity[misra_c_2012_rule_11_5_violation] */
-            pxStack = ( StackType_t * ) pvPortMallocStack( ( ( ( size_t ) uxStackDepth ) * sizeof( StackType_t ) ) );
+            if( tskSTACK_DEPTH_WILL_OVERFLOW( uxStackDepth ) )
+            {
+                /* uxStackDepth * sizeof( StackType_t ) would overflow size_t
+                 * and wrap to an undersized allocation. Treat this the same
+                 * as any other allocation failure. */
+                pxStack = NULL;
+            }
+            else
+            {
+                /* MISRA Ref 11.5.1 [Malloc memory assignment] */
+                /* More details at: https://github.com/FreeRTOS/FreeRTOS-Kernel/blob/main/MISRA.md#rule-115 */
+                /* coverity[misra_c_2012_rule_11_5_violation] */
+                pxStack = ( StackType_t * ) pvPortMallocStack( ( ( ( size_t ) uxStackDepth ) * sizeof( StackType_t ) ) );
+            }
 
             if( pxStack != NULL )
             {
