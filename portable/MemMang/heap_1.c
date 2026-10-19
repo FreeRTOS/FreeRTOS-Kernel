@@ -53,6 +53,17 @@
 /* A few bytes might be lost to byte aligning the heap start address. */
 #define configADJUSTED_HEAP_SIZE        ( configTOTAL_HEAP_SIZE - portBYTE_ALIGNMENT )
 
+/* configTOTAL_HEAP_SIZE must be larger than portBYTE_ALIGNMENT, otherwise the
+ * configADJUSTED_HEAP_SIZE subtraction above underflows. The "enough room left"
+ * check in pvPortMalloc() compares an unsigned size_t index against
+ * configADJUSTED_HEAP_SIZE, so an underflowed (very large) value silently
+ * defeats that check and pvPortMalloc() can return a pointer outside the ucHeap
+ * array. Reject such a nonsensical, too-small heap at compile time. This is a
+ * compiler (not preprocessor) check so that it still works when
+ * configTOTAL_HEAP_SIZE is defined with a cast, e.g. ( ( size_t ) 0x2000 ). */
+typedef char heapCHECK_configTOTAL_HEAP_SIZE_EXCEEDS_portBYTE_ALIGNMENT
+    [ ( ( configTOTAL_HEAP_SIZE ) > ( portBYTE_ALIGNMENT ) ) ? 1 : -1 ];
+
 /* Max value that fits in a size_t type. */
 #define heapSIZE_MAX                    ( ~( ( size_t ) 0 ) )
 
