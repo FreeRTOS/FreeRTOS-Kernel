@@ -197,6 +197,18 @@ FreeRTOS_IRQ_Handler:
     LDR     r2, [r2]
     LDR     r0, [r2]
 
+    /* Does the task have a floating point context that needs saving?  If
+    ulPortTaskHasFPUContext is 0 then no. */
+    LDR     r12, ulPortTaskHasFPUContextConst
+    LDR     r4, [r12]
+    CMP     r4, #0 /* r4 contains ulPortTaskHasFPUContext */
+
+    /* Save the floating point context, if any. */
+    FMRXNE  r12, FPSCR
+    VPUSHNE {d0-d15}
+    VPUSHNE {d16-d31}
+    PUSHNE  {r12} /* r12 contains FPSCR */
+
     /* Ensure bit 2 of the stack pointer is clear.  r2 holds the bit 2 value for
     future use.  _RB_ Does this ever actually need to be done provided the start
     of the stack is 8-byte aligned? */
@@ -204,7 +216,7 @@ FreeRTOS_IRQ_Handler:
     AND     r2, r2, #4
     SUB     sp, sp, r2
 
-    /* Call the interrupt handler.  r4 pushed to maintain alignment. */
+    /* Call the interrupt handler. */
     PUSH    {r0-r4, lr}
     LDR     r1, vApplicationIRQHandlerConst
     BLX     r1
@@ -214,6 +226,13 @@ FreeRTOS_IRQ_Handler:
     CPSID   i
     DSB
     ISB
+
+    /* Restore the floating point context, if any. */
+    CMP     r4, #0 /* r4 contains ulPortTaskHasFPUContext */
+    POPNE   {r12}  /* r12 contains FPSCR */
+    VPOPNE  {d16-d31}
+    VPOPNE  {d0-d15}
+    VMSRNE  FPSCR, r12
 
     /* Write the value read from ICCIAR to ICCEOIR. */
     LDR     r4, ulICCEOIRConst
@@ -281,13 +300,13 @@ switch_before_exit:
 /******************************************************************************
  * If the application provides an implementation of vApplicationIRQHandler(),
  * then it will get called directly without saving the FPU registers on
- * interrupt entry, and this weak implementation of
+ * interrupt entry when the FPU is not used, and this weak implementation of
  * vApplicationIRQHandler() will not get called.
  *
  * If the application provides its own implementation of
  * vApplicationFPUSafeIRQHandler() then this implementation of
- * vApplicationIRQHandler() will be called, save the FPU registers, and then
- * call vApplicationFPUSafeIRQHandler().
+ * vApplicationIRQHandler() will be called, save the FPU registers if not done
+ * already, and then call vApplicationFPUSafeIRQHandler().
  *
  * Therefore, if the application writer wants FPU registers to be saved on
  * interrupt entry their IRQ handler must be called
@@ -301,18 +320,36 @@ switch_before_exit:
 .type vApplicationIRQHandler, %function
 vApplicationIRQHandler:
     PUSH    {LR}
-    FMRX    R1,  FPSCR
-    VPUSH   {D0-D7}
-    VPUSH   {D16-D31}
-    PUSH    {R1}
+
+    /* Does the task have a floating point context that has been saved already?  If
+    ulPortTaskHasFPUContext is 1 then yes. */
+    LDR     r12, ulPortTaskHasFPUContextConst
+    LDR     r4, [r12]
+
+    /* If there is an FPU context, it was already saved. */
+    CMP     r4, #1 /* If equal, the FPU context was saved by the caller. */
+    FMRXNE  r1,  FPSCR
+    VPUSHNE {d0-d7}
+    VPUSHNE {d16-d31}
+    PUSHNE  {r1}
+    PUSHNE  {r1} /* Push FPSCR twice to keep memory alignment */
+
+    /* Store ulPortTaskHasFPUContext */
+    PUSH    {r4}
 
     LDR     r1, vApplicationFPUSafeIRQHandlerConst
     BLX     r1
 
-    POP     {R0}
-    VPOP    {D16-D31}
-    VPOP    {D0-D7}
-    VMSR    FPSCR, R0
+    /* Restore ulPortTaskHasFPUContext */
+    POP     {r4}
+
+    /* Skip the FPU register reset if there is an FPU context, the IRQ handler will do it. */
+    CMP     r4, #1 /* If true, the FPU registers will be restored by the caller. */
+    POPNE   {r0}
+    POPNE   {r0} /* FPSCR was pushed twice for alignment purposes */
+    VPOPNE  {d16-d31}
+    VPOPNE  {d0-d7}
+    VMSRNE  FPSCR, r0
 
     POP {PC}
 
