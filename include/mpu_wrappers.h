@@ -278,6 +278,11 @@
 
         #endif /* #if ( ( configUSE_MPU_WRAPPERS_V1 == 0 ) && ( configENABLE_ACCESS_CONTROL_LIST == 1 ) ) */
 
+    
+        #if ( configUSE_MPU_WRAPPERS_V1 == 0 )
+            void vvMPU_ObjectDeleted( int32_t lExternalKernelObjectHandle ) PRIVILEGED_FUNCTION;
+        #endif
+
     #endif /* MPU_WRAPPERS_INCLUDED_FROM_API_FILE */
 
     #define PRIVILEGED_FUNCTION     __attribute__( ( section( "privileged_functions" ) ) )
