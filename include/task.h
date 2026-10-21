@@ -2443,9 +2443,10 @@ char * pcTaskGetName( TaskHandle_t xTaskToQuery ) PRIVILEGED_FUNCTION;
  * The run time statistics counter is separate from the RTOS tick count.  At a
  * context switch, if its current value is not greater than the value recorded
  * when the task was switched in, that task's execution time for the interval is
- * not added to its accumulated count.  This includes an interval in which the
- * statistics counter wraps.  Accounting resumes on subsequent context switches
- * when the counter has advanced, but the omitted interval is not recovered.
+ * not added to its accumulated count.  Counter wrap can cause this condition;
+ * wrap is not otherwise detected or compensated for.  Accounting resumes on
+ * subsequent context switches when the counter has advanced, but the omitted
+ * interval is not recovered.
  *
  * Each task's accumulated count can also overflow independently of the
  * statistics counter.  Absolute counts and percentages must not be interpreted
@@ -2456,6 +2457,11 @@ char * pcTaskGetName( TaskHandle_t xTaskToQuery ) PRIVILEGED_FUNCTION;
  * (or portALT_GET_RUN_TIME_COUNTER_VALUE()).  Changing the C type alone does not
  * extend a hardware counter that still wraps at its original width.  An RTOS
  * tick count rollover does not, by itself, cause a statistics counter rollover.
+ *
+ * The formatting used by this convenience function depends on the port and is
+ * not selected from configRUN_TIME_COUNTER_TYPE.  When using a wider counter,
+ * obtain the raw values with uxTaskGetSystemState() and format them using
+ * specifiers that match the counter type.
  *
  * NOTE 2:
  *
