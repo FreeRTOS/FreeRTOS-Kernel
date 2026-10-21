@@ -4473,23 +4473,29 @@
                 xIsRxDataBufferWriteable = xPortIsAuthorizedToAccessBuffer( pvRxData,
                                                                             xBufferLengthBytes,
                                                                             tskMPU_WRITE_PERMISSION );
+            }
+            else if( ( xBufferLengthBytes == ( size_t ) 0 ) && ( xTicksToWait == ( TickType_t ) 0 ) )
+            {
+                /* xMessageBufferDiscard() has no destination buffer.  The
+                 * message buffer's object permission is still checked below. */
+                xIsRxDataBufferWriteable = pdTRUE;
+            }
 
-                if( xIsRxDataBufferWriteable == pdTRUE )
+            if( xIsRxDataBufferWriteable == pdTRUE )
+            {
+                lIndex = ( int32_t ) xStreamBuffer;
+
+                if( IS_EXTERNAL_INDEX_VALID( lIndex ) != pdFALSE )
                 {
-                    lIndex = ( int32_t ) xStreamBuffer;
+                    xCallingTaskIsAuthorizedToAccessStreamBuffer = xPortIsAuthorizedToAccessKernelObject( CONVERT_TO_INTERNAL_INDEX( lIndex ) );
 
-                    if( IS_EXTERNAL_INDEX_VALID( lIndex ) != pdFALSE )
+                    if( xCallingTaskIsAuthorizedToAccessStreamBuffer == pdTRUE )
                     {
-                        xCallingTaskIsAuthorizedToAccessStreamBuffer = xPortIsAuthorizedToAccessKernelObject( CONVERT_TO_INTERNAL_INDEX( lIndex ) );
+                        xInternalStreamBufferHandle = MPU_GetStreamBufferHandleAtIndex( CONVERT_TO_INTERNAL_INDEX( lIndex ) );
 
-                        if( xCallingTaskIsAuthorizedToAccessStreamBuffer == pdTRUE )
+                        if( xInternalStreamBufferHandle != NULL )
                         {
-                            xInternalStreamBufferHandle = MPU_GetStreamBufferHandleAtIndex( CONVERT_TO_INTERNAL_INDEX( lIndex ) );
-
-                            if( xInternalStreamBufferHandle != NULL )
-                            {
-                                xReturn = xStreamBufferReceive( xInternalStreamBufferHandle, pvRxData, xBufferLengthBytes, xTicksToWait );
-                            }
+                            xReturn = xStreamBufferReceive( xInternalStreamBufferHandle, pvRxData, xBufferLengthBytes, xTicksToWait );
                         }
                     }
                 }
