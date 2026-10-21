@@ -1184,36 +1184,13 @@ STATIC void prvAddNewTaskToReadyList( TCB_t * pxNewTCB ) PRIVILEGED_FUNCTION;
                         xLowestPriority = xLowestPriority - 1;
                     }
 
-                    if( ( uxCoreMap & ( ( UBaseType_t ) 1U << ( UBaseType_t ) xCoreID ) ) != 0U )
-                    {
-                        /* pxPreviousTCB was removed from this core and this core is not excluded
-                         * from it's core affinity mask.
-                         *
-                         * pxPreviousTCB is preempted by the new higher priority task
-                         * pxCurrentTCBs[ xCoreID ]. When searching a new core for pxPreviousTCB,
-                         * we do not need to look at the cores on which pxCurrentTCBs[ xCoreID ]
-                         * is allowed to run. The reason is - when more than one cores are
-                         * eligible for an incoming task, we preempt the core with the minimum
-                         * priority task. Because this core (i.e. xCoreID) was preempted for
-                         * pxCurrentTCBs[ xCoreID ], this means that all the others cores
-                         * where pxCurrentTCBs[ xCoreID ] can run, are running tasks with priority
-                         * no lower than pxPreviousTCB's priority. Therefore, the only cores where
-                         * which can be preempted for pxPreviousTCB are the ones where
-                         * pxCurrentTCBs[ xCoreID ] is not allowed to run (and obviously,
-                         * pxPreviousTCB is allowed to run).
-                         *
-                         * This is an optimization which reduces the number of cores needed to be
-                         * searched for pxPreviousTCB to run. */
-                        uxCoreMap &= ~( pxCurrentTCBs[ xCoreID ]->uxCoreAffinityMask );
-                    }
-                    else
-                    {
-                        /* pxPreviousTCB's core affinity mask is changed and it is no longer
-                         * allowed to run on this core. Searching all the cores in pxPreviousTCB's
-                         * new core affinity mask to find a core on which it can run. */
-                    }
-
+                    /* A context switch can result from a voluntary yield, not just
+                     * preemption of the lowest-priority eligible core.  Another
+                     * core allowed by the incoming task's affinity may therefore
+                     * still be running a lower-priority task.  Search all cores
+                     * allowed by the evicted task, except this newly assigned core. */
                     uxCoreMap &= ( ( 1U << configNUMBER_OF_CORES ) - 1U );
+                    uxCoreMap &= ~( ( UBaseType_t ) 1U << ( UBaseType_t ) xCoreID );
 
                     for( x = ( ( BaseType_t ) configNUMBER_OF_CORES - 1 ); x >= ( BaseType_t ) 0; x-- )
                     {
