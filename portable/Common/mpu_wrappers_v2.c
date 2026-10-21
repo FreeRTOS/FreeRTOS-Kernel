@@ -4480,6 +4480,12 @@
                  * message buffer's object permission is still checked below. */
                 xIsRxDataBufferWriteable = pdTRUE;
             }
+            else
+            {
+                /* A NULL receive buffer is only valid for the non-blocking
+                 * discard request. */
+                xIsRxDataBufferWriteable = pdFALSE;
+            }
 
             if( xIsRxDataBufferWriteable == pdTRUE )
             {
