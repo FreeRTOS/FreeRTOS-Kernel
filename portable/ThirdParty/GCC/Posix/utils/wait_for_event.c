@@ -95,6 +95,7 @@ bool event_wait_timed( struct event * ev,
 {
     struct timespec ts;
     int ret = 0;
+    bool triggered;
 
     clock_gettime( CLOCK_REALTIME, &ts );
     ts.tv_sec += ms / 1000;
@@ -111,15 +112,16 @@ bool event_wait_timed( struct event * ev,
     {
         ret = pthread_cond_timedwait( &ev->cond, &ev->mutex, &ts );
 
-        if( ( ret == -1 ) && ( errno == ETIMEDOUT ) )
+        if( ret == ETIMEDOUT )
         {
-            return false;
+            break;
         }
     }
 
+    triggered = ev->event_triggered;
     ev->event_triggered = false;
     pthread_mutex_unlock( &ev->mutex );
-    return true;
+    return triggered;
 }
 /*-----------------------------------------------------------*/
 
