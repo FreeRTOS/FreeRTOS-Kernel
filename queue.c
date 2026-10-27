@@ -3311,6 +3311,9 @@ BaseType_t xQueueIsQueueFullFromISR( const QueueHandle_t xQueue )
 
         traceENTER_xQueueSelectFromSet( xQueueSet, xTicksToWait );
 
+        /* Check the pointer is not NULL. */
+        configASSERT( ( xQueueSet ) );
+
         if( ( ( Queue_t * ) xQueueSet )->uxItemSize == ( UBaseType_t ) sizeof( Queue_t * ) )
         {
             ( void ) xQueueReceive( ( QueueHandle_t ) xQueueSet, &xReturn, xTicksToWait );
@@ -3331,6 +3334,9 @@ BaseType_t xQueueIsQueueFullFromISR( const QueueHandle_t xQueue )
         QueueSetMemberHandle_t xReturn = NULL;
 
         traceENTER_xQueueSelectFromSetFromISR( xQueueSet );
+
+        /* Check the pointer is not NULL. */
+        configASSERT( ( xQueueSet ) );
 
         if( ( ( Queue_t * ) xQueueSet )->uxItemSize == ( UBaseType_t ) sizeof( Queue_t * ) )
         {
