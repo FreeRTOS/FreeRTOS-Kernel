@@ -1,5 +1,11 @@
 Documentation and download available at https://www.FreeRTOS.org/
 
+Changes between FreeRTOS V11.3.2 and FreeRTOS V11.3.3 released October 29, 2026
+    + Fix a type confusion in xQueueSelectFromSet by verifying that the object
+      passed as the queue set really is a queue set, that is, that its item
+      size is sizeof( Queue_t * ). We thank Claude and Ada Logics for their
+      help identifying this issue.
+
 Changes between FreeRTOS V11.3.1 and FreeRTOS V11.3.2 released October 16, 2026
 
     + Add the ability for a port to selectively override the
