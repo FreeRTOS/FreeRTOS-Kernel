@@ -2298,6 +2298,18 @@ void vQueueDelete( QueueHandle_t xQueue )
     }
     #endif /* configSUPPORT_DYNAMIC_ALLOCATION */
 
+    #if ( ( portUSING_MPU_WRAPPERS == 1 ) && ( configENABLE_ACCESS_CONTROL_LIST == 1 ) )
+    {
+        vvMPU_ObjectDeleted( ( int32_t ) xQueue );
+    }
+    #endif
+
+        #if ( ( portUSING_MPU_WRAPPERS == 1 ) && ( configENABLE_ACCESS_CONTROL_LIST == 1 ) )
+    {
+        vvMPU_ObjectDeleted( ( int32_t ) xQueue );
+    }
+    #endif
+
     traceRETURN_vQueueDelete();
 }
 /*-----------------------------------------------------------*/
