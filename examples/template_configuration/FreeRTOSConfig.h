@@ -547,6 +547,14 @@
 #define configUSE_TASK_PREEMPTION_DISABLE         0
 
 /* When using SMP (i.e. configNUMBER_OF_CORES is greater than one), set
+ * configUSE_SCHEDULER_CORE_MASK to 1 to enable the scheduler core mask feature.
+ * When enabled, the vTaskSetSchedulerCoreMask and uxTaskGetSchedulerCoreMask
+ * APIs can be used to control which cores are allowed to run non-idle tasks
+ * system-wide at run time. Set to 0 to exclude this feature from the build.
+ * Defaults to 1 if left undefined. */
+#define configUSE_SCHEDULER_CORE_MASK             1
+
+/* When using SMP (i.e. configNUMBER_OF_CORES is greater than one), set
  * configUSE_PASSIVE_IDLE_HOOK to 1 to allow the application writer to use
  * the passive idle task hook to add background functionality without the
  * overhead of a separate task. Defaults to 0 if left undefined. */
