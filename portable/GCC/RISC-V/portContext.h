@@ -64,6 +64,10 @@
     #define portCRITICAL_NESTING_OFFSET    30
 #endif
 
+/* Keep the ISR stack aligned to the RISC-V ABI while reserving metadata used
+ * by the machine-timer fast path. */
+#define portISR_STACK_METADATA_SIZE        16
+
 #if ( configENABLE_FPU == 1 )
     /* Bit [14:13] in the mstatus encode the status of FPU state which is one of
      * the following values:
@@ -270,38 +274,48 @@ add sp, sp, -( 2 * portWORD_SIZE )
     .endm
 /*-----------------------------------------------------------*/
 
+   .macro portcontextSAVE_CALLER_REGISTERS frame
+store_x x1,  2  * portWORD_SIZE( \frame )
+store_x x5,  3  * portWORD_SIZE( \frame )
+store_x x6,  4  * portWORD_SIZE( \frame )
+store_x x7,  5  * portWORD_SIZE( \frame )
+store_x x10, 8  * portWORD_SIZE( \frame )
+store_x x11, 9  * portWORD_SIZE( \frame )
+store_x x12, 10 * portWORD_SIZE( \frame )
+store_x x13, 11 * portWORD_SIZE( \frame )
+store_x x14, 12 * portWORD_SIZE( \frame )
+store_x x15, 13 * portWORD_SIZE( \frame )
+#ifndef __riscv_32e
+    store_x x16, 14 * portWORD_SIZE( \frame )
+    store_x x17, 15 * portWORD_SIZE( \frame )
+    store_x x28, 26 * portWORD_SIZE( \frame )
+    store_x x29, 27 * portWORD_SIZE( \frame )
+    store_x x30, 28 * portWORD_SIZE( \frame )
+    store_x x31, 29 * portWORD_SIZE( \frame )
+#endif /* ifndef __riscv_32e */
+   .endm
+
+   .macro portcontextSAVE_CALLEE_REGISTERS frame
+store_x x8,  6  * portWORD_SIZE( \frame )
+store_x x9,  7  * portWORD_SIZE( \frame )
+#ifndef __riscv_32e
+    store_x x18, 16 * portWORD_SIZE( \frame )
+    store_x x19, 17 * portWORD_SIZE( \frame )
+    store_x x20, 18 * portWORD_SIZE( \frame )
+    store_x x21, 19 * portWORD_SIZE( \frame )
+    store_x x22, 20 * portWORD_SIZE( \frame )
+    store_x x23, 21 * portWORD_SIZE( \frame )
+    store_x x24, 22 * portWORD_SIZE( \frame )
+    store_x x25, 23 * portWORD_SIZE( \frame )
+    store_x x26, 24 * portWORD_SIZE( \frame )
+    store_x x27, 25 * portWORD_SIZE( \frame )
+#endif /* ifndef __riscv_32e */
+   .endm
+
    .macro portcontextSAVE_CONTEXT_INTERNAL
 addi sp, sp, -portCONTEXT_SIZE
-store_x x1,  2  * portWORD_SIZE( sp )
-store_x x5,  3  * portWORD_SIZE( sp )
-store_x x6,  4  * portWORD_SIZE( sp )
-store_x x7,  5  * portWORD_SIZE( sp )
-store_x x8,  6  * portWORD_SIZE( sp )
-store_x x9,  7  * portWORD_SIZE( sp )
-store_x x10, 8  * portWORD_SIZE( sp )
-store_x x11, 9  * portWORD_SIZE( sp )
-store_x x12, 10 * portWORD_SIZE( sp )
-store_x x13, 11 * portWORD_SIZE( sp )
-store_x x14, 12 * portWORD_SIZE( sp )
-store_x x15, 13 * portWORD_SIZE( sp )
-#ifndef __riscv_32e
-    store_x x16, 14 * portWORD_SIZE( sp )
-    store_x x17, 15 * portWORD_SIZE( sp )
-    store_x x18, 16 * portWORD_SIZE( sp )
-    store_x x19, 17 * portWORD_SIZE( sp )
-    store_x x20, 18 * portWORD_SIZE( sp )
-    store_x x21, 19 * portWORD_SIZE( sp )
-    store_x x22, 20 * portWORD_SIZE( sp )
-    store_x x23, 21 * portWORD_SIZE( sp )
-    store_x x24, 22 * portWORD_SIZE( sp )
-    store_x x25, 23 * portWORD_SIZE( sp )
-    store_x x26, 24 * portWORD_SIZE( sp )
-    store_x x27, 25 * portWORD_SIZE( sp )
-    store_x x28, 26 * portWORD_SIZE( sp )
-    store_x x29, 27 * portWORD_SIZE( sp )
-    store_x x30, 28 * portWORD_SIZE( sp )
-    store_x x31, 29 * portWORD_SIZE( sp )
-#endif /* ifndef __riscv_32e */
+portcontextSAVE_CALLER_REGISTERS sp
+portcontextSAVE_CALLEE_REGISTERS sp
 
 load_x t0, xCriticalNesting                                   /* Load the value of xCriticalNesting into t0. */
 store_x t0, portCRITICAL_NESTING_OFFSET * portWORD_SIZE( sp ) /* Store the critical nesting value to the stack. */
@@ -369,6 +383,116 @@ store_x sp, 0 ( t0 )             /* Write sp to first TCB member. */
    .endm
 /*-----------------------------------------------------------*/
 
+   .macro portcontextSAVE_TIMER_CALLER_CONTEXT
+addi sp, sp, -portCONTEXT_SIZE
+portcontextSAVE_CALLER_REGISTERS sp
+
+/* Keep the fixed integer frame base available after variable-length optional
+ * contexts have been saved by recording it in per-hart ISR stack metadata. */
+load_x t0, xISRStackTop
+addi t0, t0, -portISR_STACK_METADATA_SIZE
+store_x sp, 0( t0 )
+
+#if( configENABLE_FPU == 1 )
+    csrr t0, mstatus
+    srl t1, t0, MSTATUS_FS_OFFSET
+    andi t1, t1, 3
+    addi t2, x0, 3
+    bne t1, t2, 7f
+    portcontexSAVE_FPU_CONTEXT
+7:
+#endif
+
+#if( configENABLE_VPU == 1 )
+    csrr t0, mstatus
+    srl t1, t0, MSTATUS_VS_OFFSET
+    andi t1, t1, 3
+    addi t2, x0, 3
+    bne t1, t2, 8f
+    portcontexSAVE_VPU_CONTEXT
+8:
+#endif
+
+csrr t0, mstatus
+store_x t0, 1 * portWORD_SIZE( sp )
+portasmSAVE_ADDITIONAL_REGISTERS
+
+#if( configENABLE_FPU == 1 )
+    srl t1, t0, MSTATUS_FS_OFFSET
+    andi t1, t1, 3
+    addi t2, x0, 3
+    bne t1, t2, 9f
+    li t1, ~MSTATUS_FS_MASK
+    and t0, t0, t1
+    li t1, MSTATUS_FS_CLEAN
+    or t0, t0, t1
+    csrw mstatus, t0
+9:
+#endif
+
+#if( configENABLE_VPU == 1 )
+    srl t1, t0, MSTATUS_VS_OFFSET
+    andi t1, t1, 3
+    addi t2, x0, 3
+    bne t1, t2, 10f
+    li t1, ~MSTATUS_VS_MASK
+    and t0, t0, t1
+    li t1, MSTATUS_VS_CLEAN
+    or t0, t0, t1
+    csrw mstatus, t0
+10:
+#endif
+
+csrr t0, mepc
+store_x t0, 0 * portWORD_SIZE( sp )
+load_x t0, pxCurrentTCB
+store_x sp, 0( t0 )
+load_x sp, xISRStackTop
+addi sp, sp, -portISR_STACK_METADATA_SIZE
+   .endm
+
+   .macro portcontextSAVE_DEFERRED_TASK_STATE
+load_x t1, 0( sp )
+portcontextSAVE_CALLEE_REGISTERS t1
+load_x t0, xCriticalNesting
+store_x t0, portCRITICAL_NESTING_OFFSET * portWORD_SIZE( t1 )
+   .endm
+
+   .macro portcontextRESTORE_TIMER_CALLER_CONTEXT
+load_x t1, pxCurrentTCB
+load_x sp, 0( t1 )
+load_x t0, 0 * portWORD_SIZE( sp )
+csrw mepc, t0
+
+portasmRESTORE_ADDITIONAL_REGISTERS
+
+load_x t3, 1 * portWORD_SIZE( sp )
+csrw mstatus, t3
+
+#if( configENABLE_VPU == 1 )
+    srl t1, t3, MSTATUS_VS_OFFSET
+    andi t1, t1, 3
+    addi t2, x0, 3
+    bne t1, t2, 11f
+    portcontextRESTORE_VPU_CONTEXT
+11:
+#endif
+
+#if( configENABLE_FPU == 1 )
+    srl t1, t3, MSTATUS_FS_OFFSET
+    andi t1, t1, 3
+    addi t2, x0, 3
+    bne t1, t2, 12f
+    portcontextRESTORE_FPU_CONTEXT
+12:
+#endif
+
+portcontextRESTORE_CALLER_REGISTERS sp
+addi sp, sp, portCONTEXT_SIZE
+mret
+   .endm
+/*-----------------------------------------------------------*/
+
    .macro portcontextSAVE_EXCEPTION_CONTEXT
 portcontextSAVE_CONTEXT_INTERNAL
 csrr a0, mcause
@@ -387,6 +511,44 @@ store_x a1, 0 ( sp )    /* Asynchronous interrupt so save unmodified exception r
 load_x sp, xISRStackTop /* Switch to ISR stack. */
    .endm
 /*-----------------------------------------------------------*/
+
+   .macro portcontextRESTORE_CALLER_REGISTERS frame
+load_x x1,  2  * portWORD_SIZE( \frame )
+load_x x5,  3  * portWORD_SIZE( \frame )
+load_x x6,  4  * portWORD_SIZE( \frame )
+load_x x7,  5  * portWORD_SIZE( \frame )
+load_x x10, 8  * portWORD_SIZE( \frame )
+load_x x11, 9  * portWORD_SIZE( \frame )
+load_x x12, 10 * portWORD_SIZE( \frame )
+load_x x13, 11 * portWORD_SIZE( \frame )
+load_x x14, 12 * portWORD_SIZE( \frame )
+load_x x15, 13 * portWORD_SIZE( \frame )
+#ifndef __riscv_32e
+    load_x x16, 14 * portWORD_SIZE( \frame )
+    load_x x17, 15 * portWORD_SIZE( \frame )
+    load_x x28, 26 * portWORD_SIZE( \frame )
+    load_x x29, 27 * portWORD_SIZE( \frame )
+    load_x x30, 28 * portWORD_SIZE( \frame )
+    load_x x31, 29 * portWORD_SIZE( \frame )
+#endif
+   .endm
+
+   .macro portcontextRESTORE_CALLEE_REGISTERS frame
+load_x x8,  6  * portWORD_SIZE( \frame )
+load_x x9,  7  * portWORD_SIZE( \frame )
+#ifndef __riscv_32e
+    load_x x18, 16 * portWORD_SIZE( \frame )
+    load_x x19, 17 * portWORD_SIZE( \frame )
+    load_x x20, 18 * portWORD_SIZE( \frame )
+    load_x x21, 19 * portWORD_SIZE( \frame )
+    load_x x22, 20 * portWORD_SIZE( \frame )
+    load_x x23, 21 * portWORD_SIZE( \frame )
+    load_x x24, 22 * portWORD_SIZE( \frame )
+    load_x x25, 23 * portWORD_SIZE( \frame )
+    load_x x26, 24 * portWORD_SIZE( \frame )
+    load_x x27, 25 * portWORD_SIZE( \frame )
+#endif
+   .endm
 
    .macro portcontextRESTORE_CONTEXT
 load_x t1, pxCurrentTCB /* Load pxCurrentTCB. */
@@ -429,36 +591,8 @@ load_x t0, portCRITICAL_NESTING_OFFSET * portWORD_SIZE( sp ) /* Obtain xCritical
 load_x t1, pxCriticalNesting                                 /* Load the address of xCriticalNesting into t1. */
 store_x t0, 0 ( t1 )                                         /* Restore the critical nesting value for this task. */
 
-load_x x1,  2  * portWORD_SIZE( sp )
-load_x x5,  3  * portWORD_SIZE( sp )
-load_x x6,  4  * portWORD_SIZE( sp )
-load_x x7,  5  * portWORD_SIZE( sp )
-load_x x8,  6  * portWORD_SIZE( sp )
-load_x x9,  7  * portWORD_SIZE( sp )
-load_x x10, 8  * portWORD_SIZE( sp )
-load_x x11, 9  * portWORD_SIZE( sp )
-load_x x12, 10 * portWORD_SIZE( sp )
-load_x x13, 11 * portWORD_SIZE( sp )
-load_x x14, 12 * portWORD_SIZE( sp )
-load_x x15, 13 * portWORD_SIZE( sp )
-#ifndef __riscv_32e
-    load_x x16, 14 * portWORD_SIZE( sp )
-    load_x x17, 15 * portWORD_SIZE( sp )
-    load_x x18, 16 * portWORD_SIZE( sp )
-    load_x x19, 17 * portWORD_SIZE( sp )
-    load_x x20, 18 * portWORD_SIZE( sp )
-    load_x x21, 19 * portWORD_SIZE( sp )
-    load_x x22, 20 * portWORD_SIZE( sp )
-    load_x x23, 21 * portWORD_SIZE( sp )
-    load_x x24, 22 * portWORD_SIZE( sp )
-    load_x x25, 23 * portWORD_SIZE( sp )
-    load_x x26, 24 * portWORD_SIZE( sp )
-    load_x x27, 25 * portWORD_SIZE( sp )
-    load_x x28, 26 * portWORD_SIZE( sp )
-    load_x x29, 27 * portWORD_SIZE( sp )
-    load_x x30, 28 * portWORD_SIZE( sp )
-    load_x x31, 29 * portWORD_SIZE( sp )
-#endif /* ifndef __riscv_32e */
+portcontextRESTORE_CALLEE_REGISTERS sp
+portcontextRESTORE_CALLER_REGISTERS sp
 addi sp, sp, portCONTEXT_SIZE
 
 mret
