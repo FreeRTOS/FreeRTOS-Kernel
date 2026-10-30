@@ -103,6 +103,8 @@ typedef void ( * portISR_t )( void );
 #define portMIN_INTERRUPT_PRIORITY            ( 255UL )
 #define portNVIC_PENDSV_PRI                   ( portMIN_INTERRUPT_PRIORITY << 16UL )
 #define portNVIC_SYSTICK_PRI                  ( portMIN_INTERRUPT_PRIORITY << 24UL )
+#define portNVIC_SVC_PRI                      ( ( ( uint32_t ) configMAX_SYSCALL_INTERRUPT_PRIORITY << 24UL ) )
+#define portNVIC_SVC_PRI_TO_START_FIRST_TASK  ( ( ( uint32_t ) configMAX_SYSCALL_INTERRUPT_PRIORITY - 1UL ) << 24UL )
 /*-----------------------------------------------------------*/
 
 /**
@@ -1224,6 +1226,12 @@ void vPortSVCHandler_C( uint32_t * pulCallerStackAddress ) /* PRIVILEGED_FUNCTIO
                 }
                 #endif /* configENABLE_FPU */
 
+                /* Reduce the priority of SVC to its permanent setting. The new
+                 * setting takes effect with the next invocation of SVC, not the
+                 * one currently underway. The temporary, high priority is used
+                 * only to start the first task. */
+                portNVIC_SHPR2_REG = portNVIC_SVC_PRI;
+
                 /* Setup the context of the first task so that the first task starts
                  * executing. */
                 vRestoreContextOfFirstTask();
@@ -2194,7 +2202,7 @@ void vPortConfigureInterruptPriorities( void ) /* PRIVILEGED_FUNCTION */
 {
     #if ( ( configASSERT_DEFINED == 1 ) && ( portHAS_ARMV8M_MAIN_EXTENSION == 1 ) )
     {
-        volatile uint32_t ulImplementedPrioBits = 0;
+        volatile uint32_t ulNumPreemptPrioBits = 0;
         volatile uint8_t ucMaxPriorityValue;
 
         /* Determine the maximum priority from which ISR safe FreeRTOS API
@@ -2202,12 +2210,30 @@ void vPortConfigureInterruptPriorities( void ) /* PRIVILEGED_FUNCTION */
         * "FromISR". FreeRTOS maintains separate thread and ISR API functions to
         * ensure interrupt entry is as fast and simple as possible.
         *
-        * First, determine the number of priority bits available. Write to all
-        * possible bits in the priority setting for SVCall. */
-        portNVIC_SHPR2_REG = 0xFF000000;
+        * First, determine the number of preemption priority bits available.
+        * Write to all 7 possible bits in the priority setting for SVCall. If
+        * the hardware implements 8 bits, the least-significant bit is used for
+        * sub-priority, not preemption priority, so we don't need check that
+        * bit. */
+        portNVIC_SHPR2_REG = 0xFE000000;
 
         /* Read the value back to see how many bits stuck. */
-        ucMaxPriorityValue = ( uint8_t ) ( ( portNVIC_SHPR2_REG & 0xFF000000 ) >> 24 );
+        ucMaxPriorityValue = ( uint8_t ) ( ( portNVIC_SHPR2_REG & 0xFE000000 ) >> 24 );
+
+        #if ( configENABLE_TRUSTZONE == 1 )
+        {
+            /* In TrustZone applications, the maximum value must not use the
+            * least-significant bit of preemption priority. That bit must be
+            * zero because the hardware ignores it during de-prioritization of
+            * non-secure exceptions. */
+            ucMaxPriorityValue <<= ( uint8_t ) 0x01;
+
+            /* Initialize the counter of preemption-priority bits to 1 instead
+            * of 0. The work of counting the implemented preemption-priority
+            * bits continues further below. */
+            ulNumPreemptPrioBits = 1;
+        }
+        #endif /* #if ( configENABLE_TRUSTZONE == 1 ) */
 
         /* Use the same mask on the maximum system call priority. */
         ucMaxSysCallPriority = configMAX_SYSCALL_INTERRUPT_PRIORITY & ucMaxPriorityValue;
@@ -2220,44 +2246,42 @@ void vPortConfigureInterruptPriorities( void ) /* PRIVILEGED_FUNCTION */
         * See https://www.FreeRTOS.org/RTOS-Cortex-M3-M4.html */
         configASSERT( ucMaxSysCallPriority );
 
-        /* Check that the bits not implemented in hardware are zero in
-        * configMAX_SYSCALL_INTERRUPT_PRIORITY. */
+        /* Check that the bits not implemented in hardware as preemption-
+        * priority bits are zero in configMAX_SYSCALL_INTERRUPT_PRIORITY.
+        *
+        * In TrustZone applications, this check also ensures that the least-
+        * significant preemption-priority bit is zero in
+        * configMAX_SYSCALL_INTERRUPT_PRIORITY. The hardware ignores that bit
+        * when de-prioritizing non-secure exceptions, so it must be zero to
+        * ensure that the maximum system call priority is not higher than the
+        * application writer expects.
+        *
+        * This check also ensures that the sub-priority bit (if present) is
+        * zero in configMAX_SYSCALL_INTERRUPT_PRIORITY. When the hardware
+        * implements 8 priority bits, there is no way for the software to
+        * configure PRIGROUP to not have sub-priorities. As a result, the
+        * least significant bit is always used for sub-priority, and there are
+        * 128 preemption priorities and 2 sub-priorities.
+        *
+        * This may cause some confusion in some cases - for example, if
+        * configMAX_SYSCALL_INTERRUPT_PRIORITY is set to 5, both 5 and 4
+        * priority interrupts will be masked in Critical Sections as those
+        * are at the same preemption priority. This may appear confusing as
+        * 4 is higher (numerically lower) priority than
+        * configMAX_SYSCALL_INTERRUPT_PRIORITY and therefore, should not
+        * have been masked. Instead, if we set configMAX_SYSCALL_INTERRUPT_PRIORITY
+        * to 4, this confusion does not happen and the behaviour remains the same. */
         configASSERT( ( configMAX_SYSCALL_INTERRUPT_PRIORITY & ( uint8_t ) ( ~( uint32_t ) ucMaxPriorityValue ) ) == 0U );
 
         /* Calculate the maximum acceptable priority group value for the number
-        * of bits read back. */
+        * of preemption-priority bits implemented in the hardware. */
         while( ( ucMaxPriorityValue & portTOP_BIT_OF_BYTE ) == portTOP_BIT_OF_BYTE )
         {
-            ulImplementedPrioBits++;
+            ulNumPreemptPrioBits++;
             ucMaxPriorityValue <<= ( uint8_t ) 0x01;
         }
 
-        if( ulImplementedPrioBits == 8 )
-        {
-            /* When the hardware implements 8 priority bits, there is no way for
-            * the software to configure PRIGROUP to not have sub-priorities. As
-            * a result, the least significant bit is always used for sub-priority
-            * and there are 128 preemption priorities and 2 sub-priorities.
-            *
-            * This may cause some confusion in some cases - for example, if
-            * configMAX_SYSCALL_INTERRUPT_PRIORITY is set to 5, both 5 and 4
-            * priority interrupts will be masked in Critical Sections as those
-            * are at the same preemption priority. This may appear confusing as
-            * 4 is higher (numerically lower) priority than
-            * configMAX_SYSCALL_INTERRUPT_PRIORITY and therefore, should not
-            * have been masked. Instead, if we set configMAX_SYSCALL_INTERRUPT_PRIORITY
-            * to 4, this confusion does not happen and the behaviour remains the same.
-            *
-            * The following assert ensures that the sub-priority bit in the
-            * configMAX_SYSCALL_INTERRUPT_PRIORITY is clear to avoid the above mentioned
-            * confusion. */
-            configASSERT( ( configMAX_SYSCALL_INTERRUPT_PRIORITY & 0x1U ) == 0U );
-            ulMaxPRIGROUPValue = 0;
-        }
-        else
-        {
-            ulMaxPRIGROUPValue = portMAX_PRIGROUP_BITS - ulImplementedPrioBits;
-        }
+        ulMaxPRIGROUPValue = portMAX_PRIGROUP_BITS - ulNumPreemptPrioBits;
 
         /* Shift the priority group value back to its position within the AIRCR
         * register. */
@@ -2266,11 +2290,12 @@ void vPortConfigureInterruptPriorities( void ) /* PRIVILEGED_FUNCTION */
     }
     #endif /* #if ( ( configASSERT_DEFINED == 1 ) && ( portHAS_ARMV8M_MAIN_EXTENSION == 1 ) ) */
 
-    /* Make PendSV and SysTick the lowest priority interrupts, and make SVCall
-    * the highest priority. */
+    /* Make PendSV and SysTick the lowest priority interrupts, and configure
+     * SVCall temporarily for sufficient priority to preempt the critical
+     * section from which we start the first task. */
     portNVIC_SHPR3_REG |= portNVIC_PENDSV_PRI;
     portNVIC_SHPR3_REG |= portNVIC_SYSTICK_PRI;
-    portNVIC_SHPR2_REG = 0;
+    portNVIC_SHPR2_REG = portNVIC_SVC_PRI_TO_START_FIRST_TASK;
 }
 /*-----------------------------------------------------------*/
 
