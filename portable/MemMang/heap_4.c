@@ -410,6 +410,379 @@ void vPortFree( void * pv )
 }
 /*-----------------------------------------------------------*/
 
+#if ( configSUPPORT_HEAP_REALLOC == 1 )
+/*
+ * pvPortRealloc - Reallocate memory block size
+ *
+ * Description: Resize an allocated memory block, attempting to expand or shrink
+ * the block in place. If in-place resize is not possible, allocate a new block
+ * and copy the data.
+ *
+ * Parameters:
+ *   pv          - Pointer to the previously allocated memory block
+ *   xWantedSize - New requested size of user data (in bytes)
+ *
+ * Return Value:
+ *   On success: Pointer to the new memory block (may be the same as original)
+ *   On failure: NULL
+ *
+ * Behavior:
+ *   1) If pv == NULL, behaves like pvPortMalloc(xWantedSize).
+ *   2) If xWantedSize == 0, behaves like vPortFree(pv) and returns NULL.
+ *   3) Align the requested size and include the block header size; if the aligned
+ *      size is invalid, return NULL.
+ *   4) If the aligned requested size is <= current block size, shrink in place and
+ *      insert any sufficiently large remainder as a free block.
+ *   5) If expansion is required and there are enough free bytes in the heap, try to
+ *      expand into adjacent free blocks in this order:
+ *        - Merge with next free block if it is immediately after the current block.
+ *        - Merge with previous free block if it is immediately before the current block.
+ *        - Merge with both previous and next if combined they provide enough space.
+ *      If none of the above succeed, fall back to allocating a new block, memcpy'ing
+ *      the payload and freeing the old block.
+ */
+void * pvPortRealloc( void * pv,
+                      size_t xWantedSize )
+{
+    BlockLink_t * pxBlock;
+    BlockLink_t * pxNewBlockLink;
+    BlockLink_t * pxNextFreeBlock;
+    BlockLink_t * pxPreviousFreeBlock;
+    BlockLink_t * pxBeforePreviousFreeBlock;
+    uint8_t * puc;
+    void * pvReturn = NULL;
+    size_t xAlignedWantedSize;
+    size_t xAdditionalRequiredSize;
+    size_t xCurrentBlockSize;
+    size_t xRemainingBlockSize;
+    size_t xNextBlockSize;
+    size_t xPreviousBlockSize;
+    BaseType_t xHasNextBlock;
+    BaseType_t xHasPreviousBlock;
+
+    /* Ensure the end marker has been set up. */
+    configASSERT( pxEnd );
+
+    /* If pv is NULL behave like malloc. */
+    if( pv == NULL )
+    {
+        pvReturn = pvPortMalloc( xWantedSize );
+        goto realloc_exit;
+    }
+
+    /* If requested size is zero behave like free. */
+    if( xWantedSize == 0 )
+    {
+        vPortFree( pv );
+        pvReturn = NULL;
+        goto realloc_exit;
+    }
+
+    /* Calculate the internal aligned size including the header. */
+    xAlignedWantedSize = xWantedSize;
+
+    /* Add the header size and check for overflow. */
+    if( heapADD_WILL_OVERFLOW( xAlignedWantedSize, xHeapStructSize ) == 0 )
+    {
+        xAlignedWantedSize += xHeapStructSize;
+
+        /* Ensure byte alignment. */
+        if( ( xAlignedWantedSize & portBYTE_ALIGNMENT_MASK ) != 0x00 )
+        {
+            xAdditionalRequiredSize = portBYTE_ALIGNMENT - ( xAlignedWantedSize & portBYTE_ALIGNMENT_MASK );
+
+            if( heapADD_WILL_OVERFLOW( xAlignedWantedSize, xAdditionalRequiredSize ) == 0 )
+            {
+                xAlignedWantedSize += xAdditionalRequiredSize;
+            }
+            else
+            {
+                /* Overflow -> invalid request. */
+                xAlignedWantedSize = 0;
+            }
+        }
+        else
+        {
+            mtCOVERAGE_TEST_MARKER();
+        }
+    }
+    else
+    {
+        xAlignedWantedSize = 0;
+    }
+
+    /* Validate the aligned size. */
+    if( ( xAlignedWantedSize == 0 ) || ( heapBLOCK_SIZE_IS_VALID( xAlignedWantedSize ) == 0 ) )
+    {
+        pvReturn = NULL;
+        goto realloc_exit;
+    }
+
+    /* Get the block header for the allocated block. */
+    puc = ( uint8_t * ) pv;
+    puc -= xHeapStructSize;
+    pxBlock = ( BlockLink_t * ) puc;
+
+    heapVALIDATE_BLOCK_POINTER( pxBlock );
+    configASSERT( heapBLOCK_IS_ALLOCATED( pxBlock ) );
+
+    /* Current block size without the allocated bit. */
+    xCurrentBlockSize = pxBlock->xBlockSize & ~heapBLOCK_ALLOCATED_BITMASK;
+
+    /* 1) Shrink in place if possible. */
+    if( xAlignedWantedSize <= xCurrentBlockSize )
+    {
+        xRemainingBlockSize = xCurrentBlockSize - xAlignedWantedSize;
+
+        /* Only split if the remaining space is large enough to form a free block. */
+        if( xRemainingBlockSize > heapMINIMUM_BLOCK_SIZE )
+        {
+            vTaskSuspendAll();
+            {
+                /* Set the block to the new size and mark as allocated. */
+                pxBlock->xBlockSize = xAlignedWantedSize;
+                heapALLOCATE_BLOCK( pxBlock );
+
+                /* Create a new free block from the remainder and insert it. */
+                pxNewBlockLink = ( BlockLink_t * ) ( ( ( uint8_t * ) pxBlock ) + xAlignedWantedSize );
+                configASSERT( ( ( ( size_t ) pxNewBlockLink ) & portBYTE_ALIGNMENT_MASK ) == 0 );
+
+                pxNewBlockLink->xBlockSize = xRemainingBlockSize;
+                xFreeBytesRemaining += xRemainingBlockSize;
+                prvInsertBlockIntoFreeList( pxNewBlockLink );
+            }
+            ( void ) xTaskResumeAll();
+        }
+        else
+        {
+            /* Remainder too small to split. */
+            mtCOVERAGE_TEST_MARKER();
+        }
+        pvReturn = pv;
+        goto realloc_exit;
+    }
+    /* 2) Expansion path: try to use adjacent free blocks if overall free bytes suffice. */
+    else if( ( xAlignedWantedSize - xCurrentBlockSize ) <= xFreeBytesRemaining )
+    {
+        vTaskSuspendAll();
+        {
+            /* Walk the free list to find the free blocks immediately before and after pxBlock. */
+            pxBeforePreviousFreeBlock = &xStart;
+            pxPreviousFreeBlock = &xStart;
+            pxNextFreeBlock = heapPROTECT_BLOCK_POINTER( xStart.pxNextFreeBlock );
+            heapVALIDATE_BLOCK_POINTER( pxNextFreeBlock );
+
+            while( ( pxNextFreeBlock < pxBlock ) && ( pxNextFreeBlock->pxNextFreeBlock != heapPROTECT_BLOCK_POINTER( NULL ) ) )
+            {
+                pxBeforePreviousFreeBlock = pxPreviousFreeBlock;
+                pxPreviousFreeBlock = pxNextFreeBlock;
+                pxNextFreeBlock = heapPROTECT_BLOCK_POINTER( pxNextFreeBlock->pxNextFreeBlock );
+                heapVALIDATE_BLOCK_POINTER( pxNextFreeBlock );
+            }
+
+            /* Check if next is immediately after current. */
+            if( ( pxNextFreeBlock != pxEnd ) &&
+                ( ( ( size_t ) pxBlock + xCurrentBlockSize ) == ( size_t ) pxNextFreeBlock ) )
+            {
+                xHasNextBlock = pdTRUE;
+            }
+            else
+            {
+                xHasNextBlock = pdFALSE;
+            }
+
+            /* Check if previous is immediately before current. */
+            if( ( pxPreviousFreeBlock != &xStart ) &&
+                ( ( ( size_t ) pxPreviousFreeBlock + pxPreviousFreeBlock->xBlockSize ) == ( size_t ) pxBlock ) )
+            {
+                xHasPreviousBlock = pdTRUE;
+            }
+            else
+            {
+                xHasPreviousBlock = pdFALSE;
+            }
+
+            /* Compute required extra size and neighbor sizes. */
+            xRemainingBlockSize = xAlignedWantedSize - xCurrentBlockSize;
+            xNextBlockSize = pxNextFreeBlock->xBlockSize;
+            xPreviousBlockSize = pxPreviousFreeBlock->xBlockSize;
+            configASSERT( heapBLOCK_SIZE_IS_VALID( xNextBlockSize ) != 0 );
+            configASSERT( heapBLOCK_SIZE_IS_VALID( xPreviousBlockSize ) != 0 );
+
+            /* a) If next exists and is large enough, merge with next. */
+            if( ( xHasNextBlock == pdTRUE ) &&
+                ( xNextBlockSize >= xRemainingBlockSize ) )
+            {
+                /* Remove next from free list and update free bytes. */
+                pxPreviousFreeBlock->pxNextFreeBlock = pxNextFreeBlock->pxNextFreeBlock;
+                pxNextFreeBlock->pxNextFreeBlock = heapPROTECT_BLOCK_POINTER( NULL );
+                xFreeBytesRemaining -= xNextBlockSize;
+
+                /* Temporarily free the current block for merging. */
+                heapFREE_BLOCK( pxBlock );
+
+                /* Remaining bytes after creating the requested size. */
+                xRemainingBlockSize = xCurrentBlockSize + xNextBlockSize - xAlignedWantedSize;
+
+                if( xRemainingBlockSize > heapMINIMUM_BLOCK_SIZE )
+                {
+                    /* Set block to requested size and insert leftover as a free block. */
+                    pxBlock->xBlockSize = xAlignedWantedSize;
+
+                    pxNewBlockLink = ( BlockLink_t * ) ( ( ( uint8_t * ) pxBlock ) + xAlignedWantedSize );
+                    configASSERT( ( ( ( size_t ) pxNewBlockLink ) & portBYTE_ALIGNMENT_MASK ) == 0 );
+
+                    pxNewBlockLink->xBlockSize = xRemainingBlockSize;
+                    xFreeBytesRemaining += xRemainingBlockSize;
+                    prvInsertBlockIntoFreeList( pxNewBlockLink );
+                }
+                else
+                {
+                    /* Leftover too small, keep as part of allocated block. */
+                    pxBlock->xBlockSize = xCurrentBlockSize + xNextBlockSize;
+                }
+
+                /* Mark merged block as allocated. */
+                heapALLOCATE_BLOCK( pxBlock );
+                pvReturn = pv;
+            }
+            /* b) If previous exists and is large enough, merge with previous (data must be moved). */
+            else if( ( xHasPreviousBlock == pdTRUE ) &&
+                     ( xPreviousBlockSize >= xRemainingBlockSize ) )
+            {
+                /* Remove previous from free list and update free bytes. */
+                pxBeforePreviousFreeBlock->pxNextFreeBlock = pxPreviousFreeBlock->pxNextFreeBlock;
+                pxPreviousFreeBlock->pxNextFreeBlock = heapPROTECT_BLOCK_POINTER( NULL );
+                xFreeBytesRemaining -= xPreviousBlockSize;
+
+                heapFREE_BLOCK( pxBlock );
+
+                /* Move the payload forward into the previous block's payload area. */
+                puc = ( uint8_t * ) pxPreviousFreeBlock;
+                puc += xHeapStructSize;
+                /* Ensure memmove length will not underflow. */
+                configASSERT( heapSUBTRACT_WILL_UNDERFLOW( xCurrentBlockSize, xHeapStructSize ) == 0 );
+                ( void ) memmove( puc, pv, xCurrentBlockSize - xHeapStructSize );
+
+                /* Remaining bytes after creating the requested size. */
+                xRemainingBlockSize = xCurrentBlockSize + xPreviousBlockSize - xAlignedWantedSize;
+
+                if( xRemainingBlockSize > heapMINIMUM_BLOCK_SIZE )
+                {
+                    /* previous becomes the allocated block of requested size, insert leftover. */
+                    pxPreviousFreeBlock->xBlockSize = xAlignedWantedSize;
+
+                    pxNewBlockLink = ( BlockLink_t * ) ( ( ( uint8_t * ) pxPreviousFreeBlock ) + xAlignedWantedSize );
+                    configASSERT( ( ( ( size_t ) pxNewBlockLink ) & portBYTE_ALIGNMENT_MASK ) == 0 );
+
+                    pxNewBlockLink->xBlockSize = xRemainingBlockSize;
+                    xFreeBytesRemaining += xRemainingBlockSize;
+                    prvInsertBlockIntoFreeList( pxNewBlockLink );
+                }
+                else
+                {
+                    /* Leftover too small, treat entire previous+current as allocated. */
+                    pxPreviousFreeBlock->xBlockSize = xCurrentBlockSize + xPreviousBlockSize;
+                }
+
+                heapALLOCATE_BLOCK( pxPreviousFreeBlock );
+                /* Return the payload pointer in the previous block. */
+                pvReturn = ( void * ) puc;
+            }
+            /* c) If both neighbors exist and combined are large enough, merge both sides (move data). */
+            else if( ( xHasNextBlock == pdTRUE ) &&
+                     ( xHasPreviousBlock == pdTRUE ) &&
+                     ( ( xNextBlockSize + xPreviousBlockSize ) >= xRemainingBlockSize ) )
+            {
+                /* Remove both previous and next from the free list and update free bytes. */
+                pxBeforePreviousFreeBlock->pxNextFreeBlock = pxNextFreeBlock->pxNextFreeBlock;
+                pxNextFreeBlock->pxNextFreeBlock = heapPROTECT_BLOCK_POINTER( NULL );
+                pxPreviousFreeBlock->pxNextFreeBlock = heapPROTECT_BLOCK_POINTER( NULL );
+                xFreeBytesRemaining -= xNextBlockSize + xPreviousBlockSize;
+
+                heapFREE_BLOCK( pxBlock );
+
+                /* Move payload forward into previous block's payload area. */
+                puc = ( uint8_t * ) pxPreviousFreeBlock;
+                puc += xHeapStructSize;
+                configASSERT( heapSUBTRACT_WILL_UNDERFLOW( xCurrentBlockSize, xHeapStructSize ) == 0 );
+                ( void ) memmove( puc, pv, xCurrentBlockSize - xHeapStructSize );
+
+                /* Remaining bytes after allocation. */
+                xRemainingBlockSize = xCurrentBlockSize + xNextBlockSize + xPreviousBlockSize - xAlignedWantedSize;
+
+                if( xRemainingBlockSize > heapMINIMUM_BLOCK_SIZE )
+                {
+                    pxPreviousFreeBlock->xBlockSize = xAlignedWantedSize;
+
+                    pxNewBlockLink = ( BlockLink_t * ) ( ( ( uint8_t * ) pxPreviousFreeBlock ) + xAlignedWantedSize );
+                    configASSERT( ( ( ( size_t ) pxNewBlockLink ) & portBYTE_ALIGNMENT_MASK ) == 0 );
+
+                    pxNewBlockLink->xBlockSize = xRemainingBlockSize;
+                    xFreeBytesRemaining += xRemainingBlockSize;
+                    prvInsertBlockIntoFreeList( pxNewBlockLink );
+                }
+                else
+                {
+                    pxPreviousFreeBlock->xBlockSize = xCurrentBlockSize + xNextBlockSize + xPreviousBlockSize;
+                }
+
+                heapALLOCATE_BLOCK( pxPreviousFreeBlock );
+                pvReturn = ( void * ) puc;
+            }
+            else
+            {
+                /* None of the merge strategies worked on this path. */
+                mtCOVERAGE_TEST_MARKER();
+            }
+
+            /* Update historical minimum free bytes. */
+            if( xFreeBytesRemaining < xMinimumEverFreeBytesRemaining )
+            {
+                xMinimumEverFreeBytesRemaining = xFreeBytesRemaining;
+            }
+            else
+            {
+                mtCOVERAGE_TEST_MARKER();
+            }
+        }
+        ( void ) xTaskResumeAll();
+    }
+    else
+    {
+        /* Not enough free bytes in the entire heap to satisfy expansion. */
+        pvReturn = NULL;
+        goto realloc_exit;
+    }
+
+    /* If still NULL, fall back to allocating a new block and copying the payload. */
+    if( pvReturn == NULL )
+    {
+        puc = pvPortMalloc( xWantedSize );
+
+        if( puc != NULL )
+        {
+            /* Copy the old payload (old payload size = xCurrentBlockSize - xHeapStructSize). */
+            configASSERT( heapSUBTRACT_WILL_UNDERFLOW( xCurrentBlockSize, xHeapStructSize ) == 0 );
+            ( void ) memcpy( puc, pv, xCurrentBlockSize - xHeapStructSize );
+            vPortFree( pv );
+
+            pvReturn = ( void * ) puc;
+        }
+        else
+        {
+            mtCOVERAGE_TEST_MARKER();
+        }
+    }
+
+realloc_exit:
+    /* Ensure returned pointer is properly aligned (NULL also satisfies this). */
+    configASSERT( ( ( size_t ) pvReturn & ( size_t ) portBYTE_ALIGNMENT_MASK ) == 0 );
+    return pvReturn;
+}
+#endif /* if ( configSUPPORT_HEAP_REALLOC == 1 ) */
+/*-----------------------------------------------------------*/
+
 size_t xPortGetFreeHeapSize( void )
 {
     return xFreeBytesRemaining;
