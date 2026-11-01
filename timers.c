@@ -148,6 +148,7 @@
 /* A queue that is used to send commands to the timer service task. */
     PRIVILEGED_DATA static QueueHandle_t xTimerQueue = NULL;
     PRIVILEGED_DATA static TaskHandle_t xTimerTaskHandle = NULL;
+    PRIVILEGED_DATA static TimerDeleteCallbackFunction_t pxTimerDeleteCallback = NULL;
 
 /*-----------------------------------------------------------*/
 
@@ -1049,6 +1050,15 @@
                             break;
 
                         case tmrCOMMAND_DELETE:
+                            /* Notify wrappers while the timer control block and
+                             * its callback context are still valid. */
+                            if( pxTimerDeleteCallback != NULL )
+                            {
+                                pxTimerDeleteCallback( ( TimerHandle_t ) pxTimer,
+                                                       pxTimer->pxCallbackFunction,
+                                                       pxTimer->pvTimerID );
+                            }
+
                             #if ( configSUPPORT_DYNAMIC_ALLOCATION == 1 )
                             {
                                 /* The timer has already been removed from the active list,
@@ -1190,6 +1200,12 @@
         traceRETURN_xTimerIsTimerActive( xReturn );
 
         return xReturn;
+    }
+/*-----------------------------------------------------------*/
+
+    void vTimerDeleteCallbackRegister( TimerDeleteCallbackFunction_t pxDeleteCallback )
+    {
+        pxTimerDeleteCallback = pxDeleteCallback;
     }
 /*-----------------------------------------------------------*/
 
