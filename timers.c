@@ -89,6 +89,7 @@
         portTIMER_CALLBACK_ATTRIBUTE TimerCallbackFunction_t pxCallbackFunction; /**< The function that will be called when the timer expires. */
         #if ( configUSE_TRACE_FACILITY == 1 )
             UBaseType_t uxTimerNumber;                                           /**< An ID assigned by trace tools such as FreeRTOS+Trace */
+            struct tmrTimerControl * pxNextTimer;                                /**< Points to the next timer in the timer registry. */
         #endif
         uint8_t ucStatus;                                                        /**< Holds bits to say if the timer was statically allocated or not, and if it is active or not. */
     } xTIMER;
@@ -149,6 +150,11 @@
     PRIVILEGED_DATA static QueueHandle_t xTimerQueue = NULL;
     PRIVILEGED_DATA static TaskHandle_t xTimerTaskHandle = NULL;
 
+    #if ( configUSE_TRACE_FACILITY == 1 )
+        PRIVILEGED_DATA static Timer_t * pxTimerRegistry = NULL;
+        PRIVILEGED_DATA static volatile UBaseType_t uxCurrentNumberOfTimers = 0U;
+    #endif
+
 /*-----------------------------------------------------------*/
 
 /*
@@ -156,6 +162,11 @@
  * been initialised already.
  */
     static void prvCheckForValidListAndQueue( void ) PRIVILEGED_FUNCTION;
+
+    #if ( configUSE_TRACE_FACILITY == 1 )
+        static void prvAddTimerToRegistry( Timer_t * pxTimer ) PRIVILEGED_FUNCTION;
+        static void prvRemoveTimerFromRegistry( Timer_t * pxTimer ) PRIVILEGED_FUNCTION;
+    #endif
 
 /*
  * The timer service task (daemon).  Timer functionality is controlled by this
@@ -441,8 +452,54 @@
             pxNewTimer->ucStatus |= ( uint8_t ) tmrSTATUS_IS_AUTORELOAD;
         }
 
+        #if ( configUSE_TRACE_FACILITY == 1 )
+        {
+            prvAddTimerToRegistry( pxNewTimer );
+        }
+        #endif
+
         traceTIMER_CREATE( pxNewTimer );
     }
+/*-----------------------------------------------------------*/
+
+    #if ( configUSE_TRACE_FACILITY == 1 )
+
+        static void prvAddTimerToRegistry( Timer_t * pxTimer )
+        {
+            taskENTER_CRITICAL();
+            {
+                pxTimer->pxNextTimer = pxTimerRegistry;
+                pxTimerRegistry = pxTimer;
+                uxCurrentNumberOfTimers++;
+            }
+            taskEXIT_CRITICAL();
+        }
+
+        static void prvRemoveTimerFromRegistry( Timer_t * pxTimer )
+        {
+            Timer_t ** ppxTimer = &pxTimerRegistry;
+
+            taskENTER_CRITICAL();
+            {
+                while( *ppxTimer != NULL )
+                {
+                    if( *ppxTimer == pxTimer )
+                    {
+                        *ppxTimer = pxTimer->pxNextTimer;
+                        pxTimer->pxNextTimer = NULL;
+                        uxCurrentNumberOfTimers--;
+                        break;
+                    }
+                    else
+                    {
+                        ppxTimer = &( ( *ppxTimer )->pxNextTimer );
+                    }
+                }
+            }
+            taskEXIT_CRITICAL();
+        }
+
+    #endif /* configUSE_TRACE_FACILITY */
 /*-----------------------------------------------------------*/
 
     BaseType_t xTimerGenericCommandFromTask( TimerHandle_t xTimer,
@@ -1049,6 +1106,12 @@
                             break;
 
                         case tmrCOMMAND_DELETE:
+                            #if ( configUSE_TRACE_FACILITY == 1 )
+                            {
+                                prvRemoveTimerFromRegistry( pxTimer );
+                            }
+                            #endif
+
                             #if ( configSUPPORT_DYNAMIC_ALLOCATION == 1 )
                             {
                                 /* The timer has already been removed from the active list,
@@ -1314,6 +1377,75 @@
 
     #if ( configUSE_TRACE_FACILITY == 1 )
 
+        UBaseType_t uxTimerGetNumberOfTimers( void )
+        {
+            UBaseType_t uxNumberOfTimers;
+
+            traceENTER_uxTimerGetNumberOfTimers();
+
+            /* A critical section is not required because the variable is of
+             * type UBaseType_t. */
+            uxNumberOfTimers = uxCurrentNumberOfTimers;
+
+            traceRETURN_uxTimerGetNumberOfTimers( uxNumberOfTimers );
+
+            return uxNumberOfTimers;
+        }
+
+        UBaseType_t uxTimerGetSystemState( TimerStatus_t * const pxTimerStatusArray,
+                                           const UBaseType_t uxArraySize )
+        {
+            UBaseType_t uxNumberOfTimers = 0U;
+
+            traceENTER_uxTimerGetSystemState( pxTimerStatusArray, uxArraySize );
+
+            if( pxTimerStatusArray != NULL )
+            {
+                vTaskSuspendAll();
+                {
+                    if( uxArraySize >= uxCurrentNumberOfTimers )
+                    {
+                        Timer_t * pxTimer = pxTimerRegistry;
+                        UBaseType_t uxTimer = 0U;
+
+                        while( pxTimer != NULL )
+                        {
+                            pxTimerStatusArray[ uxTimer ].xHandle = pxTimer;
+                            pxTimerStatusArray[ uxTimer ].pcTimerName = pxTimer->pcTimerName;
+                            pxTimerStatusArray[ uxTimer ].xTimerPeriodInTicks = pxTimer->xTimerPeriodInTicks;
+                            pxTimerStatusArray[ uxTimer ].pvTimerID = pxTimer->pvTimerID;
+                            pxTimerStatusArray[ uxTimer ].xIsActive = ( ( pxTimer->ucStatus & tmrSTATUS_IS_ACTIVE ) != 0U ) ? pdTRUE : pdFALSE;
+                            pxTimerStatusArray[ uxTimer ].xAutoReload = ( ( pxTimer->ucStatus & tmrSTATUS_IS_AUTORELOAD ) != 0U ) ? pdTRUE : pdFALSE;
+
+                            if( pxTimerStatusArray[ uxTimer ].xIsActive != pdFALSE )
+                            {
+                                pxTimerStatusArray[ uxTimer ].xNextExpiryTime = listGET_LIST_ITEM_VALUE( &( pxTimer->xTimerListItem ) );
+                            }
+                            else
+                            {
+                                pxTimerStatusArray[ uxTimer ].xNextExpiryTime = 0U;
+                            }
+
+                            uxTimer++;
+                            pxTimer = pxTimer->pxNextTimer;
+                        }
+
+                        uxNumberOfTimers = uxTimer;
+                    }
+                }
+                ( void ) xTaskResumeAll();
+            }
+
+            traceRETURN_uxTimerGetSystemState( uxNumberOfTimers );
+
+            return uxNumberOfTimers;
+        }
+
+    #endif /* configUSE_TRACE_FACILITY */
+/*-----------------------------------------------------------*/
+
+    #if ( configUSE_TRACE_FACILITY == 1 )
+
         void vTimerSetTimerNumber( TimerHandle_t xTimer,
                                    UBaseType_t uxTimerNumber )
         {
@@ -1336,6 +1468,13 @@
     {
         xTimerQueue = NULL;
         xTimerTaskHandle = NULL;
+
+        #if ( configUSE_TRACE_FACILITY == 1 )
+        {
+            pxTimerRegistry = NULL;
+            uxCurrentNumberOfTimers = 0U;
+        }
+        #endif
     }
 /*-----------------------------------------------------------*/
 

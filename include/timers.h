@@ -77,6 +77,19 @@
 struct tmrTimerControl; /* The old naming convention is used to prevent breaking kernel aware debuggers. */
 typedef struct tmrTimerControl * TimerHandle_t;
 
+/* Used with uxTimerGetSystemState() to return the state of each timer in the
+ * timer registry. */
+typedef struct xTIMER_STATUS
+{
+    TimerHandle_t xHandle;          /* The handle of the timer.  This value will be invalid if the timer is deleted after the structure is populated. */
+    const char * pcTimerName;       /* A pointer to the name assigned when the timer was created. */
+    TickType_t xTimerPeriodInTicks; /* The timer's period in ticks. */
+    TickType_t xNextExpiryTime;     /* The next expiry time, or 0 if the timer is inactive. */
+    void * pvTimerID;               /* The application-supplied timer ID. */
+    BaseType_t xIsActive;           /* pdTRUE if the timer is active, otherwise pdFALSE. */
+    BaseType_t xAutoReload;         /* pdTRUE for an auto-reload timer, otherwise pdFALSE. */
+} TimerStatus_t;
+
 /*
  * Defines the prototype to which timer callback functions must conform.
  */
@@ -1332,6 +1345,50 @@ TickType_t xTimerGetPeriod( TimerHandle_t xTimer ) PRIVILEGED_FUNCTION;
  * value is undefined.
  */
 TickType_t xTimerGetExpiryTime( TimerHandle_t xTimer ) PRIVILEGED_FUNCTION;
+
+/**
+ * configUSE_TRACE_FACILITY must be set to 1 for
+ * uxTimerGetNumberOfTimers() to be available.
+ *
+ * @return The number of timers currently stored in the timer registry.
+ */
+#if ( configUSE_TRACE_FACILITY == 1 )
+    UBaseType_t uxTimerGetNumberOfTimers( void ) PRIVILEGED_FUNCTION;
+#endif
+
+/**
+ * configUSE_TRACE_FACILITY must be set to 1 for
+ * uxTimerGetSystemState() to be available.
+ *
+ * uxTimerGetSystemState() populates one TimerStatus_t structure for each
+ * timer currently stored in the timer registry.  Timers are automatically
+ * added to the registry when they are created and removed when they are
+ * deleted.
+ *
+ * This function is intended for debugging use and suspends the scheduler while
+ * the registry is copied.  The returned values provide a best-effort snapshot
+ * of timer state.  Timer commands still waiting in the timer command queue are
+ * not reflected.
+ *
+ * TimerStatus_t contains borrowed handles and pointers.  A timer handle becomes
+ * invalid when that timer is deleted, and the application must ensure that the
+ * memory referenced by timer names and IDs remains valid while it is used.
+ *
+ * When MPU wrappers are enabled, this API is privileged-only.
+ *
+ * @param pxTimerStatusArray A pointer to an array of TimerStatus_t structures.
+ * The array must contain at least one entry for each timer in the registry.  The
+ * number of timers can be obtained using uxTimerGetNumberOfTimers().
+ *
+ * @param uxArraySize The number of TimerStatus_t entries in the array.
+ *
+ * @return The number of TimerStatus_t structures populated, or zero if the
+ * supplied array is too small or pxTimerStatusArray is NULL.
+ */
+#if ( configUSE_TRACE_FACILITY == 1 )
+    UBaseType_t uxTimerGetSystemState( TimerStatus_t * const pxTimerStatusArray,
+                                       const UBaseType_t uxArraySize ) PRIVILEGED_FUNCTION;
+#endif
 
 /**
  * BaseType_t xTimerGetStaticBuffer( TimerHandle_t xTimer,

@@ -1626,6 +1626,22 @@
     #define traceRETURN_xTimerGetExpiryTime( xReturn )
 #endif
 
+#ifndef traceENTER_uxTimerGetNumberOfTimers
+    #define traceENTER_uxTimerGetNumberOfTimers()
+#endif
+
+#ifndef traceRETURN_uxTimerGetNumberOfTimers
+    #define traceRETURN_uxTimerGetNumberOfTimers( uxNumberOfTimers )
+#endif
+
+#ifndef traceENTER_uxTimerGetSystemState
+    #define traceENTER_uxTimerGetSystemState( pxTimerStatusArray, uxArraySize )
+#endif
+
+#ifndef traceRETURN_uxTimerGetSystemState
+    #define traceRETURN_uxTimerGetSystemState( uxNumberOfTimers )
+#endif
+
 #ifndef traceENTER_xTimerGetStaticBuffer
     #define traceENTER_xTimerGetStaticBuffer( xTimer, ppxTimerBuffer )
 #endif
@@ -3327,8 +3343,9 @@ typedef struct xSTATIC_TIMER
     TaskFunction_t pvDummy6;
     #if ( configUSE_TRACE_FACILITY == 1 )
         UBaseType_t uxDummy7;
+        void * pvDummy8;
     #endif
-    uint8_t ucDummy8;
+    uint8_t ucDummy9;
 } StaticTimer_t;
 
 /*
