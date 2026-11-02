@@ -966,6 +966,20 @@ BaseType_t xQueueGenericSend( QueueHandle_t xQueue,
     }
     #endif
 
+    #if ( configUSE_MUTEXES == 1 )
+    {
+        /* If the queue is a mutex and is held, only the owner can give it. */
+        if( ( pxQueue->uxQueueType == queueQUEUE_IS_MUTEX ) &&
+            ( pxQueue->u.xSemaphore.xMutexHolder != NULL ) &&
+            ( pxQueue->u.xSemaphore.xMutexHolder != xTaskGetCurrentTaskHandle() ) )
+        {
+            traceRETURN_xQueueGenericSend( pdFAIL );
+
+            return pdFAIL;
+        }
+    }
+    #endif /* configUSE_MUTEXES */
+
     for( ; ; )
     {
         taskENTER_CRITICAL();
