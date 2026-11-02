@@ -371,7 +371,26 @@ static void prvInitialiseNewStreamBuffer( StreamBuffer_t * const pxStreamBuffer,
             configASSERT( xBufferSizeBytes > 0 );
         }
 
-        configASSERT( xTriggerLevelBytes <= xBufferSizeBytes );
+        /* A batching buffer only unblocks a reader when the number of bytes
+         * in the buffer becomes strictly greater than the trigger level (see
+         * prvBytesInBufferMeetTriggerLevel()), whereas a stream/message
+         * buffer unblocks a reader when the number of bytes is greater than
+         * or equal to the trigger level.  The maximum number of bytes any of
+         * these buffers can ever hold is one less than their length (a
+         * full/empty ring buffer ambiguity - see prvBytesInBuffer()), which
+         * is compensated for non-batching buffers so xBufferSizeBytes bytes
+         * can be used (see the xBufferSizeBytes++ below).  A batching
+         * buffer's trigger level must therefore be strictly less than
+         * xBufferSizeBytes, otherwise it could never be satisfied even when
+         * the buffer is completely full. */
+        if( ( ucFlags & sbFLAGS_IS_BATCHING_BUFFER ) != ( uint8_t ) 0 )
+        {
+            configASSERT( xTriggerLevelBytes < xBufferSizeBytes );
+        }
+        else
+        {
+            configASSERT( xTriggerLevelBytes <= xBufferSizeBytes );
+        }
 
         /* A trigger level of 0 would cause a waiting task to unblock even when
          * the buffer was empty. */
@@ -452,14 +471,6 @@ static void prvInitialiseNewStreamBuffer( StreamBuffer_t * const pxStreamBuffer,
 
         configASSERT( pucStreamBufferStorageArea );
         configASSERT( pxStaticStreamBuffer );
-        configASSERT( xTriggerLevelBytes <= xBufferSizeBytes );
-
-        /* A trigger level of 0 would cause a waiting task to unblock even when
-         * the buffer was empty. */
-        if( xTriggerLevelBytes == ( size_t ) 0 )
-        {
-            xTriggerLevelBytes = ( size_t ) 1;
-        }
 
         /* In case the stream buffer is going to be used as a message buffer
          * (that is, it will hold discrete messages with a little meta data that
@@ -482,6 +493,31 @@ static void prvInitialiseNewStreamBuffer( StreamBuffer_t * const pxStreamBuffer,
         {
             /* Statically allocated stream buffer. */
             ucFlags = sbFLAGS_IS_STATICALLY_ALLOCATED;
+        }
+
+        /* Unlike the dynamically allocated path, a statically allocated
+         * buffer's xLength is exactly xBufferSizeBytes (there is no "+1"
+         * compensation - see xStreamBufferGenericCreate()), so the maximum
+         * number of bytes it can ever hold is (xBufferSizeBytes - 1).  A
+         * batching buffer only unblocks a reader when the number of bytes in
+         * the buffer becomes strictly greater than the trigger level (see
+         * prvBytesInBufferMeetTriggerLevel()), so its trigger level must be
+         * strictly less than that maximum, otherwise it could never be
+         * satisfied even when the buffer is completely full. */
+        if( ( ucFlags & sbFLAGS_IS_BATCHING_BUFFER ) != ( uint8_t ) 0 )
+        {
+            configASSERT( xTriggerLevelBytes < ( xBufferSizeBytes - 1U ) );
+        }
+        else
+        {
+            configASSERT( xTriggerLevelBytes <= xBufferSizeBytes );
+        }
+
+        /* A trigger level of 0 would cause a waiting task to unblock even when
+         * the buffer was empty. */
+        if( xTriggerLevelBytes == ( size_t ) 0 )
+        {
+            xTriggerLevelBytes = ( size_t ) 1;
         }
 
         #if ( configASSERT_DEFINED == 1 )
@@ -743,8 +779,26 @@ BaseType_t xStreamBufferSetTriggerLevel( StreamBufferHandle_t xStreamBuffer,
     }
 
     /* The trigger level is the number of bytes that must be in the stream
-     * buffer before a task that is waiting for data is unblocked. */
-    if( xTriggerLevel < pxStreamBuffer->xLength )
+     * buffer before a task that is waiting for data is unblocked.  A batching
+     * buffer only unblocks a reader when the number of bytes in the buffer
+     * becomes strictly greater than the trigger level (see
+     * prvBytesInBufferMeetTriggerLevel()), so its trigger level must be kept
+     * strictly less than the maximum number of bytes the buffer can ever hold
+     * (xLength - 1), otherwise it could never be satisfied even when the
+     * buffer is completely full. */
+    if( ( pxStreamBuffer->ucFlags & sbFLAGS_IS_BATCHING_BUFFER ) != ( uint8_t ) 0 )
+    {
+        if( xTriggerLevel < ( pxStreamBuffer->xLength - 1U ) )
+        {
+            pxStreamBuffer->xTriggerLevelBytes = xTriggerLevel;
+            xReturn = pdPASS;
+        }
+        else
+        {
+            xReturn = pdFALSE;
+        }
+    }
+    else if( xTriggerLevel < pxStreamBuffer->xLength )
     {
         pxStreamBuffer->xTriggerLevelBytes = xTriggerLevel;
         xReturn = pdPASS;
