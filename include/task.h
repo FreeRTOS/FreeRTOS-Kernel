@@ -815,6 +815,9 @@ typedef enum
  * task code is not automatically freed, and should be freed before the task
  * is deleted.
  *
+ * Deleting a task that has already been deleted but whose memory has not yet
+ * been freed by the idle task is a no-op.
+ *
  * See the demo application file death.c for sample code that utilises
  * vTaskDelete ().
  *
@@ -1278,6 +1281,9 @@ void vTaskPrioritySet( TaskHandle_t xTask,
  * Calls to vTaskSuspend are not accumulative -
  * i.e. calling vTaskSuspend () twice on the same task still only requires one
  * call to vTaskResume () to ready the suspended task.
+ *
+ * Suspending a task that has been deleted but whose memory has not yet been
+ * freed by the idle task is a no-op.
  *
  * @param xTaskToSuspend Handle to the task being suspended.  Passing a NULL
  * handle will cause the calling task to be suspended.

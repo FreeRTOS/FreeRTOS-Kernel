@@ -2214,6 +2214,7 @@ STATIC void prvInitialiseNewTask( TaskFunction_t pxTaskCode,
         TCB_t * pxTCB;
         BaseType_t xDeleteTCBInIdleTask = pdFALSE;
         BaseType_t xTaskIsRunningOrYielding;
+        BaseType_t xDeletePending = pdFALSE;
 
         traceENTER_vTaskDelete( xTaskToDelete );
 
@@ -2224,113 +2225,132 @@ STATIC void prvInitialiseNewTask( TaskFunction_t pxTaskCode,
             pxTCB = prvGetTCBFromHandle( xTaskToDelete );
             configASSERT( pxTCB != NULL );
 
-            /* Remove task from the ready/delayed list. */
-            if( uxListRemove( &( pxTCB->xStateListItem ) ) == ( UBaseType_t ) 0 )
+            /* A task that is in xTasksWaitingTermination has already been
+             * deleted and is waiting for the idle task to free its memory.
+             * Deleting such a task again must be a no-op - a repeated delete
+             * must not remove it from xTasksWaitingTermination, must not
+             * insert it into xTasksWaitingTermination again, must not change
+             * uxDeletedTasksWaitingCleanUp and must not free its memory here,
+             * as its clean up is owned by the idle task. */
+            xDeletePending = listIS_CONTAINED_WITHIN( &xTasksWaitingTermination, &( pxTCB->xStateListItem ) );
+
+            if( xDeletePending == pdFALSE )
             {
-                taskRESET_READY_PRIORITY( pxTCB->uxPriority );
-            }
-            else
-            {
-                mtCOVERAGE_TEST_MARKER();
-            }
-
-            /* Is the task waiting on an event also? */
-            if( listLIST_ITEM_CONTAINER( &( pxTCB->xEventListItem ) ) != NULL )
-            {
-                ( void ) uxListRemove( &( pxTCB->xEventListItem ) );
-            }
-            else
-            {
-                mtCOVERAGE_TEST_MARKER();
-            }
-
-            /* Increment the uxTaskNumber also so kernel aware debuggers can
-             * detect that the task lists need re-generating.  This is done before
-             * portPRE_TASK_DELETE_HOOK() as in the Windows port that macro will
-             * not return. */
-            uxTaskNumber++;
-
-            /* Use temp variable as distinct sequence points for reading volatile
-             * variables prior to a logical operator to ensure compliance with
-             * MISRA C 2012 Rule 13.5. */
-            xTaskIsRunningOrYielding = taskTASK_IS_RUNNING_OR_SCHEDULED_TO_YIELD( pxTCB );
-
-            /* If the task is running (or yielding), we must add it to the
-             * termination list so that an idle task can delete it when it is
-             * no longer running. */
-            if( ( xSchedulerRunning != pdFALSE ) && ( xTaskIsRunningOrYielding != pdFALSE ) )
-            {
-                /* A running task or a task which is scheduled to yield is being
-                 * deleted. This cannot complete when the task is still running
-                 * on a core, as a context switch to another task is required.
-                 * Place the task in the termination list. The idle task will check
-                 * the termination list and free up any memory allocated by the
-                 * scheduler for the TCB and stack of the deleted task. */
-                vListInsertEnd( &xTasksWaitingTermination, &( pxTCB->xStateListItem ) );
-
-                /* Increment the ucTasksDeleted variable so the idle task knows
-                 * there is a task that has been deleted and that it should therefore
-                 * check the xTasksWaitingTermination list. */
-                ++uxDeletedTasksWaitingCleanUp;
-
-                /* Call the delete hook before portPRE_TASK_DELETE_HOOK() as
-                 * portPRE_TASK_DELETE_HOOK() does not return in the Win32 port. */
-                traceTASK_DELETE( pxTCB );
-
-                /* Delete the task TCB in idle task. */
-                xDeleteTCBInIdleTask = pdTRUE;
-
-                /* The pre-delete hook is primarily for the Windows simulator,
-                 * in which Windows specific clean up operations are performed,
-                 * after which it is not possible to yield away from this task -
-                 * hence xYieldPending is used to latch that a context switch is
-                 * required. */
-                #if ( configNUMBER_OF_CORES == 1 )
-                    portPRE_TASK_DELETE_HOOK( pxTCB, &( xYieldPendings[ 0 ] ) );
-                #else
-                    portPRE_TASK_DELETE_HOOK( pxTCB, &( xYieldPendings[ pxTCB->xTaskRunState ] ) );
-                #endif
-
-                /* In the case of SMP, it is possible that the task being deleted
-                 * is running on another core. We must evict the task before
-                 * exiting the critical section to ensure that the task cannot
-                 * take an action which puts it back on ready/state/event list,
-                 * thereby nullifying the delete operation. Once evicted, the
-                 * task won't be scheduled ever as it will no longer be on the
-                 * ready list. */
-                #if ( configNUMBER_OF_CORES > 1 )
+                /* Remove task from the ready/delayed list. */
+                if( uxListRemove( &( pxTCB->xStateListItem ) ) == ( UBaseType_t ) 0 )
                 {
-                    if( taskTASK_IS_RUNNING( pxTCB ) == pdTRUE )
+                    taskRESET_READY_PRIORITY( pxTCB->uxPriority );
+                }
+                else
+                {
+                    mtCOVERAGE_TEST_MARKER();
+                }
+
+                /* Is the task waiting on an event also? */
+                if( listLIST_ITEM_CONTAINER( &( pxTCB->xEventListItem ) ) != NULL )
+                {
+                    ( void ) uxListRemove( &( pxTCB->xEventListItem ) );
+                }
+                else
+                {
+                    mtCOVERAGE_TEST_MARKER();
+                }
+
+                /* Increment the uxTaskNumber also so kernel aware debuggers can
+                 * detect that the task lists need re-generating.  This is done before
+                 * portPRE_TASK_DELETE_HOOK() as in the Windows port that macro will
+                 * not return. */
+                uxTaskNumber++;
+
+                /* Use temp variable as distinct sequence points for reading volatile
+                 * variables prior to a logical operator to ensure compliance with
+                 * MISRA C 2012 Rule 13.5. */
+                xTaskIsRunningOrYielding = taskTASK_IS_RUNNING_OR_SCHEDULED_TO_YIELD( pxTCB );
+
+                /* If the task is running (or yielding), we must add it to the
+                 * termination list so that an idle task can delete it when it is
+                 * no longer running. */
+                if( ( xSchedulerRunning != pdFALSE ) && ( xTaskIsRunningOrYielding != pdFALSE ) )
+                {
+                    /* A running task or a task which is scheduled to yield is being
+                     * deleted. This cannot complete when the task is still running
+                     * on a core, as a context switch to another task is required.
+                     * Place the task in the termination list. The idle task will check
+                     * the termination list and free up any memory allocated by the
+                     * scheduler for the TCB and stack of the deleted task. */
+                    vListInsertEnd( &xTasksWaitingTermination, &( pxTCB->xStateListItem ) );
+
+                    /* Increment the ucTasksDeleted variable so the idle task knows
+                     * there is a task that has been deleted and that it should therefore
+                     * check the xTasksWaitingTermination list. */
+                    ++uxDeletedTasksWaitingCleanUp;
+
+                    /* Call the delete hook before portPRE_TASK_DELETE_HOOK() as
+                     * portPRE_TASK_DELETE_HOOK() does not return in the Win32 port. */
+                    traceTASK_DELETE( pxTCB );
+
+                    /* Delete the task TCB in idle task. */
+                    xDeleteTCBInIdleTask = pdTRUE;
+
+                    /* The pre-delete hook is primarily for the Windows simulator,
+                     * in which Windows specific clean up operations are performed,
+                     * after which it is not possible to yield away from this task -
+                     * hence xYieldPending is used to latch that a context switch is
+                     * required. */
+                    #if ( configNUMBER_OF_CORES == 1 )
+                        portPRE_TASK_DELETE_HOOK( pxTCB, &( xYieldPendings[ 0 ] ) );
+                    #else
+                        portPRE_TASK_DELETE_HOOK( pxTCB, &( xYieldPendings[ pxTCB->xTaskRunState ] ) );
+                    #endif
+
+                    /* In the case of SMP, it is possible that the task being deleted
+                     * is running on another core. We must evict the task before
+                     * exiting the critical section to ensure that the task cannot
+                     * take an action which puts it back on ready/state/event list,
+                     * thereby nullifying the delete operation. Once evicted, the
+                     * task won't be scheduled ever as it will no longer be on the
+                     * ready list. */
+                    #if ( configNUMBER_OF_CORES > 1 )
                     {
-                        if( pxTCB->xTaskRunState == ( BaseType_t ) portGET_CORE_ID() )
+                        if( taskTASK_IS_RUNNING( pxTCB ) == pdTRUE )
                         {
-                            configASSERT( uxSchedulerSuspended == 0 );
-                            taskYIELD_WITHIN_API();
-                        }
-                        else
-                        {
-                            prvYieldCore( pxTCB->xTaskRunState );
+                            if( pxTCB->xTaskRunState == ( BaseType_t ) portGET_CORE_ID() )
+                            {
+                                configASSERT( uxSchedulerSuspended == 0 );
+                                taskYIELD_WITHIN_API();
+                            }
+                            else
+                            {
+                                prvYieldCore( pxTCB->xTaskRunState );
+                            }
                         }
                     }
+                    #endif /* #if ( configNUMBER_OF_CORES > 1 ) */
                 }
-                #endif /* #if ( configNUMBER_OF_CORES > 1 ) */
+                else
+                {
+                    --uxCurrentNumberOfTasks;
+                    traceTASK_DELETE( pxTCB );
+
+                    /* Reset the next expected unblock time in case it referred to
+                     * the task that has just been deleted. */
+                    prvResetNextTaskUnblockTime();
+                }
             }
             else
             {
-                --uxCurrentNumberOfTasks;
-                traceTASK_DELETE( pxTCB );
-
-                /* Reset the next expected unblock time in case it referred to
-                 * the task that has just been deleted. */
-                prvResetNextTaskUnblockTime();
+                mtCOVERAGE_TEST_MARKER();
             }
         }
         taskEXIT_CRITICAL();
 
         /* If the task is not deleting itself, call prvDeleteTCB from outside of
          * critical section. If a task deletes itself, prvDeleteTCB is called
-         * from prvCheckTasksWaitingTermination which is called from Idle task. */
-        if( xDeleteTCBInIdleTask != pdTRUE )
+         * from prvCheckTasksWaitingTermination which is called from Idle task.
+         * A repeated delete of a task that is in xTasksWaitingTermination is a
+         * no-op and must not free the TCB here either - the idle task still
+         * owns its clean up. */
+        if( ( xDeleteTCBInIdleTask != pdTRUE ) && ( xDeletePending == pdFALSE ) )
         {
             prvDeleteTCB( pxTCB );
         }
@@ -3197,6 +3217,7 @@ STATIC void prvInitialiseNewTask( TaskFunction_t pxTaskCode,
     void vTaskSuspend( TaskHandle_t xTaskToSuspend )
     {
         TCB_t * pxTCB;
+        BaseType_t xDeletePending = pdFALSE;
 
         traceENTER_vTaskSuspend( xTaskToSuspend );
 
@@ -3207,73 +3228,93 @@ STATIC void prvInitialiseNewTask( TaskFunction_t pxTaskCode,
             pxTCB = prvGetTCBFromHandle( xTaskToSuspend );
             configASSERT( pxTCB != NULL );
 
-            traceTASK_SUSPEND( pxTCB );
-
-            /* Remove task from the ready/delayed list and place in the
-             * suspended list. */
-            if( uxListRemove( &( pxTCB->xStateListItem ) ) == ( UBaseType_t ) 0 )
+            #if ( INCLUDE_vTaskDelete == 1 )
             {
-                taskRESET_READY_PRIORITY( pxTCB->uxPriority );
+                /* A task that is in xTasksWaitingTermination has already been
+                 * deleted and is waiting for the idle task to free its memory.
+                 * Moving its state item to xSuspendedTaskList would take it off
+                 * xTasksWaitingTermination without decrementing
+                 * uxDeletedTasksWaitingCleanUp, leaving the counter out of step
+                 * with the list and making the idle task read the head entry of
+                 * an empty list.  Suspending such a task is therefore a no-op. */
+                xDeletePending = listIS_CONTAINED_WITHIN( &xTasksWaitingTermination, &( pxTCB->xStateListItem ) );
             }
-            else
-            {
-                mtCOVERAGE_TEST_MARKER();
-            }
+            #endif /* #if ( INCLUDE_vTaskDelete == 1 ) */
 
-            /* Is the task waiting on an event also? */
-            if( listLIST_ITEM_CONTAINER( &( pxTCB->xEventListItem ) ) != NULL )
+            if( xDeletePending == pdFALSE )
             {
-                ( void ) uxListRemove( &( pxTCB->xEventListItem ) );
-            }
-            else
-            {
-                mtCOVERAGE_TEST_MARKER();
-            }
+                traceTASK_SUSPEND( pxTCB );
 
-            vListInsertEnd( &xSuspendedTaskList, &( pxTCB->xStateListItem ) );
-
-            #if ( configUSE_TASK_NOTIFICATIONS == 1 )
-            {
-                BaseType_t x;
-
-                for( x = ( BaseType_t ) 0; x < ( BaseType_t ) configTASK_NOTIFICATION_ARRAY_ENTRIES; x++ )
+                /* Remove task from the ready/delayed list and place in the
+                 * suspended list. */
+                if( uxListRemove( &( pxTCB->xStateListItem ) ) == ( UBaseType_t ) 0 )
                 {
-                    if( pxTCB->ucNotifyState[ x ] == taskWAITING_NOTIFICATION )
+                    taskRESET_READY_PRIORITY( pxTCB->uxPriority );
+                }
+                else
+                {
+                    mtCOVERAGE_TEST_MARKER();
+                }
+
+                /* Is the task waiting on an event also? */
+                if( listLIST_ITEM_CONTAINER( &( pxTCB->xEventListItem ) ) != NULL )
+                {
+                    ( void ) uxListRemove( &( pxTCB->xEventListItem ) );
+                }
+                else
+                {
+                    mtCOVERAGE_TEST_MARKER();
+                }
+
+                vListInsertEnd( &xSuspendedTaskList, &( pxTCB->xStateListItem ) );
+
+                #if ( configUSE_TASK_NOTIFICATIONS == 1 )
+                {
+                    BaseType_t x;
+
+                    for( x = ( BaseType_t ) 0; x < ( BaseType_t ) configTASK_NOTIFICATION_ARRAY_ENTRIES; x++ )
                     {
-                        /* The task was blocked to wait for a notification, but is
-                         * now suspended, so no notification was received. */
-                        pxTCB->ucNotifyState[ x ] = taskNOT_WAITING_NOTIFICATION;
+                        if( pxTCB->ucNotifyState[ x ] == taskWAITING_NOTIFICATION )
+                        {
+                            /* The task was blocked to wait for a notification, but is
+                             * now suspended, so no notification was received. */
+                            pxTCB->ucNotifyState[ x ] = taskNOT_WAITING_NOTIFICATION;
+                        }
                     }
                 }
-            }
-            #endif /* if ( configUSE_TASK_NOTIFICATIONS == 1 ) */
+                #endif /* if ( configUSE_TASK_NOTIFICATIONS == 1 ) */
 
-            /* In the case of SMP, it is possible that the task being suspended
-             * is running on another core. We must evict the task before
-             * exiting the critical section to ensure that the task cannot
-             * take an action which puts it back on ready/state/event list,
-             * thereby nullifying the suspend operation. Once evicted, the
-             * task won't be scheduled before it is resumed as it will no longer
-             * be on the ready list. */
-            #if ( configNUMBER_OF_CORES > 1 )
-            {
-                if( xSchedulerRunning != pdFALSE )
+                /* In the case of SMP, it is possible that the task being suspended
+                 * is running on another core. We must evict the task before
+                 * exiting the critical section to ensure that the task cannot
+                 * take an action which puts it back on ready/state/event list,
+                 * thereby nullifying the suspend operation. Once evicted, the
+                 * task won't be scheduled before it is resumed as it will no longer
+                 * be on the ready list. */
+                #if ( configNUMBER_OF_CORES > 1 )
                 {
-                    /* Reset the next expected unblock time in case it referred to the
-                     * task that is now in the Suspended state. */
-                    prvResetNextTaskUnblockTime();
-
-                    if( taskTASK_IS_RUNNING( pxTCB ) == pdTRUE )
+                    if( xSchedulerRunning != pdFALSE )
                     {
-                        if( pxTCB->xTaskRunState == ( BaseType_t ) portGET_CORE_ID() )
+                        /* Reset the next expected unblock time in case it referred to the
+                         * task that is now in the Suspended state. */
+                        prvResetNextTaskUnblockTime();
+
+                        if( taskTASK_IS_RUNNING( pxTCB ) == pdTRUE )
                         {
-                            /* The current task has just been suspended. */
-                            configASSERT( uxSchedulerSuspended == 0 );
-                            vTaskYieldWithinAPI();
+                            if( pxTCB->xTaskRunState == ( BaseType_t ) portGET_CORE_ID() )
+                            {
+                                /* The current task has just been suspended. */
+                                configASSERT( uxSchedulerSuspended == 0 );
+                                vTaskYieldWithinAPI();
+                            }
+                            else
+                            {
+                                prvYieldCore( pxTCB->xTaskRunState );
+                            }
                         }
                         else
                         {
-                            prvYieldCore( pxTCB->xTaskRunState );
+                            mtCOVERAGE_TEST_MARKER();
                         }
                     }
                     else
@@ -3281,12 +3322,12 @@ STATIC void prvInitialiseNewTask( TaskFunction_t pxTaskCode,
                         mtCOVERAGE_TEST_MARKER();
                     }
                 }
-                else
-                {
-                    mtCOVERAGE_TEST_MARKER();
-                }
+                #endif /* #if ( configNUMBER_OF_CORES > 1 ) */
             }
-            #endif /* #if ( configNUMBER_OF_CORES > 1 ) */
+            else
+            {
+                mtCOVERAGE_TEST_MARKER();
+            }
         }
         taskEXIT_CRITICAL();
 
@@ -6218,21 +6259,39 @@ STATIC void prvCheckTasksWaitingTermination( void )
         {
             #if ( configNUMBER_OF_CORES == 1 )
             {
+                pxTCB = NULL;
+
                 taskENTER_CRITICAL();
                 {
                     {
-                        /* MISRA Ref 11.5.3 [Void pointer assignment] */
-                        /* More details at: https://github.com/FreeRTOS/FreeRTOS-Kernel/blob/main/MISRA.md#rule-115 */
-                        /* coverity[misra_c_2012_rule_11_5_violation] */
-                        pxTCB = listGET_OWNER_OF_HEAD_ENTRY( ( &xTasksWaitingTermination ) );
-                        ( void ) uxListRemove( &( pxTCB->xStateListItem ) );
-                        --uxCurrentNumberOfTasks;
-                        --uxDeletedTasksWaitingCleanUp;
+                        if( listCURRENT_LIST_LENGTH( &xTasksWaitingTermination ) > ( UBaseType_t ) 0U )
+                        {
+                            /* MISRA Ref 11.5.3 [Void pointer assignment] */
+                            /* More details at: https://github.com/FreeRTOS/FreeRTOS-Kernel/blob/main/MISRA.md#rule-115 */
+                            /* coverity[misra_c_2012_rule_11_5_violation] */
+                            pxTCB = listGET_OWNER_OF_HEAD_ENTRY( ( &xTasksWaitingTermination ) );
+                            ( void ) uxListRemove( &( pxTCB->xStateListItem ) );
+                            --uxCurrentNumberOfTasks;
+                            --uxDeletedTasksWaitingCleanUp;
+                        }
+                        else
+                        {
+                            /* uxDeletedTasksWaitingCleanUp is greater than the length
+                             * of xTasksWaitingTermination.  Do not read the head entry
+                             * of the empty list - that entry has no owner.  Repair the
+                             * counter so this loop cannot dereference a non-existent
+                             * owner. */
+                            configASSERT( uxDeletedTasksWaitingCleanUp == listCURRENT_LIST_LENGTH( &xTasksWaitingTermination ) );
+                            uxDeletedTasksWaitingCleanUp = 0;
+                        }
                     }
                 }
                 taskEXIT_CRITICAL();
 
-                prvDeleteTCB( pxTCB );
+                if( pxTCB != NULL )
+                {
+                    prvDeleteTCB( pxTCB );
+                }
             }
             #else /* #if( configNUMBER_OF_CORES == 1 ) */
             {
@@ -6243,7 +6302,8 @@ STATIC void prvCheckTasksWaitingTermination( void )
                     /* For SMP, multiple idles can be running simultaneously
                      * and we need to check that other idles did not cleanup while we were
                      * waiting to enter the critical section. */
-                    if( uxDeletedTasksWaitingCleanUp > ( UBaseType_t ) 0U )
+                    if( ( uxDeletedTasksWaitingCleanUp > ( UBaseType_t ) 0U ) &&
+                        ( listCURRENT_LIST_LENGTH( &xTasksWaitingTermination ) > ( UBaseType_t ) 0U ) )
                     {
                         /* MISRA Ref 11.5.3 [Void pointer assignment] */
                         /* More details at: https://github.com/FreeRTOS/FreeRTOS-Kernel/blob/main/MISRA.md#rule-115 */
@@ -6264,6 +6324,20 @@ STATIC void prvCheckTasksWaitingTermination( void )
                             taskEXIT_CRITICAL();
                             break;
                         }
+                    }
+                    else if( uxDeletedTasksWaitingCleanUp > ( UBaseType_t ) 0U )
+                    {
+                        /* uxDeletedTasksWaitingCleanUp is greater than the length
+                         * of xTasksWaitingTermination.  Do not read the head entry
+                         * of the empty list - that entry has no owner.  Repair the
+                         * counter so this loop cannot dereference a non-existent
+                         * owner. */
+                        configASSERT( uxDeletedTasksWaitingCleanUp == listCURRENT_LIST_LENGTH( &xTasksWaitingTermination ) );
+                        uxDeletedTasksWaitingCleanUp = 0;
+                    }
+                    else
+                    {
+                        mtCOVERAGE_TEST_MARKER();
                     }
                 }
                 taskEXIT_CRITICAL();
