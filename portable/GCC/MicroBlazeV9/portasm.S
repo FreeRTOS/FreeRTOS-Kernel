@@ -37,12 +37,31 @@
 /* The context is oversized to allow functions called from the ISR to write
 back into the caller stack. */
 #if defined (__arch64__)
+#if( XPAR_MICROBLAZE_USE_STACK_PROTECTION )
+#if( XPAR_MICROBLAZE_USE_FPU != 0 )
+	#define portCONTEXT_SIZE 288
+	#define portMINUS_CONTEXT_SIZE -288
+#else
+	#define portCONTEXT_SIZE 280
+	#define portMINUS_CONTEXT_SIZE -280
+#endif
+#else
 #if( XPAR_MICROBLAZE_USE_FPU != 0 )
 	#define portCONTEXT_SIZE 272
 	#define portMINUS_CONTEXT_SIZE -272
 #else
 	#define portCONTEXT_SIZE 264
 	#define portMINUS_CONTEXT_SIZE -264
+#endif
+#endif
+#else
+#if( XPAR_MICROBLAZE_USE_STACK_PROTECTION )
+#if( XPAR_MICROBLAZE_USE_FPU != 0 )
+	#define portCONTEXT_SIZE 144
+	#define portMINUS_CONTEXT_SIZE -144
+#else
+	#define portCONTEXT_SIZE 140
+	#define portMINUS_CONTEXT_SIZE -140
 #endif
 #else
 #if( XPAR_MICROBLAZE_USE_FPU != 0 )
@@ -51,6 +70,7 @@ back into the caller stack. */
 #else
 	#define portCONTEXT_SIZE 132
 	#define portMINUS_CONTEXT_SIZE -132
+#endif
 #endif
 #endif
 
@@ -88,7 +108,16 @@ back into the caller stack. */
 #define portR2_OFFSET	240
 #define portCRITICAL_NESTING_OFFSET 248
 #define portMSR_OFFSET 256
+#if( XPAR_MICROBLAZE_USE_FPU != 0 )
 #define portFSR_OFFSET 264
+#if( XPAR_MICROBLAZE_USE_STACK_PROTECTION )
+#define portSLR_OFFSET 272
+#define portSHR_OFFSET 280
+#endif
+#elif( XPAR_MICROBLAZE_USE_STACK_PROTECTION )
+#define portSLR_OFFSET 264
+#define portSHR_OFFSET 272
+#endif
 #else
 #define portR31_OFFSET	4
 #define portR30_OFFSET	8
@@ -122,7 +151,16 @@ back into the caller stack. */
 #define portR2_OFFSET	120
 #define portCRITICAL_NESTING_OFFSET 124
 #define portMSR_OFFSET 128
+#if( XPAR_MICROBLAZE_USE_FPU != 0 )
 #define portFSR_OFFSET 132
+#if( XPAR_MICROBLAZE_USE_STACK_PROTECTION )
+#define portSLR_OFFSET 136
+#define portSHR_OFFSET 140
+#endif
+#elif( XPAR_MICROBLAZE_USE_STACK_PROTECTION )
+#define portSLR_OFFSET 132
+#define portSHR_OFFSET 136
+#endif
 
 #endif
 
