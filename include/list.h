@@ -322,7 +322,9 @@ typedef struct xLIST
 #define listREMOVE_ITEM( pxItemToRemove ) \
     do {                                  \
         /* The list item knows which list it is in.  Obtain the list from the list \
-         * item. */                                                                                 \
+         * item. */
+        configASSERT(pxItemToRemove != NULL);
+        configASSERT( pxList != NULL );                                                             \
         List_t * const pxList = ( pxItemToRemove )->pxContainer;                                    \
                                                                                                     \
         ( pxItemToRemove )->pxNext->pxPrevious = ( pxItemToRemove )->pxPrevious;                    \
