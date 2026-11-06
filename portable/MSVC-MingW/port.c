@@ -190,7 +190,7 @@ static DWORD WINAPI prvSimulatedPeripheralTimer( LPVOID lpParameter )
 
     /* Set the Waitable Timer. The timer is set to run periodically at every
     xWaitTimeBetweenTicks milliseconds. */
-    bSuccess = SetWaitableTimer( hTimer, &liDueTime, xWaitTimeBetweenTicks, NULL, NULL, 0 );
+    bSuccess = SetWaitableTimer( hTimer, &liDueTime,  ( LONG ) xWaitTimeBetweenTicks, NULL, NULL, 0 );
     configASSERT( bSuccess );
 
     while( xPortRunning == pdTRUE )
