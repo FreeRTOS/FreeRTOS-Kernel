@@ -139,6 +139,7 @@ void vListInsertEnd( List_t * const pxList,
 void vListInsert( List_t * const pxList,
                   ListItem_t * const pxNewListItem )
 {
+    configASSERT( pxList != NULL );
     ListItem_t * pxIterator;
     const TickType_t xValueOfInsertion = pxNewListItem->xItemValue;
 
