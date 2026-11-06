@@ -3668,7 +3668,9 @@ STATIC BaseType_t prvCreateIdleTasks( void )
              * address of the RAM then create the idle task. */
             #if ( configNUMBER_OF_CORES == 1 )
             {
+                uxIdleTaskStackSize = 0U;
                 vApplicationGetIdleTaskMemory( &pxIdleTaskTCBBuffer, &pxIdleTaskStackBuffer, &uxIdleTaskStackSize );
+                configASSERT( uxIdleTaskStackSize > 0U );
             }
             #else
             {
