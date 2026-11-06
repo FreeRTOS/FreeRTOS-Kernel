@@ -94,7 +94,7 @@ bool event_wait_timed( struct event * ev,
                        time_t ms )
 {
     struct timespec ts;
-    int ret = 0;
+    bool triggered;
 
     clock_gettime( CLOCK_REALTIME, &ts );
     ts.tv_sec += ms / 1000;
@@ -107,19 +107,19 @@ bool event_wait_timed( struct event * ev,
         #endif
     }
 
-    while( ( ev->event_triggered == false ) && ( ret == 0 ) )
+    while( ev->event_triggered == false )
     {
-        ret = pthread_cond_timedwait( &ev->cond, &ev->mutex, &ts );
-
-        if( ( ret == -1 ) && ( errno == ETIMEDOUT ) )
+        if( pthread_cond_timedwait( &ev->cond, &ev->mutex, &ts ) != 0 )
         {
-            return false;
+            /* ETIMEDOUT or an unrecoverable error */
+            break;
         }
     }
 
+    triggered = ev->event_triggered;
     ev->event_triggered = false;
     pthread_mutex_unlock( &ev->mutex );
-    return true;
+    return triggered;
 }
 /*-----------------------------------------------------------*/
 
