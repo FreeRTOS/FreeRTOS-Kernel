@@ -1015,6 +1015,9 @@ static size_t prvWriteMessageToBuffer( StreamBuffer_t * const pxStreamBuffer,
                                        size_t xSpace,
                                        size_t xRequiredSpace )
 {
+    configAssert(pxStreamBuffer != NULL);
+    configAssert(pvTxData != NULL);
+    
     size_t xNextHead = pxStreamBuffer->xHead;
     configMESSAGE_BUFFER_LENGTH_TYPE xMessageLength;
 
