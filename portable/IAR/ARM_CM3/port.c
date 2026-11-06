@@ -90,11 +90,13 @@ typedef void ( * portISR_t )( void );
 /* A fiddle factor to estimate the number of SysTick counts that would have
  * occurred while the SysTick counter is stopped during tickless idle
  * calculations. */
-#define portMISSED_COUNTS_FACTOR              ( 94UL )
+#ifndef portMISSED_COUNTS_FACTOR
+    #define portMISSED_COUNTS_FACTOR    ( 94UL )
+#endif
 
 /* For strict compliance with the Cortex-M spec the task start address should
  * have bit-0 clear, as it is loaded into the PC on exit from an ISR. */
-#define portSTART_ADDRESS_MASK                ( ( StackType_t ) 0xfffffffeUL )
+#define portSTART_ADDRESS_MASK    ( ( StackType_t ) 0xfffffffeUL )
 
 /* Let the user override the default SysTick clock rate.  If defined by the
  * user, this symbol must equal the SysTick clock rate when the CLK bit is 0 in the
