@@ -1581,6 +1581,8 @@ static size_t prvReadBytesFromBuffer( StreamBuffer_t * pxStreamBuffer,
 static size_t prvBytesInBuffer( const StreamBuffer_t * const pxStreamBuffer )
 {
     /* Returns the distance between xTail and xHead. */
+    configASSERT(pxStreamBuffer != NULL)
+
     size_t xCount;
 
     xCount = pxStreamBuffer->xLength + pxStreamBuffer->xHead;
