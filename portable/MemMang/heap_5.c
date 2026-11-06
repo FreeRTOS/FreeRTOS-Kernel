@@ -691,20 +691,20 @@ void vPortGetHeapStats( HeapStats_t * pxHeapStats )
         {
             while( pxBlock != pxEnd )
             {
-                /* Increment the number of blocks and record the largest block seen
-                 * so far. */
-                xBlocks++;
-
-                if( pxBlock->xBlockSize > xMaxSize )
-                {
-                    xMaxSize = pxBlock->xBlockSize;
-                }
-
                 /* Heap five will have a zero sized block at the end of each
                  * each region - the block is only used to link to the next
                  * heap region so it not a real block. */
                 if( pxBlock->xBlockSize != 0 )
                 {
+                    /* Increment the number of blocks and record the largest
+                     * and smallest blocks seen so far. */
+                    xBlocks++;
+
+                    if( pxBlock->xBlockSize > xMaxSize )
+                    {
+                        xMaxSize = pxBlock->xBlockSize;
+                    }
+
                     if( pxBlock->xBlockSize < xMinSize )
                     {
                         xMinSize = pxBlock->xBlockSize;
