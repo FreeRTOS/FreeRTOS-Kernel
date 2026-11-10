@@ -886,7 +886,7 @@ extern void vGIC_EnableCPUInterface( void );
     /*-----------------------------------------------------------*/
 
     BaseType_t xPortIsAuthorizedToAccessBuffer( const void * pvBuffer,
-                                                uint32_t ulBufferLength,
+                                                size_t xBufferLength,
                                                 uint32_t ulAccessRequested ) /* PRIVILEGED_FUNCTION */
 
     {
@@ -909,10 +909,10 @@ extern void vGIC_EnableCPUInterface( void );
         }
         else
         {
-            if( portADD_UINT64_WILL_OVERFLOW( ( ( uint64_t ) pvBuffer ), ( ulBufferLength - 1UL ) ) == pdFALSE )
+            if( portADD_UINT64_WILL_OVERFLOW( ( ( uint64_t ) pvBuffer ), ( ( uint64_t ) xBufferLength - 1ULL ) ) == pdFALSE )
             {
                 ullBufferStartAddress = ( uint64_t ) pvBuffer;
-                ullBufferEndAddress = ( ( ( uint64_t ) pvBuffer ) + ulBufferLength - 1UL );
+                ullBufferEndAddress = ( ( ( uint64_t ) pvBuffer ) + ( uint64_t ) xBufferLength - 1ULL );
 
                 for( i = 0; i < portTOTAL_NUM_REGIONS; i++ )
                 {
