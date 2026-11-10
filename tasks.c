@@ -5671,6 +5671,24 @@ void vTaskSetTimeOutState( TimeOut_t * const pxTimeOut )
     {
         pxTimeOut->xOverflowCount = xNumOfOverflows;
         pxTimeOut->xTimeOnEntering = xTickCount;
+
+        #if ( INCLUDE_xTaskAbortDelay == 1 )
+        {
+            /* A new timeout period is starting, so discard any abort that was
+             * left over from an earlier wait that did not consume it (for
+             * example, an aborted xEventGroupWaitBits()).  Otherwise the next
+             * xTaskCheckForTimeOut() would report a timeout immediately, even
+             * for a block time of portMAX_DELAY. */
+            if( pxCurrentTCB != NULL )
+            {
+                pxCurrentTCB->ucDelayAborted = ( uint8_t ) pdFALSE;
+            }
+            else
+            {
+                mtCOVERAGE_TEST_MARKER();
+            }
+        }
+        #endif /* INCLUDE_xTaskAbortDelay */
     }
     taskEXIT_CRITICAL();
 
@@ -5685,6 +5703,15 @@ void vTaskInternalSetTimeOutState( TimeOut_t * const pxTimeOut )
     /* For internal use only as it does not use a critical section. */
     pxTimeOut->xOverflowCount = xNumOfOverflows;
     pxTimeOut->xTimeOnEntering = xTickCount;
+
+    #if ( INCLUDE_xTaskAbortDelay == 1 )
+    {
+        /* See the comment in vTaskSetTimeOutState().  The callers of this
+         * function always run in the context of a task, so pxCurrentTCB
+         * cannot be NULL here. */
+        pxCurrentTCB->ucDelayAborted = ( uint8_t ) pdFALSE;
+    }
+    #endif /* INCLUDE_xTaskAbortDelay */
 
     traceRETURN_vTaskInternalSetTimeOutState();
 }
