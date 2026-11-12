@@ -442,6 +442,7 @@
 
     #define portMPU_PRBAR_EL1_ADDRESS_MASK                ( 0x0000FFFFFFFFFFC0ULL )
     #define portMPU_PRLAR_EL1_ADDRESS_MASK                ( 0x0000FFFFFFFFFFC0ULL )
+    #define portMPU_PRLAR_EL1_ADDRESS_IMPLIED_BITS        ( 0x000000000000003FULL )
     #define portMPU_PRBAR_EL1_ACCESS_PERMISSIONS_MASK     ( 3ULL<< 2ULL )
 
     #define portMPU_REGION_NON_SHAREABLE                  ( 0ULL << 4ULL )
@@ -481,7 +482,7 @@
     /* Extract last address of the MPU region as encoded in the
      * PRLAR_EL1 register value. */
     #define portEXTRACT_LAST_ADDRESS_FROM_PRLAR_EL1( prlar_el1 ) \
-        ( ( ( prlar_el1 ) & portMPU_PRLAR_EL1_ADDRESS_MASK ) | ~portMPU_PRLAR_EL1_ADDRESS_MASK )
+        ( ( ( prlar_el1 ) & portMPU_PRLAR_EL1_ADDRESS_MASK ) | portMPU_PRLAR_EL1_ADDRESS_IMPLIED_BITS )
 
     /* Does addr lies within [start, end] address range? */
     #define portIS_ADDRESS_WITHIN_RANGE( addr, start, end ) \

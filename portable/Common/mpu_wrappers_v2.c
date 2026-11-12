@@ -114,14 +114,14 @@
     #define CONVERT_TO_INTERNAL_INDEX( lIndex )    ( ( lIndex ) - INDEX_OFFSET )
 
 /**
- * @brief Max value that fits in a uint32_t type.
+ * @brief Max value that fits in a UBaseType_t type.
  */
-    #define mpuUINT32_MAX    ( ~( ( uint32_t ) 0 ) )
+    #define mpuUBASETYPE_MAX    ( ~( ( UBaseType_t ) 0 ) )
 
 /**
  * @brief Check if multiplying a and b will result in overflow.
  */
-    #define mpuMULTIPLY_UINT32_WILL_OVERFLOW( a, b )    ( ( ( a ) > 0 ) && ( ( b ) > ( mpuUINT32_MAX / ( a ) ) ) )
+    #define mpuMULTIPLY_BASETYPE_WILL_OVERFLOW( a, b )    ( ( ( a ) > 0 ) && ( ( b ) > ( mpuUBASETYPE_MAX / ( a ) ) ) )
 
 /**
  * @brief Get the index of a free slot in the kernel object pool.
@@ -1061,13 +1061,11 @@
             UBaseType_t uxReturn = 0;
             BaseType_t xIsTaskStatusArrayWriteable = pdFALSE;
             BaseType_t xIsTotalRunTimeWriteable = pdFALSE;
-            uint32_t ulArraySize = ( uint32_t ) uxArraySize;
-            uint32_t ulTaskStatusSize = ( uint32_t ) sizeof( TaskStatus_t );
 
-            if( mpuMULTIPLY_UINT32_WILL_OVERFLOW( ulTaskStatusSize, ulArraySize ) == 0 )
+            if( mpuMULTIPLY_BASETYPE_WILL_OVERFLOW( sizeof( TaskStatus_t ), uxArraySize ) == 0 )
             {
                 xIsTaskStatusArrayWriteable = xPortIsAuthorizedToAccessBuffer( pxTaskStatusArray,
-                                                                               ulTaskStatusSize * ulArraySize,
+                                                                               sizeof( TaskStatus_t ) * ( size_t ) uxArraySize,
                                                                                tskMPU_WRITE_PERMISSION );
 
                 if( pulTotalRunTime != NULL )
@@ -1080,7 +1078,7 @@
                 if( ( xIsTaskStatusArrayWriteable == pdTRUE ) &&
                     ( ( pulTotalRunTime == NULL ) || ( xIsTotalRunTimeWriteable == pdTRUE ) ) )
                 {
-                    uxReturn = uxTaskGetSystemState( pxTaskStatusArray, ( UBaseType_t ) ulArraySize, pulTotalRunTime );
+                    uxReturn = uxTaskGetSystemState( pxTaskStatusArray, uxArraySize, pulTotalRunTime );
                 }
             }
 

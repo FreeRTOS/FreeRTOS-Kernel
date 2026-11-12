@@ -286,9 +286,17 @@
 
 #else /* portUSING_MPU_WRAPPERS */
 
-    #define PRIVILEGED_FUNCTION
-    #define PRIVILEGED_DATA
-    #define FREERTOS_SYSTEM_CALL
+    #ifndef PRIVILEGED_FUNCTION
+        #define PRIVILEGED_FUNCTION
+    #endif
+
+    #ifndef PRIVILEGED_DATA
+        #define PRIVILEGED_DATA
+    #endif
+
+    #ifndef FREERTOS_SYSTEM_CALL
+        #define FREERTOS_SYSTEM_CALL
+    #endif
 
 #endif /* portUSING_MPU_WRAPPERS */
 
