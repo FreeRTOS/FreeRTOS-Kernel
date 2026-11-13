@@ -219,10 +219,10 @@ pxPortInitialiseStack:
     or t0, t0, t1                       /* Set MPIE and MPP bits in mstatus value. */
 
 #if( configENABLE_FPU == 1 )
-    /* Mark the FPU as clean in the mstatus value. */
+    /* A new task has no saved FPU context. */
     li t1, ~MSTATUS_FS_MASK
     and t0, t0, t1
-    li t1, MSTATUS_FS_CLEAN
+    li t1, MSTATUS_FS_INITIAL
     or t0, t0, t1
 #endif
 
@@ -260,6 +260,14 @@ xPortStartFirstTask:
     portasmRESTORE_ADDITIONAL_REGISTERS /* Defined in freertos_risc_v_chip_specific_extensions.h to restore any registers unique to the RISC-V implementation. */
 
     load_x  x5, 1 * portWORD_SIZE( sp ) /* Initial mstatus into x5 (t0). */
+
+#if( configENABLE_FPU == 1 )
+    /* Initialize the first task's FPU before enabling interrupts. */
+    csrw    mstatus, x5
+    portcontextINITIALISE_FPU
+    csrr    x5, mstatus
+#endif
+
     addi    x5, x5, 0x08                /* Set MIE bit so the first task starts with interrupts enabled - required as returns with ret not eret. */
     csrw    mstatus, x5                 /* Interrupts enabled from here! */
 
