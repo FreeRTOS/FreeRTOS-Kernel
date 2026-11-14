@@ -1831,10 +1831,7 @@ STATIC void prvInitialiseNewTask( TaskFunction_t pxTaskCode,
     /* Avoid dependency on memset() if it is not required. */
     #if ( tskSET_NEW_STACKS_TO_KNOWN_VALUE == 1 )
     {
-        /* Fill the stack with a known value to assist debugging.
-         * The task creation API guarantees that pxStack references a buffer
-         * containing at least uxStackDepth StackType_t elements.
-         */
+        /* Fill the stack with a known value to assist debugging. */
         ( void ) memset( pxNewTCB->pxStack, ( int ) tskSTACK_FILL_BYTE, ( size_t ) uxStackDepth * sizeof( StackType_t ) );
     }
     #endif /* tskSET_NEW_STACKS_TO_KNOWN_VALUE */
@@ -3668,9 +3665,7 @@ STATIC BaseType_t prvCreateIdleTasks( void )
              * address of the RAM then create the idle task. */
             #if ( configNUMBER_OF_CORES == 1 )
             {
-                uxIdleTaskStackSize = 0U;
                 vApplicationGetIdleTaskMemory( &pxIdleTaskTCBBuffer, &pxIdleTaskStackBuffer, &uxIdleTaskStackSize );
-                configASSERT( uxIdleTaskStackSize > 0U );
             }
             #else
             {

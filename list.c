@@ -139,11 +139,12 @@ void vListInsertEnd( List_t * const pxList,
 void vListInsert( List_t * const pxList,
                   ListItem_t * const pxNewListItem )
 {
-    configASSERT( pxList != NULL );
     ListItem_t * pxIterator;
     const TickType_t xValueOfInsertion = pxNewListItem->xItemValue;
 
     traceENTER_vListInsert( pxList, pxNewListItem );
+
+    configASSERT( pxList != NULL );
 
     /* Only effective when configASSERT() is also defined, these tests may catch
      * the list data structures being overwritten in memory.  They will not catch
