@@ -325,8 +325,6 @@ typedef struct xLIST
          * item. */                                                                                 \
         List_t * const pxList = ( pxItemToRemove )->pxContainer;                                    \
                                                                                                     \
-        configASSERT( pxList != NULL );                                                             \
-                                                                                                    \
         ( pxItemToRemove )->pxNext->pxPrevious = ( pxItemToRemove )->pxPrevious;                    \
         ( pxItemToRemove )->pxPrevious->pxNext = ( pxItemToRemove )->pxNext;                        \
         /* Make sure the index is left pointing to a valid item. */                                 \

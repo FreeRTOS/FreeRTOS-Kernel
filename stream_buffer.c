@@ -1015,13 +1015,8 @@ static size_t prvWriteMessageToBuffer( StreamBuffer_t * const pxStreamBuffer,
                                        size_t xSpace,
                                        size_t xRequiredSpace )
 {
-    size_t xNextHead;
+    size_t xNextHead = pxStreamBuffer->xHead;
     configMESSAGE_BUFFER_LENGTH_TYPE xMessageLength;
-
-    configASSERT( pxStreamBuffer != NULL );
-    configASSERT( pvTxData != NULL );
-
-    xNextHead = pxStreamBuffer->xHead;
 
     if( ( pxStreamBuffer->ucFlags & sbFLAGS_IS_MESSAGE_BUFFER ) != ( uint8_t ) 0 )
     {
@@ -1582,10 +1577,8 @@ static size_t prvReadBytesFromBuffer( StreamBuffer_t * pxStreamBuffer,
 
 static size_t prvBytesInBuffer( const StreamBuffer_t * const pxStreamBuffer )
 {
-    size_t xCount;
-
     /* Returns the distance between xTail and xHead. */
-    configASSERT( pxStreamBuffer != NULL );
+    size_t xCount;
 
     xCount = pxStreamBuffer->xLength + pxStreamBuffer->xHead;
     xCount -= pxStreamBuffer->xTail;
