@@ -51,6 +51,10 @@
     #error This file must not be used if configSUPPORT_DYNAMIC_ALLOCATION is 0
 #endif
 
+#if ( configSUPPORT_HEAP_REALLOC == 1 )
+    #error pvPortRealloc() is unsupported by heap_4.c, set configSUPPORT_HEAP_REALLOC to 0
+#endif
+
 #ifndef configHEAP_CLEAR_MEMORY_ON_FREE
     #define configHEAP_CLEAR_MEMORY_ON_FREE    0
 #endif

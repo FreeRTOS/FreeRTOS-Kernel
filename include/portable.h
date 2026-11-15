@@ -102,6 +102,10 @@
     #define configSTACK_ALLOCATION_FROM_SEPARATE_HEAP    0
 #endif
 
+#ifndef configSUPPORT_HEAP_REALLOC
+    #define configSUPPORT_HEAP_REALLOC    0
+#endif
+
 #include "mpu_wrappers.h"
 
 /* *INDENT-OFF* */
@@ -194,6 +198,20 @@ void vPortInitialiseBlocks( void ) PRIVILEGED_FUNCTION;
 size_t xPortGetFreeHeapSize( void ) PRIVILEGED_FUNCTION;
 size_t xPortGetMinimumEverFreeHeapSize( void ) PRIVILEGED_FUNCTION;
 void xPortResetHeapMinimumEverFreeHeapSize( void ) PRIVILEGED_FUNCTION;
+
+#if ( configSUPPORT_HEAP_REALLOC == 1 )
+
+/*
+ * Resize a block obtained from pvPortMalloc(), pvPortCalloc() or
+ * pvPortRealloc(), preserving its contents up to the lesser of the old and new
+ * sizes.  As with the C library realloc(), a NULL pv behaves as pvPortMalloc()
+ * and the contents of any added space are undefined.  A xWantedSize of 0 frees
+ * the block and returns NULL.  If the block cannot be resized NULL is returned
+ * and the original block is left unchanged.
+ */
+    void * pvPortRealloc( void * pv,
+                          size_t xWantedSize ) PRIVILEGED_FUNCTION;
+#endif
 
 #if ( configSTACK_ALLOCATION_FROM_SEPARATE_HEAP == 1 )
     void * pvPortMallocStack( size_t xSize ) PRIVILEGED_FUNCTION;
