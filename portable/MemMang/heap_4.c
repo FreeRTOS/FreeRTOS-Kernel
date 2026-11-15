@@ -51,10 +51,6 @@
     #error This file must not be used if configSUPPORT_DYNAMIC_ALLOCATION is 0
 #endif
 
-#if ( configSUPPORT_HEAP_REALLOC == 1 )
-    #error pvPortRealloc() is unsupported by heap_4.c, set configSUPPORT_HEAP_REALLOC to 0
-#endif
-
 #ifndef configHEAP_CLEAR_MEMORY_ON_FREE
     #define configHEAP_CLEAR_MEMORY_ON_FREE    0
 #endif
@@ -353,6 +349,173 @@ void * pvPortMalloc( size_t xWantedSize )
     configASSERT( ( ( ( size_t ) pvReturn ) & ( size_t ) portBYTE_ALIGNMENT_MASK ) == 0 );
     return pvReturn;
 }
+/*-----------------------------------------------------------*/
+
+#if ( configSUPPORT_HEAP_REALLOC == 1 )
+
+void * pvPortRealloc( void * pv,
+                      size_t xWantedSize )
+{
+    BlockLink_t * pxLink;
+    BlockLink_t * pxBeforePreceding = NULL;
+    BlockLink_t * pxPreceding;
+    BlockLink_t * pxFollowing;
+    BlockLink_t * pxNewBlockLink;
+    size_t xOldSize, xNewSize = 0, xBlockSize;
+    size_t xPrecedingSize = 0, xFollowingSize = 0;
+    void * pvReturn = NULL;
+
+    if( pv == NULL )
+    {
+        pvReturn = pvPortMalloc( xWantedSize );
+    }
+    else if( xWantedSize == 0 )
+    {
+        vPortFree( pv );
+    }
+    else
+    {
+        /* The block being resized will have a BlockLink_t structure
+         * immediately before it. */
+        pxLink = ( void * ) ( ( ( uint8_t * ) pv ) - xHeapStructSize );
+
+        heapVALIDATE_BLOCK_POINTER( pxLink );
+        configASSERT( heapBLOCK_IS_ALLOCATED( pxLink ) != 0 );
+        configASSERT( pxLink->pxNextFreeBlock == heapPROTECT_BLOCK_POINTER( NULL ) );
+
+        if( ( heapBLOCK_IS_ALLOCATED( pxLink ) != 0 ) &&
+            ( pxLink->pxNextFreeBlock == heapPROTECT_BLOCK_POINTER( NULL ) ) )
+        {
+            xOldSize = pxLink->xBlockSize & ~heapBLOCK_ALLOCATED_BITMASK;
+
+            /* Size the block as pvPortMalloc() would - large enough to also
+             * hold a BlockLink_t structure and rounded up to the byte
+             * alignment.  xNewSize is left as 0 if that would overflow. */
+            if( heapADD_WILL_OVERFLOW( xWantedSize, xHeapStructSize + ( size_t ) portBYTE_ALIGNMENT_MASK ) == 0 )
+            {
+                xNewSize = ( xWantedSize + xHeapStructSize + ( size_t ) portBYTE_ALIGNMENT_MASK ) & ~( ( size_t ) portBYTE_ALIGNMENT_MASK );
+            }
+
+            if( ( xNewSize != 0 ) && ( heapBLOCK_SIZE_IS_VALID( xNewSize ) != 0 ) )
+            {
+                vTaskSuspendAll();
+                {
+                    /* Find the free blocks either side of the block.  The list is
+                     * ordered by address, so these are the last free block below
+                     * it and the first above it, if they are adjacent. */
+                    for( pxPreceding = &xStart; heapPROTECT_BLOCK_POINTER( pxPreceding->pxNextFreeBlock ) < pxLink; pxPreceding = heapPROTECT_BLOCK_POINTER( pxPreceding->pxNextFreeBlock ) )
+                    {
+                        pxBeforePreceding = pxPreceding;
+                    }
+
+                    pxFollowing = heapPROTECT_BLOCK_POINTER( pxPreceding->pxNextFreeBlock );
+
+                    /* End markers are zero sized so are never merged. */
+                    if( ( ( ( uint8_t * ) pxLink ) + xOldSize ) == ( uint8_t * ) pxFollowing )
+                    {
+                        xFollowingSize = pxFollowing->xBlockSize;
+                    }
+
+                    if( ( pxPreceding != &xStart ) &&
+                        ( ( ( ( uint8_t * ) pxPreceding ) + pxPreceding->xBlockSize ) == ( uint8_t * ) pxLink ) )
+                    {
+                        heapVALIDATE_BLOCK_POINTER( pxPreceding );
+                        xPrecedingSize = pxPreceding->xBlockSize;
+                    }
+
+                    xBlockSize = xOldSize;
+
+                    if( xNewSize <= ( xOldSize + xFollowingSize ) )
+                    {
+                        /* Shrinking, or growing into the following free block, so
+                         * resize in place. */
+                        if( xNewSize > xOldSize )
+                        {
+                            pxPreceding->pxNextFreeBlock = pxFollowing->pxNextFreeBlock;
+                            xBlockSize += xFollowingSize;
+                        }
+
+                        pvReturn = pv;
+                    }
+                    else if( xNewSize <= ( xPrecedingSize + xOldSize + xFollowingSize ) )
+                    {
+                        /* Merge with the neighbouring free blocks and move the
+                         * contents down.  pxBeforePreceding cannot be NULL here as
+                         * pxPreceding is not xStart. */
+                        if( xFollowingSize != 0 )
+                        {
+                            pxPreceding->pxNextFreeBlock = pxFollowing->pxNextFreeBlock;
+                        }
+
+                        pxBeforePreceding->pxNextFreeBlock = pxPreceding->pxNextFreeBlock;
+                        xBlockSize += xPrecedingSize + xFollowingSize;
+                        pxLink = pxPreceding;
+                        pvReturn = ( void * ) ( ( ( uint8_t * ) pxLink ) + xHeapStructSize );
+                        ( void ) memmove( pvReturn, pv, xOldSize - xHeapStructSize );
+                    }
+                    else
+                    {
+                        mtCOVERAGE_TEST_MARKER();
+                    }
+
+                    if( pvReturn != NULL )
+                    {
+                        if( ( xBlockSize - xNewSize ) > heapMINIMUM_BLOCK_SIZE )
+                        {
+                            /* Return the excess to the free list. */
+                            pxNewBlockLink = ( void * ) ( ( ( uint8_t * ) pxLink ) + xNewSize );
+                            pxNewBlockLink->xBlockSize = xBlockSize - xNewSize;
+                            xBlockSize = xNewSize;
+
+                            #if ( configHEAP_CLEAR_MEMORY_ON_FREE == 1 )
+                            {
+                                ( void ) memset( ( ( uint8_t * ) pxNewBlockLink ) + xHeapStructSize, 0, pxNewBlockLink->xBlockSize - xHeapStructSize );
+                            }
+                            #endif
+
+                            prvInsertBlockIntoFreeList( pxNewBlockLink );
+                        }
+
+                        /* Whatever was merged in or split off, the free space
+                         * changes by the difference in the block's size. */
+                        xFreeBytesRemaining += xOldSize;
+                        xFreeBytesRemaining -= xBlockSize;
+
+                        if( xFreeBytesRemaining < xMinimumEverFreeBytesRemaining )
+                        {
+                            xMinimumEverFreeBytesRemaining = xFreeBytesRemaining;
+                        }
+
+                        pxLink->xBlockSize = xBlockSize;
+                        heapALLOCATE_BLOCK( pxLink );
+                        pxLink->pxNextFreeBlock = heapPROTECT_BLOCK_POINTER( NULL );
+
+                        traceFREE( pv, xOldSize );
+                        traceMALLOC( pvReturn, xBlockSize );
+                    }
+                }
+                ( void ) xTaskResumeAll();
+            }
+
+            if( pvReturn == NULL )
+            {
+                /* Move the block.  This is only reached when growing, so all
+                 * of the old contents fit in the new block. */
+                pvReturn = pvPortMalloc( xWantedSize );
+
+                if( pvReturn != NULL )
+                {
+                    ( void ) memcpy( pvReturn, pv, xOldSize - xHeapStructSize );
+                    vPortFree( pv );
+                }
+            }
+        }
+    }
+
+    return pvReturn;
+}
+
+#endif /* configSUPPORT_HEAP_REALLOC */
 /*-----------------------------------------------------------*/
 
 void vPortFree( void * pv )
