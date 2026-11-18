@@ -2440,6 +2440,29 @@ char * pcTaskGetName( TaskHandle_t xTaskToQuery ) PRIVILEGED_FUNCTION;
  * task into a buffer, both as an absolute count value and as a percentage
  * of the total system execution time.
  *
+ * The run time statistics counter is separate from the RTOS tick count.  At a
+ * context switch, if its current value is not greater than the value recorded
+ * when the task was switched in, that task's execution time for the interval is
+ * not added to its accumulated count.  Counter wrap can cause this condition;
+ * wrap is not otherwise detected or compensated for.  Accounting resumes on
+ * subsequent context switches when the counter has advanced, but the omitted
+ * interval is not recovered.
+ *
+ * Each task's accumulated count can also overflow independently of the
+ * statistics counter.  Absolute counts and percentages must not be interpreted
+ * as lifetime statistics after either counter overflows.  To extend the useful
+ * measurement period, configRUN_TIME_COUNTER_TYPE can be set to a wider unsigned
+ * type, such as uint64_t.  The application must also provide a correspondingly
+ * wide, monotonically increasing value from portGET_RUN_TIME_COUNTER_VALUE()
+ * (or portALT_GET_RUN_TIME_COUNTER_VALUE()).  Changing the C type alone does not
+ * extend a hardware counter that still wraps at its original width.  An RTOS
+ * tick count rollover does not, by itself, cause a statistics counter rollover.
+ *
+ * The formatting used by this convenience function depends on the port and is
+ * not selected from configRUN_TIME_COUNTER_TYPE.  When using a wider counter,
+ * obtain the raw values with uxTaskGetSystemState() and format them using
+ * specifiers that match the counter type.
+ *
  * NOTE 2:
  *
  * This function is provided for convenience only, and is used by many of the
@@ -2495,6 +2518,9 @@ char * pcTaskGetName( TaskHandle_t xTaskToQuery ) PRIVILEGED_FUNCTION;
  * backward compatibility. New applications are recommended to use
  * vTaskGetRunTimeStatistics and supply the length of the pcWriteBuffer
  * explicitly.
+ *
+ * The run time counter rollover limitations described for
+ * vTaskGetRunTimeStatistics() also apply to this compatibility macro.
  *
  * NOTE 1: This function will disable interrupts for its duration.  It is
  * not intended for normal application runtime use but as a debug aid.
