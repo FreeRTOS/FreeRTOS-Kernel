@@ -168,14 +168,16 @@ typedef void ( * portISR_t )( void );
  *
  * It is needed because the systick is a 24-bit counter.
  */
-#define portMAX_24_BIT_NUMBER       ( 0xffffffUL )
+#define portMAX_24_BIT_NUMBER    ( 0xffffffUL )
 
 /**
  * @brief A fiddle factor to estimate the number of SysTick counts that would
  * have occurred while the SysTick counter is stopped during tickless idle
  * calculations.
  */
-#define portMISSED_COUNTS_FACTOR    ( 94UL )
+#ifndef portMISSED_COUNTS_FACTOR
+    #define portMISSED_COUNTS_FACTOR    ( 94UL )
+#endif
 
 /*-----------------------------------------------------------*/
 
