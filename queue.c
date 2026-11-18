@@ -2308,6 +2308,8 @@ void vQueueDelete( QueueHandle_t xQueue )
     {
         traceENTER_uxQueueGetQueueNumber( xQueue );
 
+        configASSERT( xQueue );
+
         traceRETURN_uxQueueGetQueueNumber( ( ( Queue_t * ) xQueue )->uxQueueNumber );
 
         return ( ( Queue_t * ) xQueue )->uxQueueNumber;
@@ -2323,6 +2325,8 @@ void vQueueDelete( QueueHandle_t xQueue )
     {
         traceENTER_vQueueSetQueueNumber( xQueue, uxQueueNumber );
 
+        configASSERT( xQueue );
+
         ( ( Queue_t * ) xQueue )->uxQueueNumber = uxQueueNumber;
 
         traceRETURN_vQueueSetQueueNumber();
@@ -2337,6 +2341,8 @@ void vQueueDelete( QueueHandle_t xQueue )
     {
         traceENTER_ucQueueGetQueueType( xQueue );
 
+        configASSERT( xQueue );
+
         traceRETURN_ucQueueGetQueueType( ( ( Queue_t * ) xQueue )->ucQueueType );
 
         return ( ( Queue_t * ) xQueue )->ucQueueType;
@@ -2349,6 +2355,8 @@ UBaseType_t uxQueueGetQueueItemSize( QueueHandle_t xQueue ) /* PRIVILEGED_FUNCTI
 {
     traceENTER_uxQueueGetQueueItemSize( xQueue );
 
+    configASSERT( xQueue );
+
     traceRETURN_uxQueueGetQueueItemSize( ( ( Queue_t * ) xQueue )->uxItemSize );
 
     return ( ( Queue_t * ) xQueue )->uxItemSize;
@@ -2358,6 +2366,8 @@ UBaseType_t uxQueueGetQueueItemSize( QueueHandle_t xQueue ) /* PRIVILEGED_FUNCTI
 UBaseType_t uxQueueGetQueueLength( QueueHandle_t xQueue ) /* PRIVILEGED_FUNCTION */
 {
     traceENTER_uxQueueGetQueueLength( xQueue );
+
+    configASSERT( xQueue );
 
     traceRETURN_uxQueueGetQueueLength( ( ( Queue_t * ) xQueue )->uxLength );
 
