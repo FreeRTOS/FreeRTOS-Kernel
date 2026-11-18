@@ -111,6 +111,7 @@ static BaseType_t xSchedulerEnd = pdFALSE;
 static pthread_t hTimerTickThread;
 static bool xTimerTickThreadShouldRun;
 static uint64_t prvStartTimeNs;
+static uint64_t prvTicksCounted; /* ticks counted since prvStartTimeNs */
 static pthread_key_t xThreadKey = 0;
 /*-----------------------------------------------------------*/
 
@@ -457,15 +458,43 @@ static void * prvTimerTickHandler( void * arg )
 
     prvPortSetCurrentThreadName( "Scheduler timer" );
 
+    const uint64_t ullTickNs = ( uint64_t ) portTICK_RATE_MICROSECONDS * 1000ULL;
+    uint64_t ullNextNs = prvStartTimeNs;
+
     while( xTimerTickThreadShouldRun )
     {
+        struct timespec xNext;
+        uint64_t ullNowNs;
+
+        /*
+         * Sleep until an absolute deadline rather than for one period:
+         * a relative sleep adds the latency of every wake-up to every
+         * tick, which made the tick count lose 7-10 % against the wall
+         * clock. A thread far behind (stopped in a debugger) starts
+         * again from now instead of signalling in a burst; the handler
+         * counts the ticks it owes anyway.
+         */
+        ullNextNs += ullTickNs;
+        ullNowNs = prvGetTimeNs();
+
+        if( ullNextNs + ullTickNs < ullNowNs )
+        {
+            ullNextNs = ullNowNs;
+        }
+
+        xNext.tv_sec = ( time_t ) ( ullNextNs / 1000000000ULL );
+        xNext.tv_nsec = ( long ) ( ullNextNs % 1000000000ULL );
+
+        while( clock_nanosleep( CLOCK_MONOTONIC, TIMER_ABSTIME, &xNext, NULL ) == EINTR )
+        {
+        }
+
         /*
          * signal to the active task to cause tick handling or
          * preemption (if enabled)
          */
         Thread_t * thread = prvGetThreadFromTask( xTaskGetCurrentTaskHandle() );
         pthread_kill( thread->pthread, SIGALRM );
-        usleep( portTICK_RATE_MICROSECONDS );
     }
 
     return NULL;
@@ -479,9 +508,10 @@ static void * prvTimerTickHandler( void * arg )
 void prvSetupTimerInterrupt( void )
 {
     xTimerTickThreadShouldRun = true;
-    pthread_create( &hTimerTickThread, NULL, prvTimerTickHandler, NULL );
-
+    /* before the thread starts, which takes its first deadline from it */
     prvStartTimeNs = prvGetTimeNs();
+    prvTicksCounted = 0;
+    pthread_create( &hTimerTickThread, NULL, prvTimerTickHandler, NULL );
 }
 /*-----------------------------------------------------------*/
 
@@ -498,7 +528,25 @@ static void vPortSystemTickHandler( int sig )
 
         pxThreadToSuspend = prvGetThreadFromTask( xTaskGetCurrentTaskHandle() );
 
-        if( xTaskIncrementTick() != pdFALSE )
+        /*
+         * Count every tick that is due by the monotonic clock, not one
+         * per signal: a signal sent while the last one is still pending
+         * is merged with it, and a late one is a tick lost for good.
+         */
+        uint64_t ullDue = ( prvGetTimeNs() - prvStartTimeNs ) / ( ( uint64_t ) portTICK_RATE_MICROSECONDS * 1000ULL );
+        BaseType_t xSwitchRequired = pdFALSE;
+
+        while( prvTicksCounted < ullDue )
+        {
+            prvTicksCounted++;
+
+            if( xTaskIncrementTick() != pdFALSE )
+            {
+                xSwitchRequired = pdTRUE;
+            }
+        }
+
+        if( xSwitchRequired != pdFALSE )
         {
             /* Select Next Task. */
             vTaskSwitchContext();
