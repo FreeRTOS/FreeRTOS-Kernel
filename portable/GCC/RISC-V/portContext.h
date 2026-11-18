@@ -91,6 +91,14 @@
 
         #define portFPU_REG_SIZE                ( __riscv_flen / 8 )
         #define portFPU_REG_COUNT               33 /* 32 Floating point registers plus one CSR. */
+
+        /*
+         * Reserve space at the beginning of the FPU context block for:
+         * 1. The FCSR (one portWORD_SIZE slot).
+         * 2. Padding (one portWORD_SIZE slot) to align the FP registers:
+         *    - RV32: 8-byte boundary for double-precision registers.
+         *    - RV64: 16-byte boundary mandated by the RISC-V ABI.
+         */
         #define portFPU_REG_OFFSET( regIndex )  ( ( 2 * portWORD_SIZE ) + ( regIndex * portFPU_REG_SIZE ) )
         #define portFPU_CONTEXT_SIZE            ( portFPU_REG_SIZE * portFPU_REG_COUNT )
     #else
