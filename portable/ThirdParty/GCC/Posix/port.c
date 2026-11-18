@@ -139,7 +139,15 @@ static void prvThreadKeyDestructor( void * pvData )
 
 static void prvInitThreadKey( void )
 {
-    pthread_key_create( &xThreadKey, prvThreadKeyDestructor );
+    int iRet;
+
+    iRet = pthread_key_create( &xThreadKey, prvThreadKeyDestructor );
+
+    if( iRet != 0 )
+    {
+        prvFatalError( "pthread_key_create", iRet );
+    }
+
     /* Destroy xThreadKey when the process exits. */
     atexit( prvDestroyThreadKey );
 }
@@ -148,6 +156,7 @@ static void prvInitThreadKey( void )
 static void prvMarkAsFreeRTOSThread( void )
 {
     uint8_t * pucThreadData = NULL;
+    int iRet;
 
     ( void ) pthread_once( &hThreadKeyOnce, prvInitThreadKey );
 
@@ -156,7 +165,21 @@ static void prvMarkAsFreeRTOSThread( void )
 
     *pucThreadData = 1;
 
-    pthread_setspecific( xThreadKey, pucThreadData );
+    iRet = pthread_setspecific( xThreadKey, pucThreadData );
+
+    if( iRet != 0 )
+    {
+        /* The marker was not stored, so the TLS destructor would never run
+         * for it -- free it here instead of leaking it, then treat the
+         * failure as fatal via prvFatalError(), consistent with how this
+         * port already handles other unexpected pthread call failures
+         * (see pthread_create()/sigaction() above). This function returns
+         * void, so there is no way to propagate the failure to the caller;
+         * continuing would leave the thread unmarked and silently
+         * misclassified by prvIsFreeRTOSThread(). */
+        free( pucThreadData );
+        prvFatalError( "pthread_setspecific", iRet );
+    }
 }
 /*-----------------------------------------------------------*/
 
