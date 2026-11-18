@@ -67,7 +67,7 @@
 
 typedef struct QueuePointers
 {
-    int8_t * pcTail;     /**< Points to the byte at the end of the queue storage area.  Once more byte is allocated than necessary to store the queue items, this is used as a marker. */
+    int8_t * pcTail;     /**< Points one byte past the end of the queue storage area.  This is used as a marker. */
     int8_t * pcReadFrom; /**< Points to the last place that a queued item was read from when the structure is used as a queue. */
 } QueuePointers_t;
 
