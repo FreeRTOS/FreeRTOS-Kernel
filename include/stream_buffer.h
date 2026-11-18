@@ -710,6 +710,12 @@ size_t xStreamBufferSendFromISR( StreamBufferHandle_t xStreamBuffer,
  *
  * Receives bytes from a stream buffer.
  *
+ * The message buffer implementation reserves the combination of a NULL receive
+ * buffer, a zero buffer length and a zero block time for xMessageBufferDiscard().
+ * Use that macro to discard a message; ordinary receive operations must provide
+ * a valid receive buffer.  The reserved combination does not consume data from
+ * a stream or stream batching buffer.
+ *
  * ***NOTE***:  Uniquely among FreeRTOS objects, the stream buffer
  * implementation (so also the message buffer implementation, as message buffers
  * are built on top of stream buffers) assumes there is only one task or

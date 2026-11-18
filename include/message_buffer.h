@@ -873,6 +873,37 @@ typedef StreamBufferHandle_t MessageBufferHandle_t;
 
 /**
  * message_buffer.h
+ * @code{c}
+ * size_t xMessageBufferDiscard( MessageBufferHandle_t xMessageBuffer );
+ * @endcode
+ * Removes the next message without copying its contents to a receive buffer.
+ * This can be used when the next message is too large for the application's
+ * receive buffer.  Any following messages remain in the message buffer.
+ *
+ * This function does not wait for a message and must only be called from a
+ * task, not from an interrupt service routine.  It is a reader operation and
+ * must be serialized with other receive or discard operations on the same
+ * message buffer, following the single-reader rules for message buffers.
+ * Discarding a message performs the normal receive-completed notification, so
+ * a task waiting to send can be unblocked when space becomes available.
+ *
+ * configUSE_STREAM_BUFFERS must be set to 1 in FreeRTOSConfig.h for
+ * xMessageBufferDiscard() to be available.
+ *
+ * @param xMessageBuffer The handle of the message buffer to read from.
+ *
+ * @return The length of the discarded message in bytes, excluding its length
+ * header, or 0 if the message buffer is empty.  A stream buffer handle is not
+ * a message buffer handle; passing one returns 0 without consuming any data.
+ *
+ * \defgroup xMessageBufferDiscard xMessageBufferDiscard
+ * \ingroup MessageBufferManagement
+ */
+#define xMessageBufferDiscard( xMessageBuffer ) \
+    xStreamBufferReceive( ( xMessageBuffer ), NULL, ( size_t ) 0, ( TickType_t ) 0 )
+
+/**
+ * message_buffer.h
  *
  * @code{c}
  * BaseType_t xMessageBufferSendCompletedFromISR( MessageBufferHandle_t xMessageBuffer, BaseType_t *pxHigherPriorityTaskWoken );

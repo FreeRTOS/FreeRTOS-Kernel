@@ -323,6 +323,10 @@ static size_t prvReadBytesFromBuffer( StreamBuffer_t * pxStreamBuffer,
                                       size_t xCount,
                                       size_t xTail ) PRIVILEGED_FUNCTION;
 
+/* Remove a complete message while leaving subsequent messages untouched. */
+static size_t prvDiscardMessageFromBuffer( StreamBuffer_t * pxStreamBuffer,
+                                           size_t xBytesAvailable ) PRIVILEGED_FUNCTION;
+
 /*
  * Called by both pxStreamBufferCreate() and pxStreamBufferCreateStatic() to
  * initialise the members of the newly created stream buffer structure.
@@ -1062,6 +1066,39 @@ static size_t prvWriteMessageToBuffer( StreamBuffer_t * const pxStreamBuffer,
 }
 /*-----------------------------------------------------------*/
 
+static size_t prvDiscardMessageFromBuffer( StreamBuffer_t * pxStreamBuffer,
+                                           size_t xBytesAvailable )
+{
+    configMESSAGE_BUFFER_LENGTH_TYPE xMessageLength;
+    size_t xNextTail, xDiscardedLength = 0;
+
+    xNextTail = prvReadBytesFromBuffer( pxStreamBuffer, ( uint8_t * ) &xMessageLength,
+                                        sbBYTES_TO_STORE_MESSAGE_LENGTH, pxStreamBuffer->xTail );
+
+    /* The length header and payload are published together by the writer. */
+    configASSERT( ( size_t ) xMessageLength <= ( xBytesAvailable - sbBYTES_TO_STORE_MESSAGE_LENGTH ) );
+
+    if( ( size_t ) xMessageLength <= ( xBytesAvailable - sbBYTES_TO_STORE_MESSAGE_LENGTH ) )
+    {
+        xDiscardedLength = ( size_t ) xMessageLength;
+
+        /* Advance without copying the payload, including when it wraps. */
+        if( xDiscardedLength >= ( pxStreamBuffer->xLength - xNextTail ) )
+        {
+            xNextTail = xDiscardedLength - ( pxStreamBuffer->xLength - xNextTail );
+        }
+        else
+        {
+            xNextTail += xDiscardedLength;
+        }
+
+        pxStreamBuffer->xTail = xNextTail;
+    }
+
+    return xDiscardedLength;
+}
+/*-----------------------------------------------------------*/
+
 size_t xStreamBufferReceive( StreamBufferHandle_t xStreamBuffer,
                              void * pvRxData,
                              size_t xBufferLengthBytes,
@@ -1069,10 +1106,13 @@ size_t xStreamBufferReceive( StreamBufferHandle_t xStreamBuffer,
 {
     StreamBuffer_t * const pxStreamBuffer = xStreamBuffer;
     size_t xReceivedLength = 0, xBytesAvailable, xBytesToStoreMessageLength;
+    const BaseType_t xDiscardMessage = ( ( pvRxData == NULL ) &&
+                                         ( xBufferLengthBytes == ( size_t ) 0 ) &&
+                                         ( xTicksToWait == ( TickType_t ) 0 ) ) ? pdTRUE : pdFALSE;
 
     traceENTER_xStreamBufferReceive( xStreamBuffer, pvRxData, xBufferLengthBytes, xTicksToWait );
 
-    configASSERT( pvRxData );
+    configASSERT( ( pvRxData != NULL ) || ( xDiscardMessage != pdFALSE ) );
     configASSERT( pxStreamBuffer );
 
     /* This receive function is used by both message buffers, which store
@@ -1153,7 +1193,17 @@ size_t xStreamBufferReceive( StreamBufferHandle_t xStreamBuffer,
      * read bytes from the buffer. */
     if( xBytesAvailable > xBytesToStoreMessageLength )
     {
-        xReceivedLength = prvReadMessageFromBuffer( pxStreamBuffer, pvRxData, xBufferLengthBytes, xBytesAvailable );
+        if( xDiscardMessage != pdFALSE )
+        {
+            if( ( pxStreamBuffer->ucFlags & sbFLAGS_IS_MESSAGE_BUFFER ) != ( uint8_t ) 0 )
+            {
+                xReceivedLength = prvDiscardMessageFromBuffer( pxStreamBuffer, xBytesAvailable );
+            }
+        }
+        else
+        {
+            xReceivedLength = prvReadMessageFromBuffer( pxStreamBuffer, pvRxData, xBufferLengthBytes, xBytesAvailable );
+        }
 
         /* Was a task waiting for space in the buffer? */
         if( xReceivedLength != ( size_t ) 0 )
