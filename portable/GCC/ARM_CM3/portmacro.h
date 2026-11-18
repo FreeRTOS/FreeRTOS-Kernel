@@ -120,7 +120,8 @@ extern void vPortExitCritical( void );
 #define portENABLE_INTERRUPTS()                   vPortSetBASEPRI( 0 )
 #define portENTER_CRITICAL()                      vPortEnterCritical()
 #define portEXIT_CRITICAL()                       vPortExitCritical()
-
+#define portBASE_TYPE_ENTER_CRITICAL()
+#define portBASE_TYPE_EXIT_CRITICAL()
 /*-----------------------------------------------------------*/
 
 /* Task function macros as described on the FreeRTOS.org WEB site.  These are
