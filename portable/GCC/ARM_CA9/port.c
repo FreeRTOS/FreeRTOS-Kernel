@@ -168,7 +168,8 @@ static void prvTaskExitError( void );
 
 /*
  * If the application provides an implementation of vApplicationIRQHandler(),
- * then it will get called directly without saving the FPU registers on
+ * then it will get called directly without saving the FPU registers
+ * when there is no FPU context to preserve on
  * interrupt entry, and this weak implementation of
  * vApplicationFPUSafeIRQHandler() is just provided to remove linkage errors -
  * it should never actually get called so its implementation contains a
@@ -179,11 +180,16 @@ static void prvTaskExitError( void );
  * vApplicationIRQHandler() provided in portASM.S will save the FPU registers
  * before calling it.
  *
- * Therefore, if the application writer wants FPU registers to be saved on
+ * Therefore, if the application writer wants FPU registers to always be saved on
  * interrupt entry their IRQ handler must be called
  * vApplicationFPUSafeIRQHandler(), and if the application writer does not want
  * FPU registers to be saved on interrupt entry their IRQ handler must be
  * called vApplicationIRQHandler().
+ * 
+ * Note that for ARM Cortex A9, the FPU might be used for memory operations,
+ * depending on the C library used for memcpy, memcmp or memset. For instance,
+ * glibc uses the FPU, hence always saving it might be preferable when using it.
+ * See https://freertos.org/Using-FreeRTOS-on-Cortex-A-Embedded-Processors#important-note-for-gcc-and-possibly-other-compiler-users
  */
 void vApplicationFPUSafeIRQHandler( uint32_t ulICCIAR ) __attribute__( ( weak ) );
 
