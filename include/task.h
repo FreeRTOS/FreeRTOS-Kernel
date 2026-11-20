@@ -3652,7 +3652,7 @@ void vTaskResetState( void ) PRIVILEGED_FUNCTION;
  * \ingroup GranularLocks
  */
 #if ( portUSING_GRANULAR_LOCKS == 1 )
-    #define taskDATA_GROUP_ENTER_CRITICAL_FROM_ISR( pxISRSpinlock, puxSavedInterruptStatus ) \
+    #define taskDATA_GROUP_ENTER_CRITICAL_FROM_ISR_INLINE( pxISRSpinlock, puxSavedInterruptStatus ) \
         do {                                                                                     \
             *( puxSavedInterruptStatus ) = portSET_INTERRUPT_MASK_FROM_ISR();                    \
             {                                                                                    \
@@ -3674,7 +3674,7 @@ void vTaskResetState( void ) PRIVILEGED_FUNCTION;
  * \ingroup GranularLocks
  */
 #if ( portUSING_GRANULAR_LOCKS == 1 )
-    #define taskDATA_GROUP_EXIT_CRITICAL( pxTaskSpinlock, pxISRSpinlock )            \
+    #define taskDATA_GROUP_EXIT_CRITICAL_INLINE( pxTaskSpinlock, pxISRSpinlock )            \
         do {                                                                             \
             const BaseType_t xCoreID = ( BaseType_t ) portGET_CORE_ID();                 \
             configASSERT( portGET_CRITICAL_NESTING_COUNT( xCoreID ) > 0U );              \
@@ -3707,7 +3707,7 @@ void vTaskResetState( void ) PRIVILEGED_FUNCTION;
  * \ingroup GranularLocks
  */
 #if ( portUSING_GRANULAR_LOCKS == 1 )
-    #define taskDATA_GROUP_EXIT_CRITICAL_FROM_ISR( uxSavedInterruptStatus, pxISRSpinlock ) \
+    #define taskDATA_GROUP_EXIT_CRITICAL_FROM_ISR_INLINE( uxSavedInterruptStatus, pxISRSpinlock ) \
         do {                                                                                   \
             const BaseType_t xCoreID = ( BaseType_t ) portGET_CORE_ID();                       \
             configASSERT( portGET_CRITICAL_NESTING_COUNT( xCoreID ) > 0U );                    \
@@ -3720,6 +3720,35 @@ void vTaskResetState( void ) PRIVILEGED_FUNCTION;
                 portCLEAR_INTERRUPT_MASK_FROM_ISR( uxSavedInterruptStatus );                   \
             }                                                                                  \
         } while( 0 )
+#endif /* #if ( portUSING_GRANULAR_LOCKS == 1 ) */
+
+/*
+ * The three data group critical section forms above are expanded at every call
+ * site. A port that sets portDATA_GROUP_CRITICAL_SECTIONS_AS_FUNCTIONS to 1 has
+ * them called as functions instead. The functions expand the same macros once in
+ * tasks.c, which trades one call per use for less code.
+ */
+#if ( portUSING_GRANULAR_LOCKS == 1 )
+    #if ( portDATA_GROUP_CRITICAL_SECTIONS_AS_FUNCTIONS == 1 )
+        UBaseType_t uxTaskDataGroupEnterCriticalFromISR( portSPINLOCK_TYPE * pxISRSpinlock );
+        void vTaskDataGroupExitCritical( portSPINLOCK_TYPE * pxTaskSpinlock,
+                                         portSPINLOCK_TYPE * pxISRSpinlock );
+        void vTaskDataGroupExitCriticalFromISR( UBaseType_t uxSavedInterruptStatus,
+                                                portSPINLOCK_TYPE * pxISRSpinlock );
+
+        #define taskDATA_GROUP_ENTER_CRITICAL_FROM_ISR( pxISRSpinlock, puxSavedInterruptStatus ) \
+            do {                                                                                     \
+                *( puxSavedInterruptStatus ) = uxTaskDataGroupEnterCriticalFromISR( ( portSPINLOCK_TYPE * ) ( pxISRSpinlock ) ); \
+            } while( 0 )
+        #define taskDATA_GROUP_EXIT_CRITICAL( pxTaskSpinlock, pxISRSpinlock ) \
+            vTaskDataGroupExitCritical( ( portSPINLOCK_TYPE * ) ( pxTaskSpinlock ), ( portSPINLOCK_TYPE * ) ( pxISRSpinlock ) )
+        #define taskDATA_GROUP_EXIT_CRITICAL_FROM_ISR( uxSavedInterruptStatus, pxISRSpinlock ) \
+            vTaskDataGroupExitCriticalFromISR( ( uxSavedInterruptStatus ), ( portSPINLOCK_TYPE * ) ( pxISRSpinlock ) )
+    #else /* #if ( portDATA_GROUP_CRITICAL_SECTIONS_AS_FUNCTIONS == 1 ) */
+        #define taskDATA_GROUP_ENTER_CRITICAL_FROM_ISR    taskDATA_GROUP_ENTER_CRITICAL_FROM_ISR_INLINE
+        #define taskDATA_GROUP_EXIT_CRITICAL              taskDATA_GROUP_EXIT_CRITICAL_INLINE
+        #define taskDATA_GROUP_EXIT_CRITICAL_FROM_ISR     taskDATA_GROUP_EXIT_CRITICAL_FROM_ISR_INLINE
+    #endif /* #if ( portDATA_GROUP_CRITICAL_SECTIONS_AS_FUNCTIONS == 1 ) */
 #endif /* #if ( portUSING_GRANULAR_LOCKS == 1 ) */
 
 /**

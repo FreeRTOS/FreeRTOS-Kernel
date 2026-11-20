@@ -3746,6 +3746,43 @@ STATIC void prvInitialiseNewTask( TaskFunction_t pxTaskCode,
         traceRETURN_vTaskDataGroupEnterCritical();
     }
 
+    #if ( portDATA_GROUP_CRITICAL_SECTIONS_AS_FUNCTIONS == 1 )
+
+        UBaseType_t uxTaskDataGroupEnterCriticalFromISR( portSPINLOCK_TYPE * pxISRSpinlock )
+        {
+            UBaseType_t uxSavedInterruptStatus;
+
+            traceENTER_uxTaskDataGroupEnterCriticalFromISR( pxISRSpinlock );
+
+            taskDATA_GROUP_ENTER_CRITICAL_FROM_ISR_INLINE( pxISRSpinlock, &uxSavedInterruptStatus );
+
+            traceRETURN_uxTaskDataGroupEnterCriticalFromISR( uxSavedInterruptStatus );
+
+            return uxSavedInterruptStatus;
+        }
+
+        void vTaskDataGroupExitCritical( portSPINLOCK_TYPE * pxTaskSpinlock,
+                                         portSPINLOCK_TYPE * pxISRSpinlock )
+        {
+            traceENTER_vTaskDataGroupExitCritical( pxTaskSpinlock, pxISRSpinlock );
+
+            taskDATA_GROUP_EXIT_CRITICAL_INLINE( pxTaskSpinlock, pxISRSpinlock );
+
+            traceRETURN_vTaskDataGroupExitCritical();
+        }
+
+        void vTaskDataGroupExitCriticalFromISR( UBaseType_t uxSavedInterruptStatus,
+                                                portSPINLOCK_TYPE * pxISRSpinlock )
+        {
+            traceENTER_vTaskDataGroupExitCriticalFromISR( uxSavedInterruptStatus, pxISRSpinlock );
+
+            taskDATA_GROUP_EXIT_CRITICAL_FROM_ISR_INLINE( uxSavedInterruptStatus, pxISRSpinlock );
+
+            traceRETURN_vTaskDataGroupExitCriticalFromISR();
+        }
+
+    #endif /* #if ( portDATA_GROUP_CRITICAL_SECTIONS_AS_FUNCTIONS == 1 ) */
+
     void vTaskDataGroupLock( portSPINLOCK_TYPE * pxTaskSpinlock )
     {
         BaseType_t xCoreID;

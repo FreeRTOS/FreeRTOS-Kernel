@@ -373,6 +373,10 @@
     #define portUSING_GRANULAR_LOCKS    0
 #endif
 
+#ifndef portDATA_GROUP_CRITICAL_SECTIONS_AS_FUNCTIONS
+    #define portDATA_GROUP_CRITICAL_SECTIONS_AS_FUNCTIONS    0
+#endif
+
 #ifndef configMAX_TASK_NAME_LEN
     #define configMAX_TASK_NAME_LEN    16
 #endif
@@ -1944,6 +1948,30 @@
 
 #ifndef traceRETURN_vTaskDataGroupEnterCritical
     #define traceRETURN_vTaskDataGroupEnterCritical()
+#endif
+
+#ifndef traceENTER_vTaskDataGroupExitCritical
+    #define traceENTER_vTaskDataGroupExitCritical( pxTaskSpinlock, pxISRSpinlock )
+#endif
+
+#ifndef traceRETURN_vTaskDataGroupExitCritical
+    #define traceRETURN_vTaskDataGroupExitCritical()
+#endif
+
+#ifndef traceENTER_uxTaskDataGroupEnterCriticalFromISR
+    #define traceENTER_uxTaskDataGroupEnterCriticalFromISR( pxISRSpinlock )
+#endif
+
+#ifndef traceRETURN_uxTaskDataGroupEnterCriticalFromISR
+    #define traceRETURN_uxTaskDataGroupEnterCriticalFromISR( uxSavedInterruptStatus )
+#endif
+
+#ifndef traceENTER_vTaskDataGroupExitCriticalFromISR
+    #define traceENTER_vTaskDataGroupExitCriticalFromISR( uxSavedInterruptStatus, pxISRSpinlock )
+#endif
+
+#ifndef traceRETURN_vTaskDataGroupExitCriticalFromISR
+    #define traceRETURN_vTaskDataGroupExitCriticalFromISR()
 #endif
 
 #ifndef traceENTER_vTaskDataGroupLock
