@@ -3612,6 +3612,9 @@ STATIC void prvInitialiseNewTask( TaskFunction_t pxTaskCode,
         }
     }
 
+/* With granular locks the fast enable path skips this function unless
+ * taskPREEMPTION_ENABLE_WOULD_ACT is true, so a new action taken here at a
+ * preemption count of zero has to be added there too. */
     void vTaskTCBExitCritical( void )
     {
         const BaseType_t xCoreID = ( BaseType_t ) portGET_CORE_ID();
@@ -3925,7 +3928,9 @@ STATIC void prvInitialiseNewTask( TaskFunction_t pxTaskCode,
 
 /* The part of xTaskPreemptionEnableWithYieldStatus() that runs while the count
  * is guarded. A macro, so the NULL handle path keeps its flags in registers
- * without relying on a compiler inline attribute. */
+ * without relying on a compiler inline attribute. With granular locks the fast
+ * enable path skips this macro unless taskPREEMPTION_ENABLE_WOULD_ACT is true, so
+ * a new action taken here at a count of zero has to be added there too. */
     #define taskPREEMPTION_COUNT_DECREMENT( pxTCB, xHasDeferredAction, xTaskRequestedToYield )                                \
         do {                                                                                                                       \
             configASSERT( ( pxTCB ) != NULL );                                                                                     \
@@ -4029,6 +4034,98 @@ STATIC void prvInitialiseNewTask( TaskFunction_t pxTaskCode,
         return uxResult;
     }
 
+    #if ( portUSING_GRANULAR_LOCKS == 1 )
+
+/* Whether enabling the preemption of the task running on xCoreID has more to do
+ * than the decrement once its count reaches zero. These are the conditions that
+ * taskPREEMPTION_COUNT_DECREMENT and vTaskTCBExitCritical() act on, a deferred
+ * state change and a pended yield for the core. A task marked
+ * taskTASK_SCHEDULED_TO_YIELD always has the yield of its core pended, and is
+ * included as well. The fast enable path declines whenever this is true, so a
+ * condition added to either of them has to be added here. Called with the TCB
+ * spinlock of the task held and interrupts masked. */
+        #define taskPREEMPTION_ENABLE_WOULD_ACT( pxTCB, xCoreID )        \
+            ( ( taskDEFERRED_STATE_CHANGE( pxTCB ) != 0U ) ||                    \
+              ( xYieldPendings[ ( xCoreID ) ] != pdFALSE ) ||                    \
+              ( ( pxTCB )->xTaskRunState == taskTASK_SCHEDULED_TO_YIELD ) )
+
+/* Raise the preemption count of the calling task under its TCB spinlock with
+ * interrupts masked, the protection the TCB critical section gives, without the
+ * rest of the TCB critical section. Returns pdFALSE without changing anything
+ * when the scheduler is not running, or when the calling task has been asked to
+ * yield and vTaskTCBEnterCritical() would service the yield before the count is
+ * raised. The caller then takes the TCB critical section path. */
+        static BaseType_t prvPreemptionDisableOwnFast( void )
+        {
+            BaseType_t xRaised = pdFALSE;
+
+            if( xSchedulerRunning != pdFALSE )
+            {
+                const UBaseType_t uxSavedInterruptStatus = portSET_INTERRUPT_MASK();
+                const BaseType_t xCoreID = ( BaseType_t ) portGET_CORE_ID();
+                TCB_t * const pxTCB = pxCurrentTCBs[ xCoreID ];
+
+                portGET_SPINLOCK( xCoreID, &( pxTCB->xTCBSpinlock ) );
+
+                /* The same test as the run state check in vTaskTCBEnterCritical(). */
+                if( ( pxTCB->uxPreemptionDisable != 0U ) ||
+                    ( portGET_CRITICAL_NESTING_COUNT( xCoreID ) != 0U ) ||
+                    ( pxTCB->xTaskRunState != taskTASK_SCHEDULED_TO_YIELD ) )
+                {
+                    pxTCB->uxPreemptionDisable++;
+                    xRaised = pdTRUE;
+                }
+                else
+                {
+                    mtCOVERAGE_TEST_MARKER();
+                }
+
+                portRELEASE_SPINLOCK( xCoreID, &( pxTCB->xTCBSpinlock ) );
+                portCLEAR_INTERRUPT_MASK( uxSavedInterruptStatus );
+            }
+
+            return xRaised;
+        }
+
+/* Lower the preemption count of the calling task under its TCB spinlock with
+ * interrupts masked. Returns pdFALSE without changing anything when the scheduler
+ * is not running, or when the count would reach zero with work to do (see
+ * taskPREEMPTION_ENABLE_WOULD_ACT). The caller then takes the TCB critical
+ * section path. */
+        static BaseType_t prvPreemptionEnableOwnFast( void )
+        {
+            BaseType_t xLowered = pdFALSE;
+
+            if( xSchedulerRunning != pdFALSE )
+            {
+                const UBaseType_t uxSavedInterruptStatus = portSET_INTERRUPT_MASK();
+                const BaseType_t xCoreID = ( BaseType_t ) portGET_CORE_ID();
+                TCB_t * const pxTCB = pxCurrentTCBs[ xCoreID ];
+
+                portGET_SPINLOCK( xCoreID, &( pxTCB->xTCBSpinlock ) );
+
+                configASSERT( pxTCB->uxPreemptionDisable > 0U );
+
+                if( ( pxTCB->uxPreemptionDisable > 1U ) ||
+                    ( !taskPREEMPTION_ENABLE_WOULD_ACT( pxTCB, xCoreID ) ) )
+                {
+                    pxTCB->uxPreemptionDisable--;
+                    xLowered = pdTRUE;
+                }
+                else
+                {
+                    mtCOVERAGE_TEST_MARKER();
+                }
+
+                portRELEASE_SPINLOCK( xCoreID, &( pxTCB->xTCBSpinlock ) );
+                portCLEAR_INTERRUPT_MASK( uxSavedInterruptStatus );
+            }
+
+            return xLowered;
+        }
+
+    #endif /* #if ( portUSING_GRANULAR_LOCKS == 1 ) */
+
     void vTaskPreemptionDisable( const TaskHandle_t xTask )
     {
         TCB_t * pxTCB;
@@ -4037,21 +4134,26 @@ STATIC void prvInitialiseNewTask( TaskFunction_t pxTaskCode,
 
         if( xTask == NULL )
         {
-            kernelTCB_ENTER_CRITICAL();
+            #if ( portUSING_GRANULAR_LOCKS == 1 )
+                if( prvPreemptionDisableOwnFast() == pdFALSE )
+            #endif
             {
-                if( xSchedulerRunning != pdFALSE )
+                kernelTCB_ENTER_CRITICAL();
                 {
-                    pxTCB = prvGetTCBFromHandle( xTask );
-                    configASSERT( pxTCB != NULL );
+                    if( xSchedulerRunning != pdFALSE )
+                    {
+                        pxTCB = prvGetTCBFromHandle( xTask );
+                        configASSERT( pxTCB != NULL );
 
-                    pxTCB->uxPreemptionDisable++;
+                        pxTCB->uxPreemptionDisable++;
+                    }
+                    else
+                    {
+                        mtCOVERAGE_TEST_MARKER();
+                    }
                 }
-                else
-                {
-                    mtCOVERAGE_TEST_MARKER();
-                }
+                kernelTCB_EXIT_CRITICAL();
             }
-            kernelTCB_EXIT_CRITICAL();
         }
         else
         {
@@ -4077,21 +4179,26 @@ STATIC void prvInitialiseNewTask( TaskFunction_t pxTaskCode,
 
         if( xTask == NULL )
         {
-            kernelTCB_ENTER_CRITICAL();
+            #if ( portUSING_GRANULAR_LOCKS == 1 )
+                if( prvPreemptionEnableOwnFast() == pdFALSE )
+            #endif
             {
-                if( xSchedulerRunning != pdFALSE )
+                kernelTCB_ENTER_CRITICAL();
                 {
-                    /* Current task running on the core can not be changed by other core.
-                    * Get TCB from handle is safe to call within TCB critical section. */
-                    pxTCB = prvGetTCBFromHandle( xTask );
-                    taskPREEMPTION_COUNT_DECREMENT( pxTCB, xHasDeferredAction, xTaskRequestedToYield );
+                    if( xSchedulerRunning != pdFALSE )
+                    {
+                        /* Current task running on the core can not be changed by other core.
+                        * Get TCB from handle is safe to call within TCB critical section. */
+                        pxTCB = prvGetTCBFromHandle( xTask );
+                        taskPREEMPTION_COUNT_DECREMENT( pxTCB, xHasDeferredAction, xTaskRequestedToYield );
+                    }
+                    else
+                    {
+                        mtCOVERAGE_TEST_MARKER();
+                    }
                 }
-                else
-                {
-                    mtCOVERAGE_TEST_MARKER();
-                }
+                kernelTCB_EXIT_CRITICAL();
             }
-            kernelTCB_EXIT_CRITICAL();
         }
         else
         {
