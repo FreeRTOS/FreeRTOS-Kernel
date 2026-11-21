@@ -107,9 +107,13 @@ static sigset_t xAllSignals;
 static sigset_t xSchedulerOriginalSignalMask;
 static pthread_t hMainThread = ( pthread_t ) NULL;
 static volatile BaseType_t uxCriticalNesting;
+
+/* xSchedulerEnd and xTimerTickThreadShouldRun are written by one thread and
+ * read by another. Use the GCC/Clang atomic builtins so that the accesses are
+ * not data races under the C11 memory model. */
 static BaseType_t xSchedulerEnd = pdFALSE;
 static pthread_t hTimerTickThread;
-static bool xTimerTickThreadShouldRun;
+static BaseType_t xTimerTickThreadShouldRun = pdFALSE;
 static uint64_t prvStartTimeNs;
 static pthread_key_t xThreadKey = 0;
 /*-----------------------------------------------------------*/
@@ -292,7 +296,7 @@ BaseType_t xPortStartScheduler( void )
     vPortStartFirstTask();
 
     /* Wait until signaled by vPortEndScheduler(). */
-    while( xSchedulerEnd != pdTRUE )
+    while( __atomic_load_n( &xSchedulerEnd, __ATOMIC_ACQUIRE ) != pdTRUE )
     {
         sigwait( &xSignals, &iSignal );
     }
@@ -301,7 +305,7 @@ BaseType_t xPortStartScheduler( void )
      * clear out the variable that is used to end the scheduler, otherwise
      * subsequent scheduler restarts will end immediately.
      */
-    xSchedulerEnd = pdFALSE;
+    __atomic_store_n( &xSchedulerEnd, pdFALSE, __ATOMIC_RELEASE );
 
     /* Reset pthread_once_t, needed to restart the scheduler again.
      * memset the internal struct members for MacOS/Linux Compatibility */
@@ -328,7 +332,7 @@ void vPortEndScheduler( void )
     BaseType_t xIsFreeRTOSThread;
 
     /* Stop the timer tick thread. */
-    xTimerTickThreadShouldRun = false;
+    __atomic_store_n( &xTimerTickThreadShouldRun, pdFALSE, __ATOMIC_RELEASE );
     pthread_join( hTimerTickThread, NULL );
 
     /* Check whether the current thread is a FreeRTOS thread.
@@ -337,7 +341,7 @@ void vPortEndScheduler( void )
     xIsFreeRTOSThread = prvIsFreeRTOSThread();
 
     /* Signal the scheduler to exit its loop. */
-    xSchedulerEnd = pdTRUE;
+    __atomic_store_n( &xSchedulerEnd, pdTRUE, __ATOMIC_RELEASE );
     ( void ) pthread_kill( hMainThread, SIG_RESUME );
 
     /* Waiting to be deleted here. */
@@ -457,7 +461,7 @@ static void * prvTimerTickHandler( void * arg )
 
     prvPortSetCurrentThreadName( "Scheduler timer" );
 
-    while( xTimerTickThreadShouldRun )
+    while( __atomic_load_n( &xTimerTickThreadShouldRun, __ATOMIC_ACQUIRE ) != pdFALSE )
     {
         /*
          * signal to the active task to cause tick handling or
@@ -478,7 +482,7 @@ static void * prvTimerTickHandler( void * arg )
  */
 void prvSetupTimerInterrupt( void )
 {
-    xTimerTickThreadShouldRun = true;
+    __atomic_store_n( &xTimerTickThreadShouldRun, pdTRUE, __ATOMIC_RELEASE );
     pthread_create( &hTimerTickThread, NULL, prvTimerTickHandler, NULL );
 
     prvStartTimeNs = prvGetTimeNs();
