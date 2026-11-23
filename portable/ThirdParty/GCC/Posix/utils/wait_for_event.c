@@ -69,6 +69,12 @@ void event_delete( struct event * ev )
 }
 /*-----------------------------------------------------------*/
 
+static void event_unlock_mutex( void * mutex )
+{
+    pthread_mutex_unlock( mutex );
+}
+/*-----------------------------------------------------------*/
+
 bool event_wait( struct event * ev )
 {
     if( pthread_mutex_lock( &ev->mutex ) == EOWNERDEAD )
@@ -79,13 +85,16 @@ bool event_wait( struct event * ev )
         #endif
     }
 
+    pthread_cleanup_push( event_unlock_mutex, &ev->mutex );
+
     while( ev->event_triggered == false )
     {
         pthread_cond_wait( &ev->cond, &ev->mutex );
     }
 
     ev->event_triggered = false;
-    pthread_mutex_unlock( &ev->mutex );
+    pthread_cleanup_pop( 1 );
+
     return true;
 }
 /*-----------------------------------------------------------*/
