@@ -519,18 +519,18 @@
 #endif /* #if ( portUSING_GRANULAR_LOCKS == 1 ) */
 
 /*
- * Helper macros that pick the appropriate critical-section primitive based on
- * the number of cores configured.  On SMP builds, multi-core access requires
- * the kernel data-group lock; on single-core builds, the lighter
- * port-provided primitive is sufficient.
+ * Macros to mark the start and end of a critical code region that only reads a
+ * single BaseType_t sized task member. Ports that can read such a member
+ * atomically define portBASE_TYPE_ENTER_CRITICAL() away, so that path must be
+ * preserved wherever the kernel critical section is not required.
  */
-#if ( configNUMBER_OF_CORES > 1 )
+#if ( ( portUSING_GRANULAR_LOCKS == 1 ) && ( configNUMBER_OF_CORES > 1 ) )
     #define taskBASE_TYPE_ENTER_CRITICAL()    kernelENTER_CRITICAL()
     #define taskBASE_TYPE_EXIT_CRITICAL()     kernelEXIT_CRITICAL()
-#else /* #if ( configNUMBER_OF_CORES > 1 ) */
+#else
     #define taskBASE_TYPE_ENTER_CRITICAL()    portBASE_TYPE_ENTER_CRITICAL()
     #define taskBASE_TYPE_EXIT_CRITICAL()     portBASE_TYPE_EXIT_CRITICAL()
-#endif /* #if ( configNUMBER_OF_CORES > 1 ) */
+#endif /* #if ( ( portUSING_GRANULAR_LOCKS == 1 ) && ( configNUMBER_OF_CORES > 1 ) ) */
 
 /*-----------------------------------------------------------*/
 

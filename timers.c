@@ -106,13 +106,13 @@
  * atomically define portBASE_TYPE_ENTER_CRITICAL() away, so that path must be
  * preserved wherever a data group critical section is not required.
  */
-    #if ( configNUMBER_OF_CORES > 1 )
+    #if ( ( portUSING_GRANULAR_LOCKS == 1 ) && ( configNUMBER_OF_CORES > 1 ) )
         #define tmrBASE_TYPE_ENTER_CRITICAL()    tmrENTER_CRITICAL()
         #define tmrBASE_TYPE_EXIT_CRITICAL()     tmrEXIT_CRITICAL()
     #else
         #define tmrBASE_TYPE_ENTER_CRITICAL()    portBASE_TYPE_ENTER_CRITICAL()
         #define tmrBASE_TYPE_EXIT_CRITICAL()     portBASE_TYPE_EXIT_CRITICAL()
-    #endif /* #if ( configNUMBER_OF_CORES > 1 ) */
+    #endif /* #if ( ( portUSING_GRANULAR_LOCKS == 1 ) && ( configNUMBER_OF_CORES > 1 ) ) */
 
 /* The definition of the timers themselves. */
     typedef struct tmrTimerControl                                               /* The old naming convention is used to prevent breaking kernel aware debuggers. */
