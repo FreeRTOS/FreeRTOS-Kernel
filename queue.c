@@ -296,16 +296,17 @@ static void prvInitialiseNewQueue( const UBaseType_t uxQueueLength,
 /*
  * Macros to mark the start and end of a critical code region that only reads a
  * single BaseType_t sized queue member. Ports that can read such a member
- * atomically define portBASE_TYPE_ENTER_CRITICAL() away, so that path must be
- * preserved wherever a data group critical section is not required.
+ * atomically define portBASE_TYPE_ENTER_CRITICAL() away, and their definition
+ * is kept with granular locks too. Only the default section, which takes the
+ * kernel lock, is replaced by the data group critical section.
  */
-#if ( ( portUSING_GRANULAR_LOCKS == 1 ) && ( configNUMBER_OF_CORES > 1 ) )
+#if ( ( portUSING_GRANULAR_LOCKS == 1 ) && ( configNUMBER_OF_CORES > 1 ) && ( portBASE_TYPE_CRITICAL_IS_DEFAULT == 1 ) )
     #define queueBASE_TYPE_ENTER_CRITICAL( pxQueue )    queueENTER_CRITICAL( pxQueue )
     #define queueBASE_TYPE_EXIT_CRITICAL( pxQueue )     queueEXIT_CRITICAL( pxQueue )
 #else
     #define queueBASE_TYPE_ENTER_CRITICAL( pxQueue )    portBASE_TYPE_ENTER_CRITICAL()
     #define queueBASE_TYPE_EXIT_CRITICAL( pxQueue )     portBASE_TYPE_EXIT_CRITICAL()
-#endif /* #if ( ( portUSING_GRANULAR_LOCKS == 1 ) && ( configNUMBER_OF_CORES > 1 ) ) */
+#endif /* #if ( ( portUSING_GRANULAR_LOCKS == 1 ) && ( configNUMBER_OF_CORES > 1 ) && ( portBASE_TYPE_CRITICAL_IS_DEFAULT == 1 ) ) */
 
 /*
  * Macro to mark a queue as locked.  Locking a queue prevents an ISR from

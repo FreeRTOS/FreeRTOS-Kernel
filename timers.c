@@ -103,16 +103,17 @@
 /*
  * Macros to mark the start and end of a critical code region that only reads a
  * single BaseType_t sized timer member. Ports that can read such a member
- * atomically define portBASE_TYPE_ENTER_CRITICAL() away, so that path must be
- * preserved wherever a data group critical section is not required.
+ * atomically define portBASE_TYPE_ENTER_CRITICAL() away, and their definition
+ * is kept with granular locks too. Only the default section, which takes the
+ * kernel lock, is replaced by the data group critical section.
  */
-    #if ( ( portUSING_GRANULAR_LOCKS == 1 ) && ( configNUMBER_OF_CORES > 1 ) )
+    #if ( ( portUSING_GRANULAR_LOCKS == 1 ) && ( configNUMBER_OF_CORES > 1 ) && ( portBASE_TYPE_CRITICAL_IS_DEFAULT == 1 ) )
         #define tmrBASE_TYPE_ENTER_CRITICAL()    tmrENTER_CRITICAL()
         #define tmrBASE_TYPE_EXIT_CRITICAL()     tmrEXIT_CRITICAL()
     #else
         #define tmrBASE_TYPE_ENTER_CRITICAL()    portBASE_TYPE_ENTER_CRITICAL()
         #define tmrBASE_TYPE_EXIT_CRITICAL()     portBASE_TYPE_EXIT_CRITICAL()
-    #endif /* #if ( ( portUSING_GRANULAR_LOCKS == 1 ) && ( configNUMBER_OF_CORES > 1 ) ) */
+    #endif /* #if ( ( portUSING_GRANULAR_LOCKS == 1 ) && ( configNUMBER_OF_CORES > 1 ) && ( portBASE_TYPE_CRITICAL_IS_DEFAULT == 1 ) ) */
 
 /* The definition of the timers themselves. */
     typedef struct tmrTimerControl                                               /* The old naming convention is used to prevent breaking kernel aware debuggers. */
