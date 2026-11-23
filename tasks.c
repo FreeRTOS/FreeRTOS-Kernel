@@ -8381,13 +8381,12 @@ STATIC void prvResetNextTaskUnblockTime( void )
 
         traceENTER_xTaskPriorityDisinherit( pxMutexHolder );
 
-        #if ( ( portUSING_GRANULAR_LOCKS == 1 ) && ( configNUMBER_OF_CORES > 1 ) )
-            /* Lock the kernel data group as we are about to access its members */
-            kernelENTER_CRITICAL();
-        #endif /* #if ( ( portUSING_GRANULAR_LOCKS == 1 ) && ( configNUMBER_OF_CORES > 1 ) ) */
-
         if( pxMutexHolder != NULL )
         {
+            #if ( ( portUSING_GRANULAR_LOCKS == 1 ) && ( configNUMBER_OF_CORES > 1 ) )
+                BaseType_t xKernelLocked = pdFALSE;
+            #endif
+
             /* A task can only have an inherited priority if it holds the mutex.
              * If the mutex is held by a task then it cannot be given from an
              * interrupt, and if a mutex is given by the holding task then it must
@@ -8395,6 +8394,24 @@ STATIC void prvResetNextTaskUnblockTime( void )
             configASSERT( pxTCB == pxCurrentTCB );
             configASSERT( pxTCB->uxMutexesHeld );
             ( pxTCB->uxMutexesHeld )--;
+
+            #if ( ( portUSING_GRANULAR_LOCKS == 1 ) && ( configNUMBER_OF_CORES > 1 ) )
+                {
+                    /* The caller holds the mutex's queue critical section, and only
+                     * the holder writes its own uxMutexesHeld, so the decrement above
+                     * needs no kernel lock. The kernel lock is needed only to move
+                     * the holder's list items when it has inherited a priority. A
+                     * priority read as not inherited here is either the final state
+                     * or one in which the holder still holds another mutex, and then
+                     * there is nothing to disinherit either. A priority read as
+                     * inherited is read again below with the kernel lock held. */
+                    if( pxTCB->uxPriority != pxTCB->uxBasePriority )
+                    {
+                        kernelENTER_CRITICAL();
+                        xKernelLocked = pdTRUE;
+                    }
+                }
+            #endif /* #if ( ( portUSING_GRANULAR_LOCKS == 1 ) && ( configNUMBER_OF_CORES > 1 ) ) */
 
             /* Has the holder of the mutex inherited the priority of another
              * task? */
@@ -8457,16 +8474,19 @@ STATIC void prvResetNextTaskUnblockTime( void )
             {
                 mtCOVERAGE_TEST_MARKER();
             }
+
+            #if ( ( portUSING_GRANULAR_LOCKS == 1 ) && ( configNUMBER_OF_CORES > 1 ) )
+                if( xKernelLocked != pdFALSE )
+                {
+                    /* We are done accessing the kernel data group. Unlock it. */
+                    kernelEXIT_CRITICAL();
+                }
+            #endif /* #if ( ( portUSING_GRANULAR_LOCKS == 1 ) && ( configNUMBER_OF_CORES > 1 ) ) */
         }
         else
         {
             mtCOVERAGE_TEST_MARKER();
         }
-
-        #if ( ( portUSING_GRANULAR_LOCKS == 1 ) && ( configNUMBER_OF_CORES > 1 ) )
-            /* We are done accessing the kernel data group. Unlock it. */
-            kernelEXIT_CRITICAL();
-        #endif /* #if ( ( portUSING_GRANULAR_LOCKS == 1 ) && ( configNUMBER_OF_CORES > 1 ) ) */
 
         traceRETURN_xTaskPriorityDisinherit( xReturn );
 
@@ -9450,11 +9470,11 @@ TickType_t uxTaskResetEventItemValue( void )
 
         traceENTER_pvTaskIncrementMutexHeldCount();
 
-        #if ( ( portUSING_GRANULAR_LOCKS == 1 ) && ( configNUMBER_OF_CORES > 1 ) )
-            /* Lock the kernel data group as we are about to access its members */
-            kernelENTER_CRITICAL();
-        #endif /* #if ( ( portUSING_GRANULAR_LOCKS == 1 ) && ( configNUMBER_OF_CORES > 1 ) ) */
-
+        /* With granular locks the caller holds the mutex's queue critical
+         * section, so interrupts are masked and the task cannot move to another
+         * core between reading pxCurrentTCB and the increment. Only the task
+         * itself writes its uxMutexesHeld, so the increment needs no kernel
+         * lock. */
         pxTCB = pxCurrentTCB;
 
         /* If xSemaphoreCreateMutex() is called before any tasks have been created
@@ -9463,11 +9483,6 @@ TickType_t uxTaskResetEventItemValue( void )
         {
             ( pxTCB->uxMutexesHeld )++;
         }
-
-        #if ( ( portUSING_GRANULAR_LOCKS == 1 ) && ( configNUMBER_OF_CORES > 1 ) )
-            /* We are done accessing the kernel data group. Unlock it. */
-            kernelEXIT_CRITICAL();
-        #endif /* #if ( ( portUSING_GRANULAR_LOCKS == 1 ) && ( configNUMBER_OF_CORES > 1 ) ) */
 
         traceRETURN_pvTaskIncrementMutexHeldCount( pxTCB );
 
