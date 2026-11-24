@@ -284,17 +284,17 @@ typedef struct xLIST
  */
 #if ( configNUMBER_OF_CORES == 1 )
     #define listGET_OWNER_OF_NEXT_ENTRY( pxTCB, pxList )                                       \
-    do {                                                                                       \
-        List_t * const pxConstList = ( pxList );                                               \
-        /* Increment the index to the next item and return the item, ensuring */               \
-        /* we don't return the marker used at the end of the list.  */                         \
-        ( pxConstList )->pxIndex = ( pxConstList )->pxIndex->pxNext;                           \
-        if( ( void * ) ( pxConstList )->pxIndex == ( void * ) &( ( pxConstList )->xListEnd ) ) \
-        {                                                                                      \
-            ( pxConstList )->pxIndex = ( pxConstList )->xListEnd.pxNext;                       \
-        }                                                                                      \
-        ( pxTCB ) = ( pxConstList )->pxIndex->pvOwner;                                         \
-    } while( 0 )
+        do {                                                                                       \
+            List_t * const pxConstList = ( pxList );                                               \
+            /* Increment the index to the next item and return the item, ensuring */               \
+            /* we don't return the marker used at the end of the list.  */                         \
+            ( pxConstList )->pxIndex = ( pxConstList )->pxIndex->pxNext;                           \
+            if( ( void * ) ( pxConstList )->pxIndex == ( void * ) &( ( pxConstList )->xListEnd ) ) \
+            {                                                                                      \
+                ( pxConstList )->pxIndex = ( pxConstList )->xListEnd.pxNext;                       \
+            }                                                                                      \
+            ( pxTCB ) = ( pxConstList )->pxIndex->pvOwner;                                         \
+        } while( 0 )
 #else /* #if ( configNUMBER_OF_CORES == 1 ) */
 
 /* This function is not required in SMP. FreeRTOS SMP scheduler doesn't use

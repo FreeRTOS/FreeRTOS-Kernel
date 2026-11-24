@@ -257,10 +257,10 @@ void vCoRoutineSchedule( void );
  */
 #define crSET_STATE0( xHandle )                                       \
     ( ( CRCB_t * ) ( xHandle ) )->uxState = ( __LINE__ * 2 ); return; \
-    case ( __LINE__ * 2 ):
+        case ( __LINE__ * 2 ):
 #define crSET_STATE1( xHandle )                                               \
     ( ( CRCB_t * ) ( xHandle ) )->uxState = ( ( __LINE__ * 2 ) + 1 ); return; \
-    case ( ( __LINE__ * 2 ) + 1 ):
+        case ( ( __LINE__ * 2 ) + 1 ):
 
 /**
  * croutine. h
