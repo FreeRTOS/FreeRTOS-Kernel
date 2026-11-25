@@ -22,7 +22,7 @@ jobs:
     - name: Setup Python
       uses: actions/setup-python@master
       with:
-        python-version: 3.8
+        python-version: '3.15'
 
     - name: Install packages
       run: |
