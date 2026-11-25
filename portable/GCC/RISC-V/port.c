@@ -97,6 +97,12 @@ volatile uint64_t * pullMachineTimerCompareRegister = NULL;
 size_t xCriticalNesting = ( size_t ) 0xaaaaaaaa;
 size_t * pxCriticalNesting = &xCriticalNesting;
 
+/*
+ * Counts the interrupt nesting depth.
+ */
+size_t xInterruptNesting = 0;
+size_t * pxInterruptNesting = &xInterruptNesting;
+
 /* Used to catch tasks that attempt to return from their implementing function. */
 size_t xTaskReturnAddress = ( size_t ) portTASK_RETURN_ADDRESS;
 
@@ -203,5 +209,11 @@ void vPortEndScheduler( void )
     for( ; ; )
     {
     }
+}
+/*-----------------------------------------------------------*/
+
+BaseType_t xPortIsInsideInterrupt( void )
+{
+  return ( xInterruptNesting == 0 ) ? pdFALSE : pdTRUE;
 }
 /*-----------------------------------------------------------*/
