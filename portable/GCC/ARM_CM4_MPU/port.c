@@ -105,6 +105,7 @@ typedef void ( * portISR_t )( void );
 #define portMPU_REGION_ENABLE                     ( 0x01UL )
 #define portPERIPHERALS_START_ADDRESS             0x40000000UL
 #define portPERIPHERALS_END_ADDRESS               0x5FFFFFFFUL
+#define portMPU_RBAR_ADDRESS_MASK                 0xFFFFFFE0
 
 /* Constants required to access and manipulate the SysTick and other FreeRTOS
  * interrupts. */
@@ -1282,7 +1283,7 @@ static void prvSetupMPU( void )
     if( portMPU_TYPE_REG == portEXPECTED_MPU_TYPE_VALUE )
     {
         /* First setup the unprivileged flash for unprivileged read only access. */
-        portMPU_REGION_BASE_ADDRESS_REG = ( ( uint32_t ) __FLASH_segment_start__ ) | /* Base address. */
+        portMPU_REGION_BASE_ADDRESS_REG = ( ( ( uint32_t ) __FLASH_segment_start__ ) & portMPU_RBAR_ADDRESS_MASK ) | /* Base address. */
                                           ( portMPU_REGION_VALID ) |
                                           ( portUNPRIVILEGED_FLASH_REGION );
 
@@ -1293,7 +1294,7 @@ static void prvSetupMPU( void )
 
         /* Setup the privileged flash for privileged only access.  This is where
          * the kernel code is placed. */
-        portMPU_REGION_BASE_ADDRESS_REG = ( ( uint32_t ) __privileged_functions_start__ ) | /* Base address. */
+        portMPU_REGION_BASE_ADDRESS_REG = ( ( ( uint32_t ) __privileged_functions_start__ ) & portMPU_RBAR_ADDRESS_MASK ) | /* Base address. */
                                           ( portMPU_REGION_VALID ) |
                                           ( portPRIVILEGED_FLASH_REGION );
 
@@ -1304,7 +1305,7 @@ static void prvSetupMPU( void )
 
         /* Setup the privileged data RAM region.  This is where the kernel data
          * is placed. */
-        portMPU_REGION_BASE_ADDRESS_REG = ( ( uint32_t ) __privileged_data_start__ ) | /* Base address. */
+        portMPU_REGION_BASE_ADDRESS_REG = ( ( ( uint32_t ) __privileged_data_start__ ) & portMPU_RBAR_ADDRESS_MASK ) | /* Base address. */
                                           ( portMPU_REGION_VALID ) |
                                           ( portPRIVILEGED_RAM_REGION );
 
@@ -1316,7 +1317,7 @@ static void prvSetupMPU( void )
 
         /* By default allow everything to access the general peripherals.  The
          * system peripherals and registers are protected. */
-        portMPU_REGION_BASE_ADDRESS_REG = ( portPERIPHERALS_START_ADDRESS ) |
+        portMPU_REGION_BASE_ADDRESS_REG = ( portPERIPHERALS_START_ADDRESS & portMPU_RBAR_ADDRESS_MASK ) |
                                           ( portMPU_REGION_VALID ) |
                                           ( portGENERAL_PERIPHERALS_REGION );
 
@@ -1426,7 +1427,7 @@ void vPortStoreTaskMPUSettings( xMPU_SETTINGS * xMPUSettings,
     {
         /* No MPU regions are specified so allow access to all RAM. */
         xMPUSettings->xRegion[ 0 ].ulRegionBaseAddress =
-            ( ( uint32_t ) __SRAM_segment_start__ ) | /* Base address. */
+            ( ( ( uint32_t ) __SRAM_segment_start__ ) & portMPU_RBAR_ADDRESS_MASK ) | /* Base address. */
             ( portMPU_REGION_VALID ) |
             ( portSTACK_REGION );                     /* Region number. */
 
@@ -1462,7 +1463,7 @@ void vPortStoreTaskMPUSettings( xMPU_SETTINGS * xMPUSettings,
         {
             /* Define the region that allows access to the stack. */
             xMPUSettings->xRegion[ 0 ].ulRegionBaseAddress =
-                ( ( uint32_t ) pxBottomOfStack ) |
+                ( ( ( uint32_t ) pxBottomOfStack & portMPU_RBAR_ADDRESS_MASK ) ) |
                 ( portMPU_REGION_VALID ) |
                 ( portSTACK_REGION ); /* Region number. */
 
@@ -1490,7 +1491,7 @@ void vPortStoreTaskMPUSettings( xMPU_SETTINGS * xMPUSettings,
                  * xRegions into the CM4 specific MPU settings that are then
                  * stored in xMPUSettings. */
                 xMPUSettings->xRegion[ ul ].ulRegionBaseAddress =
-                    ( ( uint32_t ) xRegions[ lIndex ].pvBaseAddress ) |
+                    ( ( ( uint32_t ) xRegions[ lIndex ].pvBaseAddress ) & portMPU_RBAR_ADDRESS_MASK ) |
                     ( portMPU_REGION_VALID ) |
                     ( ul - 1UL ); /* Region number. */
 
