@@ -71,10 +71,10 @@
 
 /* Nested interrupt scheme is supported in this port. */
     #define ATOMIC_ENTER_CRITICAL() \
-    UBaseType_t uxCriticalSectionType = portSET_INTERRUPT_MASK_FROM_ISR()
+        UBaseType_t uxCriticalSectionType = portSET_INTERRUPT_MASK_FROM_ISR()
 
     #define ATOMIC_EXIT_CRITICAL() \
-    portCLEAR_INTERRUPT_MASK_FROM_ISR( uxCriticalSectionType )
+        portCLEAR_INTERRUPT_MASK_FROM_ISR( uxCriticalSectionType )
 
 #else
 

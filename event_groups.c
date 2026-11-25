@@ -93,13 +93,13 @@
             configASSERT( pxEventGroupBuffer );
 
             #if ( configASSERT_DEFINED == 1 )
-            {
-                /* Sanity check that the size of the structure used to declare a
-                 * variable of type StaticEventGroup_t equals the size of the real
-                 * event group structure. */
-                volatile size_t xSize = sizeof( StaticEventGroup_t );
-                configASSERT( xSize == sizeof( EventGroup_t ) );
-            }
+                {
+                    /* Sanity check that the size of the structure used to declare a
+                     * variable of type StaticEventGroup_t equals the size of the real
+                     * event group structure. */
+                    volatile size_t xSize = sizeof( StaticEventGroup_t );
+                    configASSERT( xSize == sizeof( EventGroup_t ) );
+                }
             #endif /* configASSERT_DEFINED */
 
             /* The user has provided a statically allocated event group - use it. */
@@ -114,12 +114,12 @@
                 vListInitialise( &( pxEventBits->xTasksWaitingForBits ) );
 
                 #if ( configSUPPORT_DYNAMIC_ALLOCATION == 1 )
-                {
-                    /* Both static and dynamic allocation can be used, so note that
-                     * this event group was created statically in case the event group
-                     * is later deleted. */
-                    pxEventBits->ucStaticallyAllocated = pdTRUE;
-                }
+                    {
+                        /* Both static and dynamic allocation can be used, so note that
+                         * this event group was created statically in case the event group
+                         * is later deleted. */
+                        pxEventBits->ucStaticallyAllocated = pdTRUE;
+                    }
                 #endif /* configSUPPORT_DYNAMIC_ALLOCATION */
 
                 traceEVENT_GROUP_CREATE( pxEventBits );
@@ -159,12 +159,12 @@
                 vListInitialise( &( pxEventBits->xTasksWaitingForBits ) );
 
                 #if ( configSUPPORT_STATIC_ALLOCATION == 1 )
-                {
-                    /* Both static and dynamic allocation can be used, so note this
-                     * event group was allocated statically in case the event group is
-                     * later deleted. */
-                    pxEventBits->ucStaticallyAllocated = pdFALSE;
-                }
+                    {
+                        /* Both static and dynamic allocation can be used, so note this
+                         * event group was allocated statically in case the event group is
+                         * later deleted. */
+                        pxEventBits->ucStaticallyAllocated = pdFALSE;
+                    }
                 #endif /* configSUPPORT_STATIC_ALLOCATION */
 
                 traceEVENT_GROUP_CREATE( pxEventBits );
@@ -197,9 +197,9 @@
         configASSERT( ( uxBitsToWaitFor & eventEVENT_BITS_CONTROL_BYTES ) == 0 );
         configASSERT( uxBitsToWaitFor != 0 );
         #if ( ( INCLUDE_xTaskGetSchedulerState == 1 ) || ( configUSE_TIMERS == 1 ) )
-        {
-            configASSERT( !( ( xTaskGetSchedulerState() == taskSCHEDULER_SUSPENDED ) && ( xTicksToWait != 0 ) ) );
-        }
+            {
+                configASSERT( !( ( xTaskGetSchedulerState() == taskSCHEDULER_SUSPENDED ) && ( xTicksToWait != 0 ) ) );
+            }
         #endif
 
         vTaskSuspendAll();
@@ -328,9 +328,9 @@
         configASSERT( ( uxBitsToWaitFor & eventEVENT_BITS_CONTROL_BYTES ) == 0 );
         configASSERT( uxBitsToWaitFor != 0 );
         #if ( ( INCLUDE_xTaskGetSchedulerState == 1 ) || ( configUSE_TIMERS == 1 ) )
-        {
-            configASSERT( !( ( xTaskGetSchedulerState() == taskSCHEDULER_SUSPENDED ) && ( xTicksToWait != 0 ) ) );
-        }
+            {
+                configASSERT( !( ( xTaskGetSchedulerState() == taskSCHEDULER_SUSPENDED ) && ( xTicksToWait != 0 ) ) );
+            }
         #endif
 
         vTaskSuspendAll();
@@ -673,24 +673,24 @@
         ( void ) xTaskResumeAll();
 
         #if ( ( configSUPPORT_DYNAMIC_ALLOCATION == 1 ) && ( configSUPPORT_STATIC_ALLOCATION == 0 ) )
-        {
-            /* The event group can only have been allocated dynamically - free
-             * it again. */
-            vPortFree( pxEventBits );
-        }
-        #elif ( ( configSUPPORT_DYNAMIC_ALLOCATION == 1 ) && ( configSUPPORT_STATIC_ALLOCATION == 1 ) )
-        {
-            /* The event group could have been allocated statically or
-             * dynamically, so check before attempting to free the memory. */
-            if( pxEventBits->ucStaticallyAllocated == ( uint8_t ) pdFALSE )
             {
+                /* The event group can only have been allocated dynamically - free
+                 * it again. */
                 vPortFree( pxEventBits );
             }
-            else
+        #elif ( ( configSUPPORT_DYNAMIC_ALLOCATION == 1 ) && ( configSUPPORT_STATIC_ALLOCATION == 1 ) )
             {
-                mtCOVERAGE_TEST_MARKER();
+                /* The event group could have been allocated statically or
+                 * dynamically, so check before attempting to free the memory. */
+                if( pxEventBits->ucStaticallyAllocated == ( uint8_t ) pdFALSE )
+                {
+                    vPortFree( pxEventBits );
+                }
+                else
+                {
+                    mtCOVERAGE_TEST_MARKER();
+                }
             }
-        }
         #endif /* configSUPPORT_DYNAMIC_ALLOCATION */
 
         traceRETURN_vEventGroupDelete();
@@ -710,30 +710,30 @@
             configASSERT( ppxEventGroupBuffer );
 
             #if ( configSUPPORT_DYNAMIC_ALLOCATION == 1 )
-            {
-                /* Check if the event group was statically allocated. */
-                if( pxEventBits->ucStaticallyAllocated == ( uint8_t ) pdTRUE )
                 {
+                    /* Check if the event group was statically allocated. */
+                    if( pxEventBits->ucStaticallyAllocated == ( uint8_t ) pdTRUE )
+                    {
+                        /* MISRA Ref 11.3.1 [Misaligned access] */
+                        /* More details at: https://github.com/FreeRTOS/FreeRTOS-Kernel/blob/main/MISRA.md#rule-113 */
+                        /* coverity[misra_c_2012_rule_11_3_violation] */
+                        *ppxEventGroupBuffer = ( StaticEventGroup_t * ) pxEventBits;
+                        xReturn = pdTRUE;
+                    }
+                    else
+                    {
+                        xReturn = pdFALSE;
+                    }
+                }
+            #else /* configSUPPORT_DYNAMIC_ALLOCATION */
+                {
+                    /* Event group must have been statically allocated. */
                     /* MISRA Ref 11.3.1 [Misaligned access] */
                     /* More details at: https://github.com/FreeRTOS/FreeRTOS-Kernel/blob/main/MISRA.md#rule-113 */
                     /* coverity[misra_c_2012_rule_11_3_violation] */
                     *ppxEventGroupBuffer = ( StaticEventGroup_t * ) pxEventBits;
                     xReturn = pdTRUE;
                 }
-                else
-                {
-                    xReturn = pdFALSE;
-                }
-            }
-            #else /* configSUPPORT_DYNAMIC_ALLOCATION */
-            {
-                /* Event group must have been statically allocated. */
-                /* MISRA Ref 11.3.1 [Misaligned access] */
-                /* More details at: https://github.com/FreeRTOS/FreeRTOS-Kernel/blob/main/MISRA.md#rule-113 */
-                /* coverity[misra_c_2012_rule_11_3_violation] */
-                *ppxEventGroupBuffer = ( StaticEventGroup_t * ) pxEventBits;
-                xReturn = pdTRUE;
-            }
             #endif /* configSUPPORT_DYNAMIC_ALLOCATION */
 
             traceRETURN_xEventGroupGetStaticBuffer( xReturn );

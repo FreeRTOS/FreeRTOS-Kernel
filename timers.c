@@ -249,73 +249,73 @@
         if( xTimerQueue != NULL )
         {
             #if ( ( configNUMBER_OF_CORES > 1 ) && ( configUSE_CORE_AFFINITY == 1 ) )
-            {
-                #if ( configSUPPORT_STATIC_ALLOCATION == 1 )
                 {
-                    StaticTask_t * pxTimerTaskTCBBuffer = NULL;
-                    StackType_t * pxTimerTaskStackBuffer = NULL;
-                    configSTACK_DEPTH_TYPE uxTimerTaskStackSize;
+                    #if ( configSUPPORT_STATIC_ALLOCATION == 1 )
+                        {
+                            StaticTask_t * pxTimerTaskTCBBuffer = NULL;
+                            StackType_t * pxTimerTaskStackBuffer = NULL;
+                            configSTACK_DEPTH_TYPE uxTimerTaskStackSize;
 
-                    vApplicationGetTimerTaskMemory( &pxTimerTaskTCBBuffer, &pxTimerTaskStackBuffer, &uxTimerTaskStackSize );
-                    xTimerTaskHandle = xTaskCreateStaticAffinitySet( &prvTimerTask,
-                                                                     configTIMER_SERVICE_TASK_NAME,
-                                                                     uxTimerTaskStackSize,
-                                                                     NULL,
-                                                                     ( ( UBaseType_t ) configTIMER_TASK_PRIORITY ) | portPRIVILEGE_BIT,
-                                                                     pxTimerTaskStackBuffer,
-                                                                     pxTimerTaskTCBBuffer,
-                                                                     configTIMER_SERVICE_TASK_CORE_AFFINITY );
+                            vApplicationGetTimerTaskMemory( &pxTimerTaskTCBBuffer, &pxTimerTaskStackBuffer, &uxTimerTaskStackSize );
+                            xTimerTaskHandle = xTaskCreateStaticAffinitySet( &prvTimerTask,
+                                                                             configTIMER_SERVICE_TASK_NAME,
+                                                                             uxTimerTaskStackSize,
+                                                                             NULL,
+                                                                             ( ( UBaseType_t ) configTIMER_TASK_PRIORITY ) | portPRIVILEGE_BIT,
+                                                                             pxTimerTaskStackBuffer,
+                                                                             pxTimerTaskTCBBuffer,
+                                                                             configTIMER_SERVICE_TASK_CORE_AFFINITY );
 
-                    if( xTimerTaskHandle != NULL )
-                    {
-                        xReturn = pdPASS;
-                    }
+                            if( xTimerTaskHandle != NULL )
+                            {
+                                xReturn = pdPASS;
+                            }
+                        }
+                    #else /* if ( configSUPPORT_STATIC_ALLOCATION == 1 ) */
+                        {
+                            xReturn = xTaskCreateAffinitySet( &prvTimerTask,
+                                                              configTIMER_SERVICE_TASK_NAME,
+                                                              configTIMER_TASK_STACK_DEPTH,
+                                                              NULL,
+                                                              ( ( UBaseType_t ) configTIMER_TASK_PRIORITY ) | portPRIVILEGE_BIT,
+                                                              configTIMER_SERVICE_TASK_CORE_AFFINITY,
+                                                              &xTimerTaskHandle );
+                        }
+                    #endif /* configSUPPORT_STATIC_ALLOCATION */
                 }
-                #else /* if ( configSUPPORT_STATIC_ALLOCATION == 1 ) */
-                {
-                    xReturn = xTaskCreateAffinitySet( &prvTimerTask,
-                                                      configTIMER_SERVICE_TASK_NAME,
-                                                      configTIMER_TASK_STACK_DEPTH,
-                                                      NULL,
-                                                      ( ( UBaseType_t ) configTIMER_TASK_PRIORITY ) | portPRIVILEGE_BIT,
-                                                      configTIMER_SERVICE_TASK_CORE_AFFINITY,
-                                                      &xTimerTaskHandle );
-                }
-                #endif /* configSUPPORT_STATIC_ALLOCATION */
-            }
             #else /* #if ( ( configNUMBER_OF_CORES > 1 ) && ( configUSE_CORE_AFFINITY == 1 ) ) */
-            {
-                #if ( configSUPPORT_STATIC_ALLOCATION == 1 )
                 {
-                    StaticTask_t * pxTimerTaskTCBBuffer = NULL;
-                    StackType_t * pxTimerTaskStackBuffer = NULL;
-                    configSTACK_DEPTH_TYPE uxTimerTaskStackSize;
+                    #if ( configSUPPORT_STATIC_ALLOCATION == 1 )
+                        {
+                            StaticTask_t * pxTimerTaskTCBBuffer = NULL;
+                            StackType_t * pxTimerTaskStackBuffer = NULL;
+                            configSTACK_DEPTH_TYPE uxTimerTaskStackSize;
 
-                    vApplicationGetTimerTaskMemory( &pxTimerTaskTCBBuffer, &pxTimerTaskStackBuffer, &uxTimerTaskStackSize );
-                    xTimerTaskHandle = xTaskCreateStatic( &prvTimerTask,
-                                                          configTIMER_SERVICE_TASK_NAME,
-                                                          uxTimerTaskStackSize,
-                                                          NULL,
-                                                          ( ( UBaseType_t ) configTIMER_TASK_PRIORITY ) | portPRIVILEGE_BIT,
-                                                          pxTimerTaskStackBuffer,
-                                                          pxTimerTaskTCBBuffer );
+                            vApplicationGetTimerTaskMemory( &pxTimerTaskTCBBuffer, &pxTimerTaskStackBuffer, &uxTimerTaskStackSize );
+                            xTimerTaskHandle = xTaskCreateStatic( &prvTimerTask,
+                                                                  configTIMER_SERVICE_TASK_NAME,
+                                                                  uxTimerTaskStackSize,
+                                                                  NULL,
+                                                                  ( ( UBaseType_t ) configTIMER_TASK_PRIORITY ) | portPRIVILEGE_BIT,
+                                                                  pxTimerTaskStackBuffer,
+                                                                  pxTimerTaskTCBBuffer );
 
-                    if( xTimerTaskHandle != NULL )
-                    {
-                        xReturn = pdPASS;
-                    }
+                            if( xTimerTaskHandle != NULL )
+                            {
+                                xReturn = pdPASS;
+                            }
+                        }
+                    #else /* if ( configSUPPORT_STATIC_ALLOCATION == 1 ) */
+                        {
+                            xReturn = xTaskCreate( &prvTimerTask,
+                                                   configTIMER_SERVICE_TASK_NAME,
+                                                   configTIMER_TASK_STACK_DEPTH,
+                                                   NULL,
+                                                   ( ( UBaseType_t ) configTIMER_TASK_PRIORITY ) | portPRIVILEGE_BIT,
+                                                   &xTimerTaskHandle );
+                        }
+                    #endif /* configSUPPORT_STATIC_ALLOCATION */
                 }
-                #else /* if ( configSUPPORT_STATIC_ALLOCATION == 1 ) */
-                {
-                    xReturn = xTaskCreate( &prvTimerTask,
-                                           configTIMER_SERVICE_TASK_NAME,
-                                           configTIMER_TASK_STACK_DEPTH,
-                                           NULL,
-                                           ( ( UBaseType_t ) configTIMER_TASK_PRIORITY ) | portPRIVILEGE_BIT,
-                                           &xTimerTaskHandle );
-                }
-                #endif /* configSUPPORT_STATIC_ALLOCATION */
-            }
             #endif /* #if ( ( configNUMBER_OF_CORES > 1 ) && ( configUSE_CORE_AFFINITY == 1 ) ) */
         }
         else
@@ -379,14 +379,14 @@
             traceENTER_xTimerCreateStatic( pcTimerName, xTimerPeriodInTicks, xAutoReload, pvTimerID, pxCallbackFunction, pxTimerBuffer );
 
             #if ( configASSERT_DEFINED == 1 )
-            {
-                /* Sanity check that the size of the structure used to declare a
-                 * variable of type StaticTimer_t equals the size of the real timer
-                 * structure. */
-                volatile size_t xSize = sizeof( StaticTimer_t );
-                configASSERT( xSize == sizeof( Timer_t ) );
-                ( void ) xSize; /* Prevent unused variable warning when configASSERT() is not defined. */
-            }
+                {
+                    /* Sanity check that the size of the structure used to declare a
+                     * variable of type StaticTimer_t equals the size of the real timer
+                     * structure. */
+                    volatile size_t xSize = sizeof( StaticTimer_t );
+                    configASSERT( xSize == sizeof( Timer_t ) );
+                    ( void ) xSize; /* Prevent unused variable warning when configASSERT() is not defined. */
+                }
             #endif /* configASSERT_DEFINED */
 
             /* A pointer to a StaticTimer_t structure MUST be provided, use it. */
@@ -752,13 +752,13 @@
         ( void ) pvParameters;
 
         #if ( configUSE_DAEMON_TASK_STARTUP_HOOK == 1 )
-        {
-            /* Allow the application writer to execute some code in the context of
-             * this task at the point the task starts executing.  This is useful if the
-             * application includes initialisation code that would benefit from
-             * executing after the scheduler has been started. */
-            vApplicationDaemonTaskStartupHook();
-        }
+            {
+                /* Allow the application writer to execute some code in the context of
+                 * this task at the point the task starts executing.  This is useful if the
+                 * application includes initialisation code that would benefit from
+                 * executing after the scheduler has been started. */
+                vApplicationDaemonTaskStartupHook();
+            }
         #endif /* configUSE_DAEMON_TASK_STARTUP_HOOK */
 
         for( ; configCONTROL_INFINITE_LOOP(); )
@@ -943,25 +943,25 @@
         while( xQueueReceive( xTimerQueue, &xMessage, tmrNO_DELAY ) != pdFAIL )
         {
             #if ( INCLUDE_xTimerPendFunctionCall == 1 )
-            {
-                /* Negative commands are pended function calls rather than timer
-                 * commands. */
-                if( xMessage.xMessageID < ( BaseType_t ) 0 )
                 {
-                    const CallbackParameters_t * const pxCallback = &( xMessage.u.xCallbackParameters );
+                    /* Negative commands are pended function calls rather than timer
+                     * commands. */
+                    if( xMessage.xMessageID < ( BaseType_t ) 0 )
+                    {
+                        const CallbackParameters_t * const pxCallback = &( xMessage.u.xCallbackParameters );
 
-                    /* The timer uses the xCallbackParameters member to request a
-                     * callback be executed.  Check the callback is not NULL. */
-                    configASSERT( pxCallback );
+                        /* The timer uses the xCallbackParameters member to request a
+                         * callback be executed.  Check the callback is not NULL. */
+                        configASSERT( pxCallback );
 
-                    /* Call the function. */
-                    pxCallback->pxCallbackFunction( pxCallback->pvParameter1, pxCallback->ulParameter2 );
+                        /* Call the function. */
+                        pxCallback->pxCallbackFunction( pxCallback->pvParameter1, pxCallback->ulParameter2 );
+                    }
+                    else
+                    {
+                        mtCOVERAGE_TEST_MARKER();
+                    }
                 }
-                else
-                {
-                    mtCOVERAGE_TEST_MARKER();
-                }
-            }
             #endif /* INCLUDE_xTimerPendFunctionCall */
 
             /* Commands that are positive are timer commands rather than pended
@@ -1050,27 +1050,27 @@
 
                         case tmrCOMMAND_DELETE:
                             #if ( configSUPPORT_DYNAMIC_ALLOCATION == 1 )
-                            {
-                                /* The timer has already been removed from the active list,
-                                 * just free up the memory if the memory was dynamically
-                                 * allocated. */
-                                if( ( pxTimer->ucStatus & tmrSTATUS_IS_STATICALLY_ALLOCATED ) == ( uint8_t ) 0 )
+                               {
+                                   /* The timer has already been removed from the active list,
+                                    * just free up the memory if the memory was dynamically
+                                    * allocated. */
+                                   if( ( pxTimer->ucStatus & tmrSTATUS_IS_STATICALLY_ALLOCATED ) == ( uint8_t ) 0 )
+                                   {
+                                       vPortFree( pxTimer );
+                                   }
+                                   else
+                                   {
+                                       pxTimer->ucStatus &= ( ( uint8_t ) ~tmrSTATUS_IS_ACTIVE );
+                                   }
+                               }
+                            #else /* if ( configSUPPORT_DYNAMIC_ALLOCATION == 1 ) */
                                 {
-                                    vPortFree( pxTimer );
-                                }
-                                else
-                                {
+                                    /* If dynamic allocation is not enabled, the memory
+                                     * could not have been dynamically allocated. So there is
+                                     * no need to free the memory - just mark the timer as
+                                     * "not active". */
                                     pxTimer->ucStatus &= ( ( uint8_t ) ~tmrSTATUS_IS_ACTIVE );
                                 }
-                            }
-                            #else /* if ( configSUPPORT_DYNAMIC_ALLOCATION == 1 ) */
-                            {
-                                /* If dynamic allocation is not enabled, the memory
-                                 * could not have been dynamically allocated. So there is
-                                 * no need to free the memory - just mark the timer as
-                                 * "not active". */
-                                pxTimer->ucStatus &= ( ( uint8_t ) ~tmrSTATUS_IS_ACTIVE );
-                            }
                             #endif /* configSUPPORT_DYNAMIC_ALLOCATION */
                             break;
 
@@ -1128,31 +1128,31 @@
                 pxOverflowTimerList = &xActiveTimerList2;
 
                 #if ( configSUPPORT_STATIC_ALLOCATION == 1 )
-                {
-                    /* The timer queue is allocated statically in case
-                     * configSUPPORT_DYNAMIC_ALLOCATION is 0. */
-                    PRIVILEGED_DATA static StaticQueue_t xStaticTimerQueue;
-                    PRIVILEGED_DATA static uint8_t ucStaticTimerQueueStorage[ ( size_t ) configTIMER_QUEUE_LENGTH * sizeof( DaemonTaskMessage_t ) ];
+                    {
+                        /* The timer queue is allocated statically in case
+                         * configSUPPORT_DYNAMIC_ALLOCATION is 0. */
+                        PRIVILEGED_DATA static StaticQueue_t xStaticTimerQueue;
+                        PRIVILEGED_DATA static uint8_t ucStaticTimerQueueStorage[ ( size_t ) configTIMER_QUEUE_LENGTH * sizeof( DaemonTaskMessage_t ) ];
 
-                    xTimerQueue = xQueueCreateStatic( ( UBaseType_t ) configTIMER_QUEUE_LENGTH, ( UBaseType_t ) sizeof( DaemonTaskMessage_t ), &( ucStaticTimerQueueStorage[ 0 ] ), &xStaticTimerQueue );
-                }
+                        xTimerQueue = xQueueCreateStatic( ( UBaseType_t ) configTIMER_QUEUE_LENGTH, ( UBaseType_t ) sizeof( DaemonTaskMessage_t ), &( ucStaticTimerQueueStorage[ 0 ] ), &xStaticTimerQueue );
+                    }
                 #else
-                {
-                    xTimerQueue = xQueueCreate( ( UBaseType_t ) configTIMER_QUEUE_LENGTH, ( UBaseType_t ) sizeof( DaemonTaskMessage_t ) );
-                }
+                    {
+                        xTimerQueue = xQueueCreate( ( UBaseType_t ) configTIMER_QUEUE_LENGTH, ( UBaseType_t ) sizeof( DaemonTaskMessage_t ) );
+                    }
                 #endif /* if ( configSUPPORT_STATIC_ALLOCATION == 1 ) */
 
                 #if ( configQUEUE_REGISTRY_SIZE > 0 )
-                {
-                    if( xTimerQueue != NULL )
                     {
-                        vQueueAddToRegistry( xTimerQueue, "TmrQ" );
+                        if( xTimerQueue != NULL )
+                        {
+                            vQueueAddToRegistry( xTimerQueue, "TmrQ" );
+                        }
+                        else
+                        {
+                            mtCOVERAGE_TEST_MARKER();
+                        }
                     }
-                    else
-                    {
-                        mtCOVERAGE_TEST_MARKER();
-                    }
-                }
                 #endif /* configQUEUE_REGISTRY_SIZE */
             }
             else
