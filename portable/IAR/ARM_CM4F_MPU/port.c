@@ -169,11 +169,13 @@ typedef void ( * portISR_t )( void );
 /* A fiddle factor to estimate the number of SysTick counts that would have
  * occurred while the SysTick counter is stopped during tickless idle
  * calculations. */
-#define portMISSED_COUNTS_FACTOR                  ( 45UL )
+#ifndef portMISSED_COUNTS_FACTOR
+    #define portMISSED_COUNTS_FACTOR    ( 45UL )
+#endif
 
 /* For strict compliance with the Cortex-M spec the task start address should
  * have bit-0 clear, as it is loaded into the PC on exit from an ISR. */
-#define portSTART_ADDRESS_MASK                    ( ( StackType_t ) 0xfffffffeUL )
+#define portSTART_ADDRESS_MASK    ( ( StackType_t ) 0xfffffffeUL )
 
 /* Does addr lie within [start, end] address range? */
 #define portIS_ADDRESS_WITHIN_RANGE( addr, start, end ) \

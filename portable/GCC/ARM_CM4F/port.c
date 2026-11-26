@@ -102,7 +102,9 @@ typedef void ( * portISR_t )( void );
 /* A fiddle factor to estimate the number of SysTick counts that would have
  * occurred while the SysTick counter is stopped during tickless idle
  * calculations. */
-#define portMISSED_COUNTS_FACTOR              ( 94UL )
+#ifndef portMISSED_COUNTS_FACTOR
+    #define portMISSED_COUNTS_FACTOR    ( 94UL )
+#endif
 
 /* Let the user override the default SysTick clock rate.  If defined by the
  * user, this symbol must equal the SysTick clock rate when the CLK bit is 0 in the
