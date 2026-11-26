@@ -4122,15 +4122,6 @@ void vTaskInternalSetTimeOutState( TimeOut_t * const pxTimeOut ) PRIVILEGED_FUNC
     void vTaskExitCriticalFromISR( UBaseType_t uxSavedInterruptStatus );
 #endif
 
-/*
- * Checks whether a yield is required after portUNLOCK_DATA_GROUP() returns.
- * To be called while data group is locked or after an interrupt invokes
- * a FreeRTOS API prior to returning to the task.
- */
-#if ( ( portUSING_GRANULAR_LOCKS == 1 ) && ( configNUMBER_OF_CORES > 1 ) )
-    BaseType_t xTaskUnlockCanYield( void ) PRIVILEGED_FUNCTION;
-#endif
-
 #if ( portUSING_MPU_WRAPPERS == 1 )
 
 /*

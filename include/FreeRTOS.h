@@ -1990,14 +1990,6 @@
     #define traceRETURN_taskDataGroupUnlock( xReturn )
 #endif
 
-#ifndef traceENTER_xTaskUnlockCanYield
-    #define traceENTER_xTaskUnlockCanYield()
-#endif
-
-#ifndef traceRETURN_xTaskUnlockCanYield
-    #define traceRETURN_xTaskUnlockCanYield( xReturn )
-#endif
-
 #ifndef traceENTER_vTaskSuspend
     #define traceENTER_vTaskSuspend( xTaskToSuspend )
 #endif

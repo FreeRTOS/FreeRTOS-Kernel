@@ -10671,36 +10671,3 @@ void vTaskResetState( void )
     #endif /* #if ( configGENERATE_RUN_TIME_STATS == 1 ) */
 }
 /*-----------------------------------------------------------*/
-
-#if ( ( portUSING_GRANULAR_LOCKS == 1 ) && ( configNUMBER_OF_CORES > 1 ) )
-
-    BaseType_t xTaskUnlockCanYield( void )
-    {
-        BaseType_t xReturn;
-        BaseType_t xCoreID = portGET_CORE_ID();
-
-        traceENTER_xTaskUnlockCanYield();
-
-        /* Current core to call this function should handle the yield request when
-         * the scheduler is suspended. In vTaskSwitchContext, the core will be blocking
-         * on TASK spinlocks until scheduler is resumed. */
-        if( ( xYieldPendings[ xCoreID ] == pdTRUE )
-            #if ( configUSE_TASK_PREEMPTION_DISABLE == 1 )
-                && ( pxCurrentTCBs[ xCoreID ]->uxPreemptionDisable == 0U )
-            #endif /* ( configUSE_TASK_PREEMPTION_DISABLE == 1 ) */
-            )
-        {
-            xReturn = pdTRUE;
-        }
-        else
-        {
-            xReturn = pdFALSE;
-        }
-
-        traceRETURN_xTaskUnlockCanYield( xReturn );
-
-        return xReturn;
-    }
-
-#endif /* #if ( ( portUSING_GRANULAR_LOCKS == 1 ) && ( configNUMBER_OF_CORES > 1 ) ) */
-/*-----------------------------------------------------------*/
