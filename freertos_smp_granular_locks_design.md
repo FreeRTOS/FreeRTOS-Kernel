@@ -185,28 +185,24 @@ This section checks that the data group critical section and locking mechanisms 
 
 # Public API Changes
 
-To support **"Dual Spinlock With Data Group Locking"**, the following changes have been made to the public facing API. These changes are non-breaking, meaning that applications that can build against the existing SMP FreeRTOS kernel will still be able to build even with granular locking enabled (albeit less performant).
+These changes are non-breaking: an application that builds against the SMP kernel without granular locks also builds with granular locks enabled.
 
-The following APIs have been added to enter/exit a critical section in a data group. This are called by FreeRTOS source code to mark critical sections in data groups. However, users can also create their own data groups and enter/exit critical sections in the same manner.
-
-If granular locking is disabled, these macros simply revert to being the standard task enter/exit critical macros.
+The kernel files use the following macros, declared in `task.h` with `portUSING_GRANULAR_LOCKS == 1`, for the critical sections and locks of a data group. Each data group passes its own `xTaskSpinlock` and `xISRSpinlock`.
 
 ```c
-#if ( portUSING_GRANULAR_LOCKS == 1 )
-    #define data_groupENTER_CRITICAL()                                    portENTER_CRITICAL_DATA_GROUP( ( portSPINLOCK_TYPE * ) pxTaskSpinlock, ( portSPINLOCK_TYPE * ) pxISRSpinlock )
-    #define data_groupENTER_CRITICAL_FROM_ISR()                           portENTER_CRITICAL_DATA_GROUP_FROM_ISR( ( portSPINLOCK_TYPE * ) pxISRSpinlock )
-    #define data_groupEXIT_CRITICAL()                                     portEXIT_CRITICAL_DATA_GROUP( ( portSPINLOCK_TYPE * ) pxTaskSpinlock, ( portSPINLOCK_TYPE * ) pxISRSpinlock )
-    #define data_groupEXIT_CRITICAL_FROM_ISR( uxSavedInterruptStatus )    portEXIT_CRITICAL_DATA_GROUP_FROM_ISR( uxSavedInterruptStatus, ( portSPINLOCK_TYPE * ) pxISRSpinlock )
-#else /* #if ( portUSING_GRANULAR_LOCKS == 1 ) */
-    #define data_groupENTER_CRITICAL()                                    taskENTER_CRITICAL()
-    #define data_groupENTER_CRITICAL_FROM_ISR()                           taskENTER_CRITICAL_FROM_ISR()
-    #define data_groupEXIT_CRITICAL()                                     taskEXIT_CRITICAL()
-    #define data_groupEXIT_CRITICAL_FROM_ISR( uxSavedInterruptStatus )    taskEXIT_CRITICAL_FROM_ISR( uxSavedInterruptStatus )
-#endif /* #if ( portUSING_GRANULAR_LOCKS == 1 ) */
+taskDATA_GROUP_ENTER_CRITICAL( pxTaskSpinlock, pxISRSpinlock )
+taskDATA_GROUP_EXIT_CRITICAL( pxTaskSpinlock, pxISRSpinlock )
+taskDATA_GROUP_ENTER_CRITICAL_FROM_ISR( pxISRSpinlock, puxSavedInterruptStatus )
+taskDATA_GROUP_EXIT_CRITICAL_FROM_ISR( uxSavedInterruptStatus, pxISRSpinlock )
+taskDATA_GROUP_LOCK( pxTaskSpinlock )
+taskDATA_GROUP_UNLOCK( pxTaskSpinlock )
+taskDATA_GROUP_PROMOTE_LOCK_TO_CRITICAL( pxISRSpinlock )
+taskDATA_GROUP_DEMOTE_CRITICAL_TO_LOCK( pxISRSpinlock )
 ```
 
-In case of the kernel data group (tasks.c), the granular locking macros make use of the existing `vTaskEnter/ExitCritical<FromISR>()` functions to establish critical sections.
+`taskDATA_GROUP_ENTER_CRITICAL()` and `taskDATA_GROUP_LOCK()` are functions in `tasks.c` (`vTaskDataGroupEnterCritical()`, `vTaskDataGroupLock()`), because they check the run state of the calling task. The exit and `FROM_ISR` forms are macros. A port can set `portDATA_GROUP_CRITICAL_SECTIONS_AS_FUNCTIONS` to 1 to have them called as functions in `tasks.c` instead, which expand the same macro bodies. Ports and applications can create their own data groups with the same macros.
 
+Each kernel file maps its own critical section macros (`queueENTER_CRITICAL()`, `event_groupsENTER_CRITICAL()`, `sbENTER_CRITICAL()`, `tmrENTER_CRITICAL()`) and lock macros to these when granular locks are enabled, and to `taskENTER_CRITICAL()`, the queue lock or the scheduler suspension otherwise. The kernel data group uses `vTaskEnterCritical()` and the related functions:
 
 ```c
 #if ( portUSING_GRANULAR_LOCKS == 1 )
@@ -214,190 +210,71 @@ In case of the kernel data group (tasks.c), the granular locking macros make use
     #define kernelENTER_CRITICAL_FROM_ISR()                           vTaskEnterCriticalFromISR()
     #define kernelEXIT_CRITICAL()                                     vTaskExitCritical()
     #define kernelEXIT_CRITICAL_FROM_ISR( uxSavedInterruptStatus )    vTaskExitCriticalFromISR( uxSavedInterruptStatus )
-#else /* #if ( portUSING_GRANULAR_LOCKS == 1 ) */
+#else
     #define kernelENTER_CRITICAL()                                    taskENTER_CRITICAL()
     #define kernelENTER_CRITICAL_FROM_ISR()                           taskENTER_CRITICAL_FROM_ISR()
     #define kernelEXIT_CRITICAL()                                     taskEXIT_CRITICAL()
     #define kernelEXIT_CRITICAL_FROM_ISR( uxSavedInterruptStatus )    taskEXIT_CRITICAL_FROM_ISR( uxSavedInterruptStatus )
-#endif /* #if ( portUSING_GRANULAR_LOCKS == 1 ) */
+#endif
 ```
 
-The previous critical section macros, viz., `taskENTER/EXIT_CRITICAL()` are still provided and can be called by users. However, FreeRTOS source code will no longer call them. If called by the users, the port should implement a "user" data group. As a result, if an application previously relied on `taskENTER/EXIT_CRITICAL()` for thread safe access to some user data, the same code is still thread safe with granular locking enabled.
-
-```c
-#define taskENTER_CRITICAL()                portENTER_CRITICAL()
-#define taskEXIT_CRITICAL()                 portEXIT_CRITICAL()
-#define taskENTER_CRITICAL_FROM_ISR()       portENTER_CRITICAL_FROM_ISR()
-#define taskEXIT_CRITICAL_FROM_ISR( x )     portEXIT_CRITICAL_FROM_ISR( x )
-```
+`taskENTER_CRITICAL()` and `taskEXIT_CRITICAL()` and their `FROM_ISR` forms are still provided for applications, but the kernel files no longer call them with granular locks. The port decides what they protect. A port can implement them as a "user" data group, so that code that relied on them for data shared between tasks stays thread safe. Such a section then does not exclude the kernel data group or any other data group.
 
 # Porting Interface
 
-To support **"Dual Spinlock With Data Group Locking"**, ports will need to provide the following macro definitions
+A port that sets `portUSING_GRANULAR_LOCKS` to 1 provides the following. `FreeRTOS.h` stops the build with an `#error` if one of the spinlock macros or `portCHECK_IF_IN_ISR()` is missing, and if `configNUMBER_OF_CORES` is 1 or `configUSE_TASK_PREEMPTION_DISABLE` is 0.
 
 ## Port Config
 
-The ports will need to provide the following port configuration macros
-
 ```c
-#define portUSING_GRANULAR_LOCKS        1   // Enables usage of granular locks
-#define portCRITICAL_NESTING_IN_TCB     0   // Disable critical nesting in TCB. Ports will need to track their own critical nesting
+#define portUSING_GRANULAR_LOCKS        1   /* Enables granular locks. */
+#define portCRITICAL_NESTING_IN_TCB     0   /* The port keeps a critical nesting count per core. */
 ```
+
+With `portCRITICAL_NESTING_IN_TCB == 0` the port provides `portGET_CRITICAL_NESTING_COUNT()`, `portSET_CRITICAL_NESTING_COUNT()`, `portINCREMENT_CRITICAL_NESTING_COUNT()` and `portDECREMENT_CRITICAL_NESTING_COUNT()`, each taking a core ID, as the SMP kernel already requires when the count is not kept in the task control block.
 
 ## Spinlocks
 
-Ports will need to provide the following spinlock related macros macros
-
 ```c
-/*
-Data type for the port's implementation of a spinlock
-*/
-#define portSPINLOCK_TYPE               port_spinlock_t
+#define portSPINLOCK_TYPE                           port_spinlock_t
+#define portINIT_SPINLOCK( pxSpinlock )             _port_spinlock_init( pxSpinlock )
+#define portINIT_SPINLOCK_STATIC                    PORT_SPINLOCK_STATIC_INIT
+#define portGET_SPINLOCK( xCoreID, pxSpinlock )     _port_spinlock_take( xCoreID, pxSpinlock )
+#define portRELEASE_SPINLOCK( xCoreID, pxSpinlock ) _port_spinlock_give( xCoreID, pxSpinlock )
+#define portCHECK_IF_IN_ISR()                       _port_in_isr()
 ```
 
-Macros are provided for the spinlocks for initializing them either statically or dynamically. This is reflected in the macros API pattern.
+- `portGET_SPINLOCK()` must let a core take a spinlock it already holds, and `portRELEASE_SPINLOCK()` must then release it the same number of times. The kernel takes a task's TCB spinlock again while it holds it, for example in `vTaskDelete()` of a task that runs on another core.
+- `portGET_SPINLOCK()` is called with interrupts enabled for the task spinlock of a data group (`taskDATA_GROUP_LOCK()` and the first step of `vTaskDataGroupEnterCritical()`).
+- Taking and releasing a spinlock must order memory as an acquire and a release.
 
-```c
-#define portINIT_SPINLOCK( pxSpinlock )    _port_spinlock_init( pxSpinlock )
-#define portINIT__SPINLOCK_STATIC          PORT_SPINLOCK_STATIC_INIT
-```
+`portENTER_CRITICAL()` and `portEXIT_CRITICAL()` and their `FROM_ISR` forms are what `taskENTER_CRITICAL()` and the others call (see *Public API Changes*).
 
-## Critical Section Macros
+## Optional
 
-The port will need to provide implementations for macros to enter/exit a data group critical section according the procedures described above. Typical implementations of each macro is demonstrated below:
-
-```c
-#if ( ( portUSING_GRANULAR_LOCKS == 1 ) && ( configNUMBER_OF_CORES > 1 ) )
-    #define portENTER_CRITICAL_DATA_GROUP( pxTaskSpinlock, pxISRSpinlock )     vPortEnterCriticalDataGroup( pxTaskSpinlock, pxISRSpinlock )
-    #define portENTER_CRITICAL_DATA_GROUP_FROM_ISR( pxISRSpinlock )            uxPortEnterCriticalDataGroupFromISR( pxISRSpinlock )
-    #define portEXIT_CRITICAL_DATA_GROUP( pxTaskSpinlock, pxISRSpinlock )      vPortExitCriticalDataGroup( pxTaskSpinlock, pxISRSpinlock )
-    #define portEXIT_CRITICAL_DATA_GROUP_FROM_ISR( x, pxISRSpinlock )          vPortExitCriticalDataGroupFromISR( x, pxISRSpinlock )
-#endif /* #if ( ( portUSING_GRANULAR_LOCKS == 1 ) && ( configNUMBER_OF_CORES > 1 ) ) */
-```
-
-Example implementation of `portENTER_CRITICAL_DATA_GROUP( pxTaskSpinlock, pxISRSpinlock )` and `portEXIT_CRITICAL_DATA_GROUP( pxTaskSpinlock, pxISRSpinlock )`. Note that:
-
-- `pxTaskSpinlock` is made optional in case users want to create their own data groups that are protected only be a single lock.
-- The kernel implements the `xTaskUnlockCanYield()` function to indicate whether an yield should occur when a critical section exits. This function takes into account whether there are any pending yields and whether preemption is currently disabled.
-
-```c
-void vPortEnterCriticalDataGroup( port_spinlock_t *pxTaskSpinlock, port_spinlock_t *pxISRSpinlock )
-{
-    portDISABLE_INTERRUPTS();
-
-    BaseType_t xCoreID = xPortGetCoreID();
-
-    /* Task spinlock is optional and is always taken first */
-    if( pxTaskSpinlock != NULL )
-    {
-        vPortSpinlockTake( pxTaskSpinlock, portMUX_NO_TIMEOUT );
-        uxCriticalNesting[ xCoreID ]++;
-    }
-
-    /* ISR spinlock must always be provided */
-    vPortSpinlockTake( pxISRSpinlock, portMUX_NO_TIMEOUT );
-    uxCriticalNesting[ xCoreID ]++;
-}
-
-void vPortExitCriticalDataGroup( port_spinlock_t *pxTaskSpinlock, port_spinlock_t *pxISRSpinlock )
-{
-    BaseType_t xCoreID = xPortGetCoreID();
-    BaseType_t xYieldCurrentTask;
-
-    configASSERT( uxCriticalNesting[ xCoreID ] > 0U );
-
-    /* Get the xYieldPending stats inside the critical section. */
-    xYieldCurrentTask = xTaskUnlockCanYield();
-
-    /* ISR spinlock must always be provided */
-    vPortSpinlockRelease( pxISRSpinlock );
-    uxCriticalNesting[ xCoreID ]--;
-
-    /* Task spinlock is optional and is always taken first */
-    if( pxTaskSpinlock != NULL )
-    {
-        vPortSpinlockRelease( pxTaskSpinlock);
-        uxCriticalNesting[ xCoreID ]--;
-    }
-
-    assert(uxCriticalNesting[ xCoreID ] >= 0);
-
-    if( uxCriticalNesting[ xCoreID ] == 0 )
-    {
-        portENABLE_INTERRUPTS();
-
-        /* When a task yields in a critical section it just sets xYieldPending to
-         * true. So now that we have exited the critical section check if xYieldPending
-         * is true, and if so yield. */
-        if( xYieldCurrentTask != pdFALSE )
-        {
-            portYIELD();
-        }
-        else
-        {
-            mtCOVERAGE_TEST_MARKER();
-        }
-    }
-}
-```
-
-Example implementation of `portENTER_CRITICAL_DATA_GROUP_FROM_ISR( pxISRSpinlock )` and `portEXIT_CRITICAL_DATA_GROUP_FROM_ISR( x, pxISRSpinlock )`. Note that only `pxISRSpinlock` needs to be provided since ISR critical sections take a single lock.
-
-```c
-UBaseType_t uxPortLockDataGroupFromISR( port_spinlock_t *pxISRSpinlock )
-{
-    UBaseType_t uxSavedInterruptStatus = 0;
-
-    uxSavedInterruptStatus = portSET_INTERRUPT_MASK_FROM_ISR();
-
-    vPortSpinlockTake( pxISRSpinlock, portMUX_NO_TIMEOUT );
-    uxCriticalNesting[xPortGetCoreID()]++;
-
-    return uxSavedInterruptStatus;
-}
-
-```c
-void vPortUnlockDataGroupFromISR( UBaseType_t uxSavedInterruptStatus, port_spinlock_t *pxISRSpinlock )
-{
-    BaseType_t xCoreID = xPortGetCoreID();
-
-    vPortSpinlockRelease( pxISRSpinlock );
-    uxCriticalNesting[ xCoreID ]--;
-
-    assert(uxCriticalNesting[ xCoreID ] >= 0);
-
-    if( uxCriticalNesting[ xCoreID ] == 0 )
-    {
-        portCLEAR_INTERRUPT_MASK_FROM_ISR( uxSavedInterruptStatus );
-    }
-}
-```
+- `portDATA_GROUP_CRITICAL_SECTIONS_AS_FUNCTIONS`: 1 to call the data group exit and `FROM_ISR` macros as functions (default 0).
+- `portBASE_TYPE_ENTER_CRITICAL()` and `portBASE_TYPE_EXIT_CRITICAL()`: a port that can read a `BaseType_t` sized member atomically defines them. The kernel then uses them for the functions that read one such member, with granular locks too. With the default definitions the kernel takes the data group or kernel critical section instead. A port that defines them away can define `portBASE_TYPE_EXIT_CRITICAL()` as an acquire fence to keep the ordering of the spinlock.
 
 # Source Specific Changes
 
-- Added a `xTaskSpinlock` and `xISRSpinlock` to the data structures of each data group
-- All calls to `taskENTER/EXIT_CRITICAL[_FROM_ISR]()` have been replaced with `data_groupENTER/EXIT_CRITICAL[_FROM_ISR]()`.
-- Added `xTaskUnlockCanYield()` which indicates whether a yield should occur when exiting a critical (i.e., unlocking a data group). Yields should not occur if preemption is disabled (such as when exiting a critical section inside a suspension block).
+- Added a `xTaskSpinlock` and `xISRSpinlock` to the data structures of each data group.
+- With granular locks, the critical sections of each file take the spinlocks of the data group they change instead of the kernel's.
 
 ## Tasks (Kernel Data Group)
 
-- Some functions are called from nested critical sections of other data groups, thus an extra critical section call needs to be added to lock/unlock the kernel data group:
+- Some functions are called from critical sections of other data groups, so they take the kernel data group's locks themselves:
   - `vTaskInternalSetTimeOutState()`
   - `xTaskIncrementTick()`
   - `vTaskSwitchContext()`
   - `xTaskRemoveFromEventList()`
-  - `vTaskInternalSetTimeOutState()`
   - `eTaskConfirmSleepModeStatus()`
-  - `xTaskPriorityDisinherit()`
-  - `pvTaskIncrementMutexHeldCount()`
-- Some functions are called from nested suspension blocks of other data groups, thus an extra suspend/resume call need to be added:
+  - `xTaskPriorityDisinherit()`, only when the holder's priority is inherited
+- Some functions are called while another data group is locked, so they suspend the kernel data group themselves:
   - `vTaskPlaceOnEventList()`
   - `vTaskPlaceOnUnorderedEventList()`
   - `vTaskPlaceOnEventListRestricted()`
-- `prvCheckForRunStateChange()` has been removed
-- Updated `vTaskSuspendAll()` and `xTaskResumeAll()`
-    - Now holds the `xTaskSpinlock` during kernel suspension
-    - Also increments/decrements `xPreemptionDisable` to prevent yield from occuring when exiting a critical section from inside a kernel suspension block.
+- `vTaskSuspendAll()` takes the kernel data group's `xTaskSpinlock` and holds it until `xTaskResumeAll()`, and records the core that suspended the scheduler (see *Scheduler Suspension*).
+- `pvTaskIncrementMutexHeldCount()` changes the held count of the calling task without the kernel critical section. Only the holding task writes it, inside the mutex's queue critical section.
 
 ## Queue
 
@@ -407,7 +284,7 @@ void vPortUnlockDataGroupFromISR( UBaseType_t uxSavedInterruptStatus, port_spinl
 
 ## Event Groups
 
-- Added `eventLOCK()` and `eventUNLOCK()`
+- Added `event_groupsLOCK()` and `event_groupsUNLOCK()`
   - If granular locks are disabled, reverts to the previous `vTaskSuspendAll()` and `xTaskResumeAll()` calls
   - If granular locks are enabled, will lock/unlock the event groups data group for tasks
 - `xEventGroupSetBits()` and `vEventGroupDelete()` will manually walk the task lists (which belong to the kernel data group). Thus, an extra `vTaskSuspendAll()`/`xTaskResumeAll()` is added to ensure that the kernel data group is suspended while walking those tasks lists.
@@ -439,7 +316,7 @@ Currently, `vTaskPriorityDisinheritAfterTimeout()` is called wrapping critical s
 
 Currently, nested calls of `vTaskPreemptionEnable()` is not supported. However, nested calls are required for granular locking due the occurrence of nested suspension across multiple data groups.
 
-Thus, `vTaskPreemptionEnable()` has been updated to support nested calls. This is done by changing `xPreemptionDisable` to a count, where a non-zero count means that the current task cannot be preempted.
+Thus, `vTaskPreemptionEnable()` has been updated to support nested calls. This is done by changing `uxPreemptionDisable` to a count, where a non-zero count means that the current task cannot be preempted.
 
 # TCB Locks
 
