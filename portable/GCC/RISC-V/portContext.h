@@ -124,6 +124,21 @@
 .extern pxCriticalNesting
 /*-----------------------------------------------------------*/
 
+#if ( configENABLE_FPU == 1 )
+    .macro portcontextINITIALISE_FPU
+/* Initial state is independent of the current rounding mode and flags. */
+csrw fcsr, zero
+    .irp reg, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31
+    #if __riscv_flen == 64
+fcvt.d.w f\reg, zero
+    #else
+fmv.w.x f\reg, zero
+    #endif
+    .endr
+    .endm
+#endif
+/*-----------------------------------------------------------*/
+
     .macro portcontexSAVE_FPU_CONTEXT
 addi sp, sp, -( portFPU_CONTEXT_SIZE )
 /* Store the FPU registers. */
@@ -418,11 +433,16 @@ csrw mstatus, t3
 #if( configENABLE_FPU == 1 )
     srl t1, t3, MSTATUS_FS_OFFSET
     andi t1, t1, 3
+    addi t2, x0, 1
+    beq t1, t2, 6f /* An initial context has no FPU image on the stack. */
     addi t2, x0, 3
-    bne t1, t2, 6f /* If FPU status is not dirty, do not restore FPU registers. */
+    bne t1, t2, 7f /* If FPU status is not dirty, do not restore FPU registers. */
 
     portcontextRESTORE_FPU_CONTEXT
+    j 7f
 6:
+    portcontextINITIALISE_FPU
+7:
 #endif /* ifdef portasmSTORE_FPU_CONTEXT */
 
 load_x t0, portCRITICAL_NESTING_OFFSET * portWORD_SIZE( sp ) /* Obtain xCriticalNesting value for this task from task's stack. */
