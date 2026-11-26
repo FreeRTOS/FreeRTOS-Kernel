@@ -4220,15 +4220,31 @@ STATIC void prvInitialiseNewTask( TaskFunction_t pxTaskCode,
                 vTaskDelete( xTask );
                 xAlreadyYielded = pdTRUE;
             }
-            else if( taskDEFERRED_STATE_CHANGE( pxTCB ) & tskDEFERRED_SUSPENSION )
-            {
-                vTaskSuspend( xTask );
-                xAlreadyYielded = pdTRUE;
-            }
             else
             {
-                /* Concurrent operation cleared the deferred state — nothing to do. */
-                mtCOVERAGE_TEST_MARKER();
+                /* vTaskResume() and xTaskResumeFromISR() cancel a deferred
+                 * suspension inside a kernel critical section. Read the request
+                 * and suspend the task inside one kernel critical section, so that
+                 * a resume either finds the task suspended or cancels the request
+                 * before it is read. */
+                #if ( portUSING_GRANULAR_LOCKS == 1 )
+                    kernelENTER_CRITICAL();
+                #endif
+
+                if( taskDEFERRED_STATE_CHANGE( pxTCB ) & tskDEFERRED_SUSPENSION )
+                {
+                    vTaskSuspend( xTask );
+                    xAlreadyYielded = pdTRUE;
+                }
+                else
+                {
+                    /* Concurrent operation cleared the deferred state — nothing to do. */
+                    mtCOVERAGE_TEST_MARKER();
+                }
+
+                #if ( portUSING_GRANULAR_LOCKS == 1 )
+                    kernelEXIT_CRITICAL();
+                #endif
             }
         }
         else
