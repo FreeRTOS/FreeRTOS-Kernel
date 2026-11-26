@@ -3779,8 +3779,8 @@ void vTaskResetState( void ) PRIVILEGED_FUNCTION;
 
 /* Release the task spinlock and re-enable preemption.
  * Returns the yield status reported by xTaskPreemptionEnableWithYieldStatus(). */
-    BaseType_t taskDataGroupUnlock( portSPINLOCK_TYPE * pxTaskSpinlock );
-    #define taskDATA_GROUP_UNLOCK    taskDataGroupUnlock
+    BaseType_t xTaskDataGroupUnlock( portSPINLOCK_TYPE * pxTaskSpinlock ) PRIVILEGED_FUNCTION;
+    #define taskDATA_GROUP_UNLOCK    xTaskDataGroupUnlock
 #endif /* #if ( portUSING_GRANULAR_LOCKS == 1 ) */
 
 /**

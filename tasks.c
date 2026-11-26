@@ -3826,18 +3826,18 @@ STATIC void prvInitialiseNewTask( TaskFunction_t pxTaskCode,
         traceRETURN_vTaskDataGroupLock();
     }
 
-    BaseType_t taskDataGroupUnlock( portSPINLOCK_TYPE * pxTaskSpinlock )
+    BaseType_t xTaskDataGroupUnlock( portSPINLOCK_TYPE * pxTaskSpinlock )
     {
         BaseType_t xReturn;
 
-        traceENTER_taskDataGroupUnlock( pxTaskSpinlock );
+        traceENTER_xTaskDataGroupUnlock( pxTaskSpinlock );
 
         /* Release the task spinlock and re-enable preemption, returning whether
          * re-enabling preemption requires the caller to yield. */
         portRELEASE_SPINLOCK( portGET_CORE_ID(), pxTaskSpinlock );
         xReturn = xTaskPreemptionEnableWithYieldStatus( NULL );
 
-        traceRETURN_taskDataGroupUnlock( xReturn );
+        traceRETURN_xTaskDataGroupUnlock( xReturn );
 
         return xReturn;
     }

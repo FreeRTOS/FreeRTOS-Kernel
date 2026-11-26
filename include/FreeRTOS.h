@@ -1982,12 +1982,12 @@
     #define traceRETURN_vTaskDataGroupLock()
 #endif
 
-#ifndef traceENTER_taskDataGroupUnlock
-    #define traceENTER_taskDataGroupUnlock( pxTaskSpinlock )
+#ifndef traceENTER_xTaskDataGroupUnlock
+    #define traceENTER_xTaskDataGroupUnlock( pxTaskSpinlock )
 #endif
 
-#ifndef traceRETURN_taskDataGroupUnlock
-    #define traceRETURN_taskDataGroupUnlock( xReturn )
+#ifndef traceRETURN_xTaskDataGroupUnlock
+    #define traceRETURN_xTaskDataGroupUnlock( xReturn )
 #endif
 
 #ifndef traceENTER_vTaskSuspend
