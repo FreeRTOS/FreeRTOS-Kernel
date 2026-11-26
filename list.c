@@ -144,6 +144,8 @@ void vListInsert( List_t * const pxList,
 
     traceENTER_vListInsert( pxList, pxNewListItem );
 
+    configASSERT( pxList != NULL );
+
     /* Only effective when configASSERT() is also defined, these tests may catch
      * the list data structures being overwritten in memory.  They will not catch
      * data errors caused by incorrect configuration or use of FreeRTOS. */
