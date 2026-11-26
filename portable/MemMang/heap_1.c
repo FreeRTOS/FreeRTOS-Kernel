@@ -50,6 +50,12 @@
     #error This file must not be used if configSUPPORT_DYNAMIC_ALLOCATION is 0
 #endif
 
+/* pvPortRealloc() needs to know the size of the block being resized and to be
+ * able to free it, but heap_1 does not record block sizes and never frees. */
+#if ( configSUPPORT_HEAP_REALLOC == 1 )
+    #error pvPortRealloc() is unsupported by heap_1.c, set configSUPPORT_HEAP_REALLOC to 0
+#endif
+
 /* A few bytes might be lost to byte aligning the heap start address. */
 #define configADJUSTED_HEAP_SIZE        ( configTOTAL_HEAP_SIZE - portBYTE_ALIGNMENT )
 

@@ -80,6 +80,50 @@ void * pvPortMalloc( size_t xWantedSize )
 }
 /*-----------------------------------------------------------*/
 
+#if ( configSUPPORT_HEAP_REALLOC == 1 )
+
+void * pvPortRealloc( void * pv,
+                      size_t xWantedSize )
+{
+    void * pvReturn = NULL;
+
+    /* Handled here as the C library behaviour for a size of 0 is
+     * implementation defined. */
+    if( xWantedSize == 0 )
+    {
+        vPortFree( pv );
+    }
+    else
+    {
+        vTaskSuspendAll();
+        {
+            pvReturn = realloc( pv, xWantedSize );
+
+            if( ( pvReturn != NULL ) && ( pv != NULL ) )
+            {
+                traceFREE( pv, 0 );
+            }
+
+            traceMALLOC( pvReturn, xWantedSize );
+        }
+        ( void ) xTaskResumeAll();
+
+        #if ( configUSE_MALLOC_FAILED_HOOK == 1 )
+        {
+            if( pvReturn == NULL )
+            {
+                vApplicationMallocFailedHook();
+            }
+        }
+        #endif
+    }
+
+    return pvReturn;
+}
+
+#endif /* configSUPPORT_HEAP_REALLOC */
+/*-----------------------------------------------------------*/
+
 void vPortFree( void * pv )
 {
     if( pv != NULL )

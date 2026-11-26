@@ -307,6 +307,12 @@
  * catch pointer corruptions. Defaults to 0 if left undefined. */
 #define configENABLE_HEAP_PROTECTOR                  0
 
+/* Set configSUPPORT_HEAP_REALLOC to 1 to include pvPortRealloc() in the build.
+ * It is intended for porting existing code that relies on realloc.  Heap
+ * implementations that cannot support it raise an #error.  Defaults to 0 if
+ * left undefined. */
+#define configSUPPORT_HEAP_REALLOC                   0
+
 /******************************************************************************/
 /* Interrupt nesting behaviour configuration. *********************************/
 /******************************************************************************/
