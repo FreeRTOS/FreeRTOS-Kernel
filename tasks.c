@@ -4169,6 +4169,36 @@ STATIC void prvInitialiseNewTask( TaskFunction_t pxTaskCode,
 
 #if ( configUSE_TASK_PREEMPTION_DISABLE == 1 )
 
+/* Requests the yield that was pended for the core that runs pxTCB while the
+ * task's preemption was disabled, and then sets xYieldRequested to pdTRUE.
+ * Called in a kernel critical section after the task's preemption count has
+ * reached zero. */
+    #define taskYIELD_PENDED_CORE_OF_TASK( pxTCB, xYieldRequested )                      \
+    do {                                                                                 \
+        const BaseType_t xExecutingCore = prvGetExecutingCore( pxTCB );                  \
+                                                                                         \
+        if( ( xExecutingCore >= 0 ) && ( xYieldPendings[ xExecutingCore ] != pdFALSE ) ) \
+        {                                                                                \
+            if( ( ( pxTCB )->xTaskRunState == taskTASK_SCHEDULED_TO_YIELD ) &&           \
+                ( xExecutingCore != ( BaseType_t ) portGET_CORE_ID() ) )                 \
+            {                                                                            \
+                /* Marked without an IPI. prvYieldCore() would skip it. */               \
+                portYIELD_CORE( xExecutingCore );                                        \
+            }                                                                            \
+            else                                                                         \
+            {                                                                            \
+                prvYieldCore( xExecutingCore );                                          \
+            }                                                                            \
+                                                                                         \
+            ( xYieldRequested ) = pdTRUE;                                                \
+        }                                                                                \
+    } while( 0 )
+
+#endif /* #if ( configUSE_TASK_PREEMPTION_DISABLE == 1 ) */
+/*-----------------------------------------------------------*/
+
+#if ( configUSE_TASK_PREEMPTION_DISABLE == 1 )
+
     BaseType_t xTaskPreemptionEnableWithYieldStatus( const TaskHandle_t xTask )
     {
         TCB_t * pxTCB;
@@ -4238,8 +4268,15 @@ STATIC void prvInitialiseNewTask( TaskFunction_t pxTaskCode,
                 }
                 else
                 {
-                    /* Concurrent operation cleared the deferred state — nothing to do. */
-                    mtCOVERAGE_TEST_MARKER();
+                    /* Concurrent operation cleared the deferred state. A yield
+                     * pended for the task's core while its preemption was
+                     * disabled is still owed, as when no state change was
+                     * deferred. */
+                    #if ( portUSING_GRANULAR_LOCKS == 1 )
+                        taskYIELD_PENDED_CORE_OF_TASK( pxTCB, xAlreadyYielded );
+                    #else
+                        mtCOVERAGE_TEST_MARKER();
+                    #endif
                 }
 
                 #if ( portUSING_GRANULAR_LOCKS == 1 )
@@ -4254,28 +4291,12 @@ STATIC void prvInitialiseNewTask( TaskFunction_t pxTaskCode,
                 /* prvYieldCore must be called in critical section. */
                 kernelENTER_CRITICAL();
                 {
-                    BaseType_t xExecutingCore;
-
                     pxTCB = prvGetTCBFromHandle( xTask );
 
                     /* There is gap between TCB critical section and kernel critical section.
                      * Checking the yield pending again to prevent that the current task
                      * already handle the yield request. */
-                    xExecutingCore = prvGetExecutingCore( pxTCB );
-
-                    if( ( xExecutingCore >= 0 ) && ( xYieldPendings[ xExecutingCore ] != pdFALSE ) )
-                    {
-                        if( ( pxTCB->xTaskRunState == taskTASK_SCHEDULED_TO_YIELD ) &&
-                            ( xExecutingCore != ( BaseType_t ) portGET_CORE_ID() ) )
-                        {
-                            /* Marked without an IPI. prvYieldCore() would skip it. */
-                            portYIELD_CORE( xExecutingCore );
-                        }
-                        else
-                        {
-                            prvYieldCore( xExecutingCore );
-                        }
-                    }
+                    taskYIELD_PENDED_CORE_OF_TASK( pxTCB, xAlreadyYielded );
                 }
                 kernelEXIT_CRITICAL();
                 xAlreadyYielded = pdTRUE;
