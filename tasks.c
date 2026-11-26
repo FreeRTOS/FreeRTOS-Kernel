@@ -6827,7 +6827,6 @@ void vTaskPlaceOnEventList( List_t * const pxEventList,
 
         /* THIS FUNCTION MUST BE CALLED WITH THE
          * SCHEDULER SUSPENDED AND THE QUEUE BEING ACCESSED LOCKED. */
-        configASSERT( uxSchedulerSuspended != ( UBaseType_t ) 0U );
     #endif /* #if ( ( portUSING_GRANULAR_LOCKS == 1 ) && ( configNUMBER_OF_CORES > 1 ) ) */
 
     /* Place the event list item of the TCB in the appropriate event list.
@@ -6915,7 +6914,6 @@ void vTaskPlaceOnUnorderedEventList( List_t * pxEventList,
              * 'Restricted' in its name.  It is not part of the public API.  It is
              * designed for use by kernel code, and has special calling requirements -
              * it should be called with the scheduler suspended. */
-            configASSERT( uxSchedulerSuspended != ( UBaseType_t ) 0U );
         #endif /* #if ( ( portUSING_GRANULAR_LOCKS == 1 ) && ( configNUMBER_OF_CORES > 1 ) ) */
 
         /* Place the event list item of the TCB in the appropriate event list.
