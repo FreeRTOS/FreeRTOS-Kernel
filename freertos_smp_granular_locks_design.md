@@ -465,6 +465,25 @@ A queue checks an event list with `listLIST_IS_EMPTY()` before it calls `xTaskRe
 
 An empty list therefore stays empty, and skipping the call gives the same result as the call. A list that was not empty can be emptied by a removal on another core, for example a timeout in the tick, so the remove functions check the list again under the kernel ISR spinlock.
 
+# Behaviour Changes
+
+Two changes in this branch can be noticed by application code. The rule for code that runs while the scheduler is suspended is described in *Scheduler Suspension*.
+
+## Nested Preemption Disable
+
+This applies to every build with `configUSE_TASK_PREEMPTION_DISABLE == 1`, with or without granular locks. Before this branch, `vTaskPreemptionDisable()` set a flag in the task, and `vTaskPreemptionEnable()` cleared it and always asked the task's core to yield. The flag is now a count (`uxPreemptionDisable`):
+
+- `vTaskPreemptionDisable()` adds one and `vTaskPreemptionEnable()` subtracts one, so the calls can be nested. Preemption is enabled again only when the count reaches zero.
+- While the count is above zero, a yield requested for the task's core is recorded and not sent. `vTaskSwitchContext()` records the yield in the same way.
+- When the count reaches zero, the core yields only if a yield was recorded meanwhile.
+- Before the scheduler starts, both functions do nothing.
+
+Code that calls `vTaskPreemptionDisable()` more than once now needs the same number of `vTaskPreemptionEnable()` calls. Code that relied on a yield from every `vTaskPreemptionEnable()` no longer gets one. With granular locks, `vTaskSuspend()` and `vTaskDelete()` of a task with preemption disabled take effect when the task enables preemption again (*Deferred State Changes*).
+
+## Tick Hook After the Switch Decision
+
+With granular locks, `xTaskIncrementTick()` calls `vApplicationTickHook()` after it has left the kernel critical section, because queue functions called from the hook take the queue's locks, which must not be taken inside the kernel data group. The return value of `xTaskIncrementTick()` is decided before the hook runs. A task that the hook makes ready on the tick's core therefore runs at that core's next yield point, not at the end of the tick interrupt. Without granular locks the hook runs inside `xTaskIncrementTick()` as before.
+
 # Known Limitations
 
 - Under `configRUN_MULTIPLE_PRIORITIES == 1`, the relaxed lock hierarchy means that an unblock triggered by a tick on one core may take effect on the unblocking core a little later than under global locking. The single-highest-priority invariant continues to hold under `configRUN_MULTIPLE_PRIORITIES == 0`.
