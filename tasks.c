@@ -5194,22 +5194,23 @@ void vTaskSuspendAll( void )
             /* uxSchedulerSuspended is increased after prvCheckForRunStateChange. The
              * purpose is to prevent altering the variable when fromISR APIs are readying
              * it. */
-            if( ( uxSchedulerSuspended == 0U )
+            /* If the scheduler is being suspended after taking a granular lock (in any data group)
+             * then we do not check for the run state of a task and we let it run through until
+             * the granular lock is released. */
 
-                /* If the scheduler is being suspended after taking a granular lock (in any data group)
-                 * then we do not check for the run state of a task and we let it run through until
-                 * the granular lock is released. */
-
-                /* Task may acquire kernel lock in data group critical section.
-                * In this case, check for run state change is not required since
-                * we can't yield for other task when preemption is disabled. */
-                #if ( portUSING_GRANULAR_LOCKS == 1 )
-                    && ( portGET_CRITICAL_NESTING_COUNT( xCoreID ) == 0U )
-                #endif /* #if ( portUSING_GRANULAR_LOCKS == 1 ) */
-                #if ( configUSE_TASK_PREEMPTION_DISABLE == 1 )
-                    && ( pxCurrentTCBs[ xCoreID ]->uxPreemptionDisable == 0U )
-                #endif /* #if ( configUSE_TASK_PREEMPTION_DISABLE == 1 ) */
-                )
+            /* Task may acquire kernel lock in data group critical section.
+            * In this case, check for run state change is not required since
+            * we can't yield for other task when preemption is disabled. */
+            #if ( portUSING_GRANULAR_LOCKS == 1 )
+                if( ( uxSchedulerSuspended == 0U ) &&
+                    ( portGET_CRITICAL_NESTING_COUNT( xCoreID ) == 0U ) &&
+                    ( pxCurrentTCBs[ xCoreID ]->uxPreemptionDisable == 0U ) )
+            #elif ( configUSE_TASK_PREEMPTION_DISABLE == 1 )
+                if( ( uxSchedulerSuspended == 0U ) &&
+                    ( pxCurrentTCBs[ xCoreID ]->uxPreemptionDisable == 0U ) )
+            #else
+                if( uxSchedulerSuspended == 0U )
+            #endif /* #if ( portUSING_GRANULAR_LOCKS == 1 ) */
             {
                 prvCheckForRunStateChange();
             }
@@ -8640,16 +8641,17 @@ STATIC void prvResetNextTaskUnblockTime( void )
         {
             const BaseType_t xCoreID = ( BaseType_t ) portGET_CORE_ID();
 
-            if( ( portGET_CRITICAL_NESTING_COUNT( xCoreID ) == 0U )
-                #if ( configUSE_TASK_PREEMPTION_DISABLE == 1 )
+            #if ( configUSE_TASK_PREEMPTION_DISABLE == 1 )
 
-                    /* Task yield can be called in a data group critical section.
-                     * Adding a preemption disable check to prevent invalid context
-                     * switch. */
-                    && ( pxCurrentTCBs[ xCoreID ]->uxPreemptionDisable == 0U ) &&
-                    ( taskDEFERRED_STATE_CHANGE( pxCurrentTCBs[ xCoreID ] ) == 0U )
-                #endif /* #if ( configUSE_TASK_PREEMPTION_DISABLE == 1 ) */
-                )
+                /* Task yield can be called in a data group critical section.
+                 * Adding a preemption disable check to prevent invalid context
+                 * switch. */
+                if( ( portGET_CRITICAL_NESTING_COUNT( xCoreID ) == 0U ) &&
+                    ( pxCurrentTCBs[ xCoreID ]->uxPreemptionDisable == 0U ) &&
+                    ( taskDEFERRED_STATE_CHANGE( pxCurrentTCBs[ xCoreID ] ) == 0U ) )
+            #else
+                if( portGET_CRITICAL_NESTING_COUNT( xCoreID ) == 0U )
+            #endif /* #if ( configUSE_TASK_PREEMPTION_DISABLE == 1 ) */
             {
                 portYIELD();
             }
@@ -8739,11 +8741,12 @@ STATIC void prvResetNextTaskUnblockTime( void )
                  * interrupt.  Only assert if the critical nesting count is 1 to
                  * protect against recursive calls if the assert function also uses a
                  * critical section. */
-                if( ( portGET_CRITICAL_NESTING_COUNT( xCoreID ) == 1U )
-                    #if ( configUSE_TASK_PREEMPTION_DISABLE == 1 )
-                        && ( pxCurrentTCBs[ xCoreID ]->uxPreemptionDisable == 0U )
-                    #endif /* #if ( configUSE_TASK_PREEMPTION_DISABLE == 1 ) */
-                    )
+                #if ( configUSE_TASK_PREEMPTION_DISABLE == 1 )
+                    if( ( portGET_CRITICAL_NESTING_COUNT( xCoreID ) == 1U ) &&
+                        ( pxCurrentTCBs[ xCoreID ]->uxPreemptionDisable == 0U ) )
+                #else
+                    if( portGET_CRITICAL_NESTING_COUNT( xCoreID ) == 1U )
+                #endif /* #if ( configUSE_TASK_PREEMPTION_DISABLE == 1 ) */
                 {
                     portASSERT_IF_IN_ISR();
 
