@@ -87,6 +87,14 @@
 
 #ifndef portBASE_TYPE_ENTER_CRITICAL
     #define portBASE_TYPE_ENTER_CRITICAL()    taskENTER_CRITICAL()
+
+/* Granular locks replace the default section with the critical section of the
+ * data group that holds the member. */
+    #define portBASE_TYPE_CRITICAL_IS_DEFAULT    1
+#endif
+
+#ifndef portBASE_TYPE_CRITICAL_IS_DEFAULT
+    #define portBASE_TYPE_CRITICAL_IS_DEFAULT    0
 #endif
 
 #ifndef portBASE_TYPE_EXIT_CRITICAL
