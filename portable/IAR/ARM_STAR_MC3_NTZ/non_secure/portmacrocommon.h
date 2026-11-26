@@ -151,6 +151,15 @@ extern void vClearInterruptMask( uint32_t ulMask ) /* __attribute__(( naked )) P
     void vApplicationGenerateTaskRandomPacKey( uint32_t * pulTaskPacKey );
 
 #endif /* configENABLE_PAC */
+
+/**
+ * @brief Configures interrupt priorities on the calling core.
+ *
+ * Must be called from privileged code during core initialisation. On SMP
+ * systems, the application must call this function on each secondary core
+ * before starting scheduling on that core.
+ */
+extern void vPortConfigureInterruptPriorities( void ) /* PRIVILEGED_FUNCTION */;
 /*-----------------------------------------------------------*/
 
 /**
