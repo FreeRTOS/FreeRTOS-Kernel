@@ -3544,7 +3544,11 @@ BaseType_t xQueueIsQueueFullFromISR( const QueueHandle_t xQueue )
          *  time a yield will be performed.  If an item is added to the queue while
          *  the queue is locked, and the calling task blocks on the queue, then the
          *  calling task will be immediately unblocked when the queue is unlocked. */
-        queueLOCK( pxQueue );
+        #if ( ( portUSING_GRANULAR_LOCKS == 1 ) && ( configNUMBER_OF_CORES > 1 ) )
+            queueLOCK( pxQueue );
+        #else
+            prvLockQueue( pxQueue );
+        #endif
 
         if( pxQueue->uxMessagesWaiting == ( UBaseType_t ) 0U )
         {
@@ -3556,7 +3560,11 @@ BaseType_t xQueueIsQueueFullFromISR( const QueueHandle_t xQueue )
             mtCOVERAGE_TEST_MARKER();
         }
 
-        queueUNLOCK( pxQueue, pdFALSE );
+        #if ( ( portUSING_GRANULAR_LOCKS == 1 ) && ( configNUMBER_OF_CORES > 1 ) )
+            queueUNLOCK( pxQueue, pdFALSE );
+        #else
+            prvUnlockQueue( pxQueue );
+        #endif
 
         traceRETURN_vQueueWaitForMessageRestricted();
     }
