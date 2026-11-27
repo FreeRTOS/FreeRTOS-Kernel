@@ -402,6 +402,10 @@ typedef enum
 #endif
 
 #if ( ( configSUPPORT_DYNAMIC_ALLOCATION == 1 ) && ( configNUMBER_OF_CORES > 1 ) && ( configUSE_CORE_AFFINITY == 1 ) )
+
+/* uxCoreAffinityMask must not be 0 - it indicates the cores on which the
+ * task can run.  If it is 0 then configTASK_DEFAULT_CORE_AFFINITY is used
+ * instead. */
     BaseType_t xTaskCreateAffinitySet( TaskFunction_t pxTaskCode,
                                        const char * const pcName,
                                        const configSTACK_DEPTH_TYPE uxStackDepth,
@@ -530,6 +534,10 @@ typedef enum
 #endif /* configSUPPORT_STATIC_ALLOCATION */
 
 #if ( ( configSUPPORT_STATIC_ALLOCATION == 1 ) && ( configNUMBER_OF_CORES > 1 ) && ( configUSE_CORE_AFFINITY == 1 ) )
+
+/* uxCoreAffinityMask must not be 0 - it indicates the cores on which the
+ * task can run.  If it is 0 then configTASK_DEFAULT_CORE_AFFINITY is used
+ * instead. */
     TaskHandle_t xTaskCreateStaticAffinitySet( TaskFunction_t pxTaskCode,
                                                const char * const pcName,
                                                const configSTACK_DEPTH_TYPE uxStackDepth,
@@ -538,7 +546,7 @@ typedef enum
                                                StackType_t * const puxStackBuffer,
                                                StaticTask_t * const pxTaskBuffer,
                                                UBaseType_t uxCoreAffinityMask ) PRIVILEGED_FUNCTION;
-#endif
+#endif /* if ( ( configSUPPORT_STATIC_ALLOCATION == 1 ) && ( configNUMBER_OF_CORES > 1 ) && ( configUSE_CORE_AFFINITY == 1 ) ) */
 
 /**
  * task. h
@@ -1412,7 +1420,9 @@ BaseType_t xTaskResumeFromISR( TaskHandle_t xTaskToResume ) PRIVILEGED_FUNCTION;
  * @param uxCoreAffinityMask A bitwise value that indicates the cores on
  * which the task can run. Cores are numbered from 0 to configNUMBER_OF_CORES - 1.
  * For example, to ensure that a task can run on core 0 and core 1, set
- * uxCoreAffinityMask to 0x03.
+ * uxCoreAffinityMask to 0x03.  uxCoreAffinityMask must not be 0 - a mask of 0
+ * would make the task runnable on no core.  Passing 0 is a no-op and the task
+ * keeps its current core affinity mask.
  *
  * Example usage:
  *
