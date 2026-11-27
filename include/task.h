@@ -3164,8 +3164,8 @@ BaseType_t xTaskGenericNotifyWait( UBaseType_t uxIndexToWaitOn,
  * new set of API functions that could address specific notifications within the
  * array.  xTaskNotifyFromISR() is the original API function, and remains
  * backward compatible by always operating on the notification value at index 0
- * within the array. Calling xTaskNotifyGiveFromISR() is equivalent to calling
- * xTaskNotifyGiveIndexedFromISR() with the uxIndexToNotify parameter set to 0.
+ * within the array. Calling vTaskNotifyGiveFromISR() is equivalent to calling
+ * vTaskNotifyGiveIndexedFromISR() with the uxIndexToNotify parameter set to 0.
  *
  * @param xTaskToNotify The handle of the task being notified.  The handle to a
  * task can be returned from the xTaskCreate() API function used to create the
@@ -3175,7 +3175,7 @@ BaseType_t xTaskGenericNotifyWait( UBaseType_t uxIndexToWaitOn,
  * @param uxIndexToNotify The index within the target task's array of
  * notification values to which the notification is to be sent.  uxIndexToNotify
  * must be less than configTASK_NOTIFICATION_ARRAY_ENTRIES.
- * xTaskNotifyGiveFromISR() does not have this parameter and always sends
+ * vTaskNotifyGiveFromISR() does not have this parameter and always sends
  * notifications to index 0.
  *
  * @param pxHigherPriorityTaskWoken  vTaskNotifyGiveFromISR() will set
